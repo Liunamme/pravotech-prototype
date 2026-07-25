@@ -19,6 +19,7 @@ import styles from './CasesTab.module.css';
 export function CasesTab({ workspaceId }: { workspaceId: Id }) {
   const documents = useStore((state) => state.documents);
   const events = useStore((state) => state.events);
+  const openInspector = useStore((state) => state.openInspector);
 
   const rows = useMemo(() => {
     const cases = Object.values(documents).filter(
@@ -51,29 +52,35 @@ export function CasesTab({ workspaceId }: { workspaceId: Id }) {
   }
 
   return (
-    <div className={styles.root} role="table" aria-label="Портфель дел">
+    <div className={styles.root} aria-label="Портфель дел">
       {rows.map(({ doc, nextHearing }) => (
-        <div key={doc.id} className={styles.row} role="row">
-          <div className={styles.cell} role="cell">
+        <button
+          key={doc.id}
+          type="button"
+          className={styles.row}
+          onClick={() => openInspector(doc.id)}
+          aria-label={`Открыть документ: ${doc.title}`}
+        >
+          <div className={styles.cell}>
             <span className={styles.title}>{doc.title}</span>
             {doc.parties && <span className={styles.parties}>{doc.parties.join(' · ')}</span>}
           </div>
 
-          <div className={styles.cell} role="cell">
+          <div className={styles.cell}>
             <span className={styles.cellLabel}>Стадия</span>
             <span className={styles.cellValue}>{doc.meta?.['Стадия'] ?? '—'}</span>
           </div>
 
-          <div className={styles.cell} role="cell">
+          <div className={styles.cell}>
             <span className={styles.cellLabel}>Ближайшее заседание</span>
             <span className={styles.cellValue}>{nextHearing ? formatDateTime(nextHearing.at) : '—'}</span>
           </div>
 
-          <div className={styles.cell} role="cell">
+          <div className={styles.cell}>
             <span className={styles.cellLabel}>Место</span>
             <span className={styles.cellValue}>{nextHearing?.location ?? '—'}</span>
           </div>
-        </div>
+        </button>
       ))}
     </div>
   );

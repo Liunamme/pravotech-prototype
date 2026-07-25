@@ -54,9 +54,10 @@
   color: var(--pt-text);
 }
 
-/* Активная страница — заметная фиолетовая плашка (design review). */
+/* Активная страница — заметная фиолетовая плашка с чёткой рамкой (design review). */
 .active {
   background: var(--pt-accent-soft-hi);
+  box-shadow: inset 0 0 0 1px var(--pt-accent);
   color: var(--pt-accent);
 }
 

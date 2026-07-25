@@ -43,12 +43,20 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
     activeTabId && manifest.contextTabs.some((t) => t.id === activeTabId) ? activeTabId : firstTab?.id;
   const [tabValue, setTabValue] = useState<Id | undefined>(initialTab);
 
-  // Если пришли по прямой ссылке /tab/:tabId — синхронизируем локальную вкладку.
+  // Синхронизация вкладки:
+  //  • прямая ссылка /tab/:tabId → выбрать её;
+  //  • смена пространства (тот же компонент, другой manifest) → если текущая
+  //    вкладка чужая (напр. 'cases' осталась от «Дел» при переходе в «Обязательства»),
+  //    сбросить на первую — иначе Tabs не найдёт value и покажет пустоту.
   useEffect(() => {
     if (activeTabId && manifest.contextTabs.some((t) => t.id === activeTabId)) {
       setTabValue(activeTabId);
+      return;
     }
-  }, [activeTabId, manifest.contextTabs]);
+    setTabValue((current) =>
+      current && manifest.contextTabs.some((t) => t.id === current) ? current : firstTab?.id,
+    );
+  }, [activeTabId, manifest.contextTabs, firstTab?.id]);
 
   function handleNewThread() {
     if (creating) return;

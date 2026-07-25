@@ -69,9 +69,18 @@ export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
   }
 
   return (
-    <RadixDialog.Root open={open} onOpenChange={handleOpenChange}>
+    // modal={false} — инспектор это слайд-овер, а не полноэкранная модалка.
+    // В modal-режиме Radix блокирует скролл body и компенсирует ширину
+    // скроллбара через padding-right, из-за чего весь интерфейс дёргался вбок
+    // при открытии. Скрима у инспектора нет, чат под ним остаётся доступен —
+    // modal={false} убирает и scroll-lock, и лишний реflow.
+    <RadixDialog.Root open={open} onOpenChange={handleOpenChange} modal={false}>
       <RadixDialog.Portal container={container ?? undefined}>
-        <RadixDialog.Content className={styles.content} aria-describedby={undefined}>
+        <RadixDialog.Content
+          className={styles.content}
+          aria-describedby={undefined}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
           <RadixDialog.Title className={styles.visuallyHidden}>{doc?.title ?? 'Документ'}</RadixDialog.Title>
 
           <RadixDialog.Close asChild>

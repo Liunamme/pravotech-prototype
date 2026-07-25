@@ -34,6 +34,8 @@ export type ActionCardShellProps<P> = {
   cardType: CardTypeDef<P>;
   /** «Сегодня» показывает, из какого пространства карточка — в своём пространстве это шум (docs/UX.md §3). */
   showWorkspace?: boolean;
+  /** Карточка отрисована внутри чата (card_ref) — прячет «Показать в чате». */
+  inChat?: boolean;
   expanded: boolean;
   onExpandChange: (next: boolean) => void;
   /** Roving tabindex очереди (docs/UX.md §3); вне очереди (чат) — обычная фокусируемость. */
@@ -98,6 +100,7 @@ export function ActionCardShell<P>({
   card,
   cardType,
   showWorkspace = false,
+  inChat = false,
   expanded,
   onExpandChange,
   tabIndex = 0,
@@ -274,7 +277,8 @@ export function ActionCardShell<P>({
             onRetry={retry}
           />
 
-          {originLink && (
+          {/* «Показать в чате» бессмысленно, когда карточка уже отрисована в чате. */}
+          {originLink && !inChat && (
             <Link to={originLink} className={styles.showInChat} onClick={(e) => e.stopPropagation()}>
               <ArrowRight size={13} strokeWidth={2} aria-hidden="true" />
               Показать в чате

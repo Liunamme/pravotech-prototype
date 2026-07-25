@@ -163,7 +163,7 @@ function CardRefBlock({ cardId }: { cardId: string }) {
   // карточками сразу.
   return (
     <div className={styles.cardRef}>
-      <CardRenderer cardId={cardId} showWorkspace={false} />
+      <CardRenderer cardId={cardId} showWorkspace={false} inChat />
     </div>
   );
 }

@@ -21,6 +21,7 @@ import styles from './ContractsTab.module.css';
 export function ContractsTab({ workspaceId }: { workspaceId: Id }) {
   const documents = useStore((state) => state.documents);
   const cards = useStore((state) => state.cards);
+  const openInspector = useStore((state) => state.openInspector);
 
   const rows = useMemo(() => {
     const contracts = Object.values(documents).filter(
@@ -52,15 +53,21 @@ export function ContractsTab({ workspaceId }: { workspaceId: Id }) {
   }
 
   return (
-    <div className={styles.root} role="table" aria-label="Договорный портфель">
+    <div className={styles.root} aria-label="Договорный портфель">
       {rows.map(({ doc, renewal }) => (
-        <div key={doc.id} className={styles.row} role="row">
-          <div className={styles.cell} role="cell">
+        <button
+          key={doc.id}
+          type="button"
+          className={styles.row}
+          onClick={() => openInspector(doc.id)}
+          aria-label={`Открыть документ: ${doc.title}`}
+        >
+          <div className={styles.cell}>
             <span className={styles.title}>{doc.title}</span>
             {doc.parties && <span className={styles.parties}>{doc.parties.join(' · ')}</span>}
           </div>
 
-          <div className={styles.cell} role="cell">
+          <div className={styles.cell}>
             <span className={styles.cellLabel}>Автопродление</span>
             <span className={styles.cellValue}>
               {renewal ? (
@@ -74,11 +81,11 @@ export function ContractsTab({ workspaceId }: { workspaceId: Id }) {
             </span>
           </div>
 
-          <div className={styles.cell} role="cell">
+          <div className={styles.cell}>
             <span className={styles.cellLabel}>Уведомить до</span>
             <span className={styles.cellValue}>{renewal ? formatDate(renewal.payload.noticeDeadline) : '—'}</span>
           </div>
-        </div>
+        </button>
       ))}
     </div>
   );

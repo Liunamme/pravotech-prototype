@@ -11,6 +11,8 @@ export type CardRendererProps = {
   cardId: Id;
   /** «Сегодня» показывает бейдж пространства, своё пространство — нет (docs/UX.md §3). */
   showWorkspace?: boolean;
+  /** Карточка внутри чата (card_ref) — прячет «Показать в чате». */
+  inChat?: boolean;
   /**
    * Раскрытие управляется извне (роль `CardQueue` — клавиатурная навигация,
    * §3 UX.md). Без пары `expanded`/`onExpandChange` карточка управляет
@@ -39,6 +41,7 @@ export type CardRendererProps = {
 export function CardRenderer({
   cardId,
   showWorkspace = false,
+  inChat = false,
   expanded,
   onExpandChange,
   tabIndex,
@@ -92,6 +95,7 @@ export function CardRenderer({
       card={card}
       cardType={cardType}
       showWorkspace={showWorkspace}
+      inChat={inChat}
       expanded={isControlled ? expanded : internalExpanded}
       onExpandChange={isControlled ? (onExpandChange as (next: boolean) => void) : setInternalExpanded}
       tabIndex={tabIndex}
