@@ -3,9 +3,8 @@
  * pravotex-desktop.dc.html строки ~331-360): `position: absolute` относительно
  * `main` (страница прокидывает её узел как `container` портала — см.
  * `DocumentInspector.tsx`), не `fixed` от вьюпорта. Ширина ровно 520px из
- * макета — это единственное место в проекте, где стекло по-настоящему
- * "оверлей поверх поверхности", поэтому здесь, в отличие от плоских
- * карточек, уместен полноценный `backdrop-filter`.
+ * макета. Фон плотный тёмный без `backdrop-filter`: blur размывал bloom за
+ * инспектором и давал белёсую засветку в зонах затухания тела (design review).
  */
 
 .content {
@@ -21,9 +20,11 @@
 
   display: flex;
   flex-direction: column;
-  background: var(--pt-overlay);
-  backdrop-filter: var(--pt-overlay-blur);
-  -webkit-backdrop-filter: var(--pt-overlay-blur);
+  /* Плотный тёмный фон БЕЗ backdrop-filter: blur размывал bloom за инспектором,
+     и в зонах затухания тела (прозрачных) просвечивало белёсое размытое пятно
+     (design review). Плотный фон блокирует bloom — затухание уходит в чистый
+     тёмный, без белого свечения. */
+  background: linear-gradient(0deg, var(--pt-overlay), var(--pt-overlay)), var(--pt-bg);
   border-left: 1px solid var(--pt-overlay-line);
   box-shadow: -14px 0 44px rgba(0, 0, 0, 0.16);
 

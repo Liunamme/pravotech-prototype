@@ -1,9 +1,10 @@
 import { useMemo, type ReactNode } from 'react';
 import { FileStack, FileText, Gavel, Landmark, Mail, type LucideIcon } from 'lucide-react';
 import type { DocAnchor, DocBlock, DocumentKind, Id, LegalDocument } from '@/types/domain';
-import { Button, ScrollArea } from '@/shared/ui';
+import { Button } from '@/shared/ui';
 import { formatDate } from '@/shared/lib/date';
 import { cn } from '@/shared/lib/cn';
+import { useScrollFade } from '@/shared/lib/useScrollFade';
 import { HighlightAnchor, HighlightMark } from '../HighlightAnchor';
 import styles from './DocumentViewer.module.css';
 
@@ -54,6 +55,7 @@ function renderBlockText(text: string, anchor: DocAnchor | undefined): ReactNode
  * ≤68ch, нумерация пунктов в левом поле `tabular-nums`.
  */
 export function DocumentViewer({ document, activeAnchorId }: DocumentViewerProps) {
+  const fade = useScrollFade();
   const activeAnchor = useMemo(
     () => (activeAnchorId ? document.anchors.find((a) => a.id === activeAnchorId) : undefined),
     [document.anchors, activeAnchorId],
@@ -99,7 +101,7 @@ export function DocumentViewer({ document, activeAnchorId }: DocumentViewerProps
         </Button>
       </header>
 
-      <ScrollArea className={styles.scroll}>
+      <div className={styles.scroll} ref={fade.ref} onScroll={fade.onScroll}>
         <div className={styles.prose}>
           {document.blocks.map((block) => {
             const isActive = block.id === activeAnchor?.blockId;
@@ -107,7 +109,7 @@ export function DocumentViewer({ document, activeAnchorId }: DocumentViewerProps
             return <BlockView key={block.id} block={block} isActive={isActive} anchor={anchorForBlock} />;
           })}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }
