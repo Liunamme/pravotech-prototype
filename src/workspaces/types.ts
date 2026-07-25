@@ -8,7 +8,7 @@
  */
 
 import type { FC } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import type { AppIcon } from '@/shared/ui/icons/AppIcons';
 import type {
   ActionCard,
   CalendarEvent,
@@ -26,14 +26,14 @@ export type AgentSkill = {
   label: string;
   /** Текст, который подставляется в композер. */
   prompt: string;
-  icon?: LucideIcon;
+  icon?: AppIcon;
 };
 
 /** Вкладка в контекстной панели пространства ('Договоры', 'Дела', 'События'). */
 export type ContextTabDef = {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: AppIcon;
   Component: FC<{ workspaceId: Id }>;
 };
 
@@ -46,7 +46,7 @@ export interface CardTypeDef<P = unknown> {
   type: string;
   /** 'Уведомление об отказе от пролонгации' */
   label: string;
-  icon: LucideIcon;
+  icon: AppIcon;
   /** Read-режим тела карточки. Хромировку (шапку, кнопки, diff) рисует ActionCardShell. */
   Body: FC<{ payload: P; card: ActionCard<P> }>;
   /** Форма режима «изменить». Нет формы — кнопка «Изменить» скрыта. */
@@ -77,7 +77,7 @@ export interface WorkspaceManifest {
   title: string;
   /** Короткое имя для рейки. */
   shortTitle: string;
-  icon: LucideIcon;
+  icon: AppIcon;
   /** Для пустых состояний и настроек. */
   description: string;
   contextTabs: ContextTabDef[];
