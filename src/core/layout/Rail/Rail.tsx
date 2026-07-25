@@ -45,6 +45,8 @@ export function Rail() {
             </NavLink>
           </RailTooltip>
 
+          <div className={styles.divider} role="separator" aria-orientation="horizontal" />
+
           {workspaces.map((workspace) => {
             const Icon = workspace.icon;
             return (

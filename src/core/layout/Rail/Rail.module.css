@@ -9,17 +9,23 @@
   flex-direction: column;
   align-items: center;
   /* Верхний отступ 64px оставляет место под логотип «право(тех)». */
-  padding: 64px 0 16px;
-  gap: 16px;
+  padding: 64px 0 18px;
+  gap: 20px;
 }
 
-/* Равный ритм между всеми иконками навигации (Сегодня / Обязательства / Дела). */
 .top,
 .bottom {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
+}
+
+/* Разделитель отделяет «Сегодня» (уровень 1) от рабочих пространств. */
+.divider {
+  width: 22px;
+  height: 1px;
+  background: var(--pt-line);
 }
 
 .spacer {
@@ -48,13 +54,14 @@
   color: var(--pt-text);
 }
 
+/* Активная страница — заметная фиолетовая плашка (design review). */
 .active {
-  background: var(--pt-accent-soft);
+  background: var(--pt-accent-soft-hi);
   color: var(--pt-accent);
 }
 
 .active:hover {
-  background: var(--pt-accent-soft);
+  background: var(--pt-accent-soft-hi);
   color: var(--pt-accent);
 }
 
