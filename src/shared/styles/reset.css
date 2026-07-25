@@ -78,6 +78,38 @@ table {
   isolation: isolate;
 }
 
+/* Скроллбары — тонкие и ненавязчивые, вместо толстых системных (design_handoff). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pt-line) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--pt-line);
+  border-radius: var(--radius-full);
+  /* Прозрачная рамка отступает бегунок от края — он не липнет к стенке. */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--pt-t3);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
