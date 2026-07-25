@@ -1,7 +1,8 @@
 .root {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: 8px;
+  justify-content: center;
 }
 
 .chip {
@@ -10,28 +11,31 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  height: 28px;
-  padding: 0 var(--space-3);
+  padding: 9px 15px;
   border-radius: var(--radius-full);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
+  background: var(--pt-glass2);
+  border: 1px solid var(--pt-line);
+  color: var(--pt-text);
+  font-size: 12.5px;
   white-space: nowrap;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   transition:
-    background-color var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out);
 }
 
 .chip:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--color-border-strong);
-  color: var(--color-text);
+  border-color: var(--pt-accent);
+  color: var(--pt-accent);
 }
 
 .chip svg {
-  color: var(--color-accent);
+  color: var(--pt-accent);
+}
+
+.chip:hover svg {
+  color: currentColor;
 }
 
 @container (max-width: 480px) {

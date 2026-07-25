@@ -1,4 +1,4 @@
-import { Bot, RotateCcw, TriangleAlert } from 'lucide-react';
+import { RotateCcw, TriangleAlert } from 'lucide-react';
 import type { Message } from '@/types/domain';
 import { Button } from '@/shared/ui';
 import { formatDateTime } from '@/shared/lib/date';
@@ -33,7 +33,7 @@ export function MessageItem({ message, onRetry, onOptionSelect }: MessageItemPro
     <div className={cn(styles.row, styles[`role_${message.role}`])}>
       {isAgent && (
         <div className={styles.avatar} aria-hidden="true">
-          <Bot size={16} strokeWidth={2} />
+          П
         </div>
       )}
 
