@@ -49,6 +49,12 @@
   --pt-overlay-blur: blur(22px) saturate(150%);
   /* Световой кант сверху у стеклянных поверхностей. */
   --pt-inset-hi: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  /* Стекло при ховере — высветляется (design review). */
+  --pt-glass-hi: rgba(255, 255, 255, 0.13);
+  /* Плотнее accent-soft — для активного пункта навигации (заметная плашка). */
+  --pt-accent-soft-hi: rgba(139, 92, 246, 0.38);
+  /* Матовое стекло для sticky-заголовков в очереди/таймлайне. */
+  --pt-sticky: rgba(28, 20, 40, 0.94);
 
   /* ─────────────── Семантический слой (маппинг на --pt-*) ─────────────── */
   /* Поверхности */
@@ -121,9 +127,9 @@
   --color-p3-subtle: var(--pt-p3bg);
   --color-p3-border: var(--pt-line);
 
-  /* Фокус */
-  --color-focus-ring: var(--pt-accent);
-  --focus-ring: 0 0 0 2px var(--pt-bg), 0 0 0 4px var(--color-focus-ring);
+  /* Фокус — мягкий светлый ореол, не «люто тёмный» контур (design review). */
+  --color-focus-ring: var(--pt-accent-hover);
+  --focus-ring: 0 0 0 3px var(--pt-accent-soft);
 
   /* Тени → на макетную */
   --shadow-sm: var(--pt-shadow);
@@ -235,4 +241,7 @@
   --pt-overlay-line: rgba(26, 14, 44, 0.1);
   --pt-overlay-blur: blur(20px) saturate(150%);
   --pt-inset-hi: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --pt-glass-hi: rgba(255, 255, 255, 0.9);
+  --pt-accent-soft-hi: rgba(139, 92, 246, 0.2);
+  --pt-sticky: rgba(244, 240, 250, 0.9);
 }

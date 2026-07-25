@@ -13,11 +13,18 @@
   border: 1px solid var(--pt-line);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+/* Фокус подсвечивает весь инпут мягко и светло, а не толстым тёмным ring. */
+.inputRow:focus-within {
+  border-color: var(--pt-accent-hover);
+  box-shadow: var(--focus-ring);
 }
 
 .textarea {
-  composes: focusRing from '../../../shared/styles/shared.module.css';
-
   flex: 1;
   min-width: 0;
   min-height: calc(14px * 1.5 + 16px);
@@ -25,6 +32,8 @@
   padding: 8px 0;
   background: transparent;
   border: none;
+  /* Фокус виден на всём контейнере (.inputRow:focus-within), не на textarea. */
+  outline: none;
   color: var(--pt-text);
   font-family: var(--font-ui);
   font-size: 14px;
