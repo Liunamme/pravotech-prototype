@@ -3,7 +3,7 @@
  * docs/SCENARIOS.md §2). Единственная точка сборки — реестр (`registry.ts`)
  * подключает это единым литеральным элементом массива.
  */
-import { FileText } from 'lucide-react';
+import { ContractIcon } from '@/shared/ui/icons/AppIcons';
 import type { WorkspaceManifest } from '@/workspaces/types';
 import { obligationsCardTypes } from './cards';
 import { obligationsContextTabs } from './tabs';
@@ -14,7 +14,7 @@ export const obligationsManifest: WorkspaceManifest = {
   id: 'obligations',
   title: 'Обязательства по договорам',
   shortTitle: 'Обязательства',
-  icon: FileText,
+  icon: ContractIcon,
   description:
     'Сроки автопродления, претензии контрагентов и платежи по договорному портфелю — что нужно решить и к какому сроку.',
   contextTabs: obligationsContextTabs,

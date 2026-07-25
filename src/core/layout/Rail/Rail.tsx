@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { LayoutDashboard, LoaderCircle, Moon, Settings, Sun } from 'lucide-react';
+import { LoaderCircle, Moon, Settings, Sun } from 'lucide-react';
+import { TodayIcon } from '@/shared/ui/icons/AppIcons';
 import { useTheme } from '@/app/ThemeProvider';
 import { useStore } from '@/store';
 import { selectActiveTasks } from '@/store/selectors';
@@ -45,7 +46,7 @@ export function Rail({ onOpenTasks, onOpenSettings, tasksActive, settingsActive 
               className={({ isActive }) => cn(styles.item, isActive && styles.active)}
               aria-label="Сегодня"
             >
-              <LayoutDashboard size={16} strokeWidth={1.8} />
+              <TodayIcon size={18} />
             </NavLink>
           </RailTooltip>
 

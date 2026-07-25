@@ -7,7 +7,7 @@
  * другие вкладки контекста (Дела / Заседания — хронология вместо портфеля),
  * другие навыки. Раскладка и оболочка карточки — те же.
  */
-import { Gavel } from 'lucide-react';
+import { GavelStandIcon } from '@/shared/ui/icons/AppIcons';
 import type { WorkspaceManifest } from '@/workspaces/types';
 import { litigationCardTypes } from './cards';
 import { litigationContextTabs } from './tabs';
@@ -18,7 +18,7 @@ export const litigationManifest: WorkspaceManifest = {
   id: 'litigation',
   title: 'Судебные дела',
   shortTitle: 'Дела',
-  icon: Gavel,
+  icon: GavelStandIcon,
   description:
     'Заседания, доказательства и процессуальные сроки по судебным делам — что подготовить и подать, чтобы не пропустить срок.',
   contextTabs: litigationContextTabs,
