@@ -5,25 +5,26 @@
   flex-direction: column;
 }
 
-.queueSection {
-  flex: 1 1 60%;
-  min-height: 0;
+.topBlock {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--pt-line2);
 }
 
-.calendarSection {
-  flex: 1 1 40%;
-  min-height: 160px;
-  display: flex;
-  flex-direction: column;
+.panelBody {
+  flex: 1;
+  min-height: 0;
+  animation: crossfade 150ms var(--ease-out);
 }
 
-.calendarLabel {
-  flex-shrink: 0;
-  padding: 10px 16px 6px;
-  font-size: 10px;
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.9px;
-  text-transform: uppercase;
-  color: var(--pt-t3);
+@keyframes crossfade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

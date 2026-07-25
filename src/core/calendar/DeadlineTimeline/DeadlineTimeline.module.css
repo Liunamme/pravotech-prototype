@@ -32,10 +32,9 @@
 }
 
 /* Заголовок дня — капсом, с линией-продолжением (design_handoff `d.label`). */
+/* Заголовок дня — просто капс-метка с линией, без фона и sticky (design_handoff):
+   таймлайн сроков в макете плоский, заголовки не «плашки». */
 .dayHeader {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
   display: flex;
   align-items: center;
   gap: 9px;
@@ -46,8 +45,6 @@
   text-transform: uppercase;
   color: var(--pt-t3);
   white-space: nowrap;
-  /* См. комментарий в CardQueue.module.css — то же обоснование. */
-  background: var(--pt-glass3);
 }
 
 .dayHeader::after {
