@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type UIEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MessagesSquare, Plus } from 'lucide-react';
 import type { Id, ThreadStatus } from '@/types/domain';
@@ -8,6 +8,25 @@ import { selectWorkspaceThreads } from '@/store/selectors';
 import { Button, EmptyState, IconButton, Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui';
 import { cn } from '@/shared/lib/cn';
 import styles from './WorkspaceSidebar.module.css';
+
+/**
+ * Затухание у краёв списка — ТОЛЬКО когда за краем реально есть скрытый контент:
+ * сверху при прокрутке вниз, снизу пока не достигли дна. В дефолтной позиции и
+ * у самого низа затухания нет (иначе первая/последняя карточка размывалась бы
+ * зря). Управляется CSS-переменными `--fade-top`/`--fade-bottom`, которые
+ * читает mask в стилях. Порог 1px гасит дрожание на субпиксельном скролле.
+ */
+function useScrollFade() {
+  const update = useCallback((el: HTMLElement) => {
+    const atTop = el.scrollTop <= 1;
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+    el.style.setProperty('--fade-top', atTop ? '0px' : '28px');
+    el.style.setProperty('--fade-bottom', atBottom ? '0px' : '28px');
+  }, []);
+  const ref = useCallback((el: HTMLElement | null) => el && update(el), [update]);
+  const onScroll = useCallback((e: UIEvent<HTMLElement>) => update(e.currentTarget), [update]);
+  return { ref, onScroll };
+}
 
 export type WorkspaceSidebarProps = {
   manifest: WorkspaceManifest;
@@ -35,6 +54,7 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
   const [creating, setCreating] = useState(false);
 
   const firstTab = manifest.contextTabs[0];
+  const fade = useScrollFade();
 
   // Вкладка контекста — ЛОКАЛЬНОЕ состояние, не URL: переключение «Договоры/
   // Обязательства» не должно сбрасывать выбранный в центре чат-тред. URL хранит
@@ -141,7 +161,13 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
           {manifest.contextTabs.map((tab) => {
             const TabComponent = tab.Component;
             return (
-              <TabsContent key={tab.id} value={tab.id} className={styles.tabContent}>
+              <TabsContent
+                key={tab.id}
+                value={tab.id}
+                className={styles.tabContent}
+                ref={fade.ref}
+                onScroll={fade.onScroll}
+              >
                 <TabComponent workspaceId={manifest.id} />
               </TabsContent>
             );
