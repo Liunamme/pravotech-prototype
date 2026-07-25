@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MessagesSquare, Plus } from 'lucide-react';
 import type { Id, ThreadStatus } from '@/types/domain';
@@ -35,7 +35,20 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
   const [creating, setCreating] = useState(false);
 
   const firstTab = manifest.contextTabs[0];
-  const tabValue = activeTabId && manifest.contextTabs.some((t) => t.id === activeTabId) ? activeTabId : firstTab?.id;
+
+  // Вкладка контекста — ЛОКАЛЬНОЕ состояние, не URL: переключение «Договоры/
+  // Обязательства» не должно сбрасывать выбранный в центре чат-тред. URL хранит
+  // только активный тред; вкладка контекста живёт здесь.
+  const initialTab =
+    activeTabId && manifest.contextTabs.some((t) => t.id === activeTabId) ? activeTabId : firstTab?.id;
+  const [tabValue, setTabValue] = useState<Id | undefined>(initialTab);
+
+  // Если пришли по прямой ссылке /tab/:tabId — синхронизируем локальную вкладку.
+  useEffect(() => {
+    if (activeTabId && manifest.contextTabs.some((t) => t.id === activeTabId)) {
+      setTabValue(activeTabId);
+    }
+  }, [activeTabId, manifest.contextTabs]);
 
   function handleNewThread() {
     if (creating) return;
@@ -59,9 +72,9 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
     <div className={styles.root}>
       <div className={styles.threadsSection}>
         <div className={styles.threadsHeader}>
-          <p className={styles.sectionLabel}>Разговоры</p>
+          <p className={styles.sectionLabel}>Диалоги</p>
           <IconButton
-            aria-label="Новый разговор"
+            aria-label="Новый диалог"
             variant="ghost"
             size="sm"
             className={styles.newThreadButton}
@@ -75,11 +88,11 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
           <EmptyState
             className={styles.threadsEmpty}
             icon={MessagesSquare}
-            title="Пока ни одного разговора"
-            description="Каждый разговор — отдельная задача. Начните с вопроса агенту."
+            title="Пока ни одного диалога"
+            description="Каждый диалог — отдельная задача. Начните с вопроса агенту."
             action={
               <Button variant="secondary" size="sm" onClick={handleNewThread}>
-                Новый разговор
+                Новый диалог
               </Button>
             }
           />
@@ -101,11 +114,7 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
       </div>
 
       {manifest.contextTabs.length > 0 && tabValue && (
-        <Tabs
-          value={tabValue}
-          onValueChange={(value) => navigate(`/w/${manifest.id}/tab/${value}`)}
-          className={styles.tabsRoot}
-        >
+        <Tabs value={tabValue} onValueChange={(value) => setTabValue(value)} className={styles.tabsRoot}>
           <TabsList className={styles.tabsList}>
             {manifest.contextTabs.map((tab) => {
               const Icon = tab.icon;
