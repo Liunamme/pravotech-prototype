@@ -1,16 +1,31 @@
 /**
- * Хромировка карточки действия. Адаптив — только `@container` (SPEC 4.5,
- * docs/UX.md §8): карточка не знает, в узкой она колонке или широкой,
- * только сколько места у неё самой.
+ * Хромировка карточки действия (design_handoff строки ~227-298: `CARDS`/
+ * `groups[].cards`). Адаптив — только `@container` (SPEC 4.5, docs/UX.md §8):
+ * карточка не знает, в узкой она колонке или широкой, только сколько места
+ * у неё самой.
+ *
+ * `.root.root` — специфичность нарочно удвоена там, где нужно перебить
+ * `Card.module.css` (`shared/ui/Card`, вне границ этой задачи): оба модуля
+ * дают классу одинаковую специфичность (0,1,0), а порядок финального
+ * бандла — не то, на что стоит полагаться.
  */
 
-.root {
+.root.root {
   container-type: inline-size;
   container-name: action-card;
 
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  padding: 12px 14px;
+  border-radius: var(--radius-3xl);
+  background: var(--pt-glass2);
+  border: 1px solid var(--pt-line);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  overflow: hidden;
   cursor: pointer;
   transform-origin: top center;
   /* Фиксированный потолок нужен, чтобы `max-height` было от чего анимировать
@@ -23,25 +38,27 @@
     transform var(--duration-base) var(--ease-in),
     opacity var(--duration-base) var(--ease-in),
     max-height var(--duration-base) var(--ease-in),
-    border-color var(--duration-fast) var(--ease-out);
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
 }
 
-.root[data-priority='P0'] {
-  border-left: 3px solid var(--color-p0);
+/* P0 — акцентная обводка + halo вокруг карточки (design_handoff `c.ring`). */
+.root.root[data-priority='P0'] {
+  border-color: var(--pt-p0);
+  box-shadow:
+    0 0 0 3px var(--pt-p0bg),
+    0 10px 26px rgba(0, 0, 0, 0.16);
 }
 
 /*
  * «Карточка решена» — сжатие по высоте + затухание, 220мс ease-in
  * (docs/UX.md §7). Класс навешивает `useCardDecision` (`isExiting`).
- * `box-sizing: border-box` (reset.css, глобально) — `max-height: 0` вместе
- * с `overflow: hidden` схлопывает бордер-бокс целиком, включая паддинги
- * `.root` из `Card.module.css`, без необходимости переопределять их здесь
- * (а порядок каскада между двумя разными CSS-модулями — не то, на что
- * стоит полагаться).
  */
-.exiting {
+.exiting.exiting {
   overflow: hidden;
   max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
   transform: scaleY(0.92);
   opacity: 0;
   pointer-events: none;
@@ -59,7 +76,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .root {
+  .root.root {
     animation: none;
   }
 }
@@ -71,76 +88,89 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+  flex-wrap: wrap;
+  row-gap: 6px;
 }
 
 .idLeft {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 8px;
   min-width: 0;
+  flex-wrap: wrap;
+  row-gap: 6px;
 }
 
 .typeIcon {
   composes: focusRing from '../../../shared/styles/shared.module.css';
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
   border-radius: var(--radius-sm);
 }
 
 .typeLabel {
   composes: truncate from '../../../shared/styles/shared.module.css';
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
+  font-size: 11px;
+  color: var(--pt-t3);
   /* Прячется первым при нехватке места — см. @container ниже. */
   display: none;
 }
 
-.workspaceBadge {
+.workspaceBadge.workspaceBadge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+  padding: 2px 7px;
+  height: auto;
+  border-radius: var(--radius-full);
+  background: var(--pt-glass);
+  border-color: var(--pt-line2);
+  color: var(--pt-t2);
+  font-size: 10.5px;
+  font-weight: var(--weight-medium);
 }
 
 .deadline {
   flex-shrink: 0;
-  font-size: var(--text-sm);
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .deadline_overdue {
-  color: var(--color-danger);
+  color: var(--pt-p0);
   font-weight: var(--weight-semibold);
 }
 
 .deadline_today {
-  color: var(--color-warning);
+  color: var(--pt-p0);
   font-weight: var(--weight-semibold);
 }
 
 .deadline_soon {
-  color: var(--color-text);
+  color: var(--pt-text);
   font-weight: var(--weight-semibold);
 }
 
 .deadline_normal {
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
 }
 
 /* ── заголовок / суть ─────────────────────────────────────────────── */
 
 .title {
-  font-size: var(--text-md);
+  font-size: 14.5px;
   font-weight: var(--weight-semibold);
-  color: var(--color-text);
-  line-height: var(--leading-tight);
+  color: var(--pt-text);
+  line-height: 1.32;
+  letter-spacing: -0.1px;
 }
 
 .summary {
-  font-size: var(--text-base);
-  line-height: var(--leading-normal);
-  color: var(--color-text-secondary);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--pt-t2);
 }
 
 /* ── раскрытие: grid-template-rows 0fr → 1fr, без reflow соседей ───── */
@@ -162,7 +192,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 11px;
 }
 
 /* ── привязка / diff / источники ──────────────────────────────────── */
@@ -172,26 +202,28 @@
   composes: truncate from '../../../shared/styles/shared.module.css';
 
   align-self: flex-start;
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  border-bottom: 1px dashed var(--color-border-strong);
+  font-size: 11.5px;
+  color: var(--pt-t2);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  border-bottom: none;
 }
 
 .subjectRef:hover {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
+  color: var(--pt-accent);
 }
 
 .diffNote {
   font-size: var(--text-sm);
-  color: var(--color-warning);
+  color: var(--pt-p1);
 }
 
 .sources {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1);
+  gap: 6px;
 }
 
 /* ── форма правки ─────────────────────────────────────────────────── */
@@ -199,12 +231,19 @@
 .editArea {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 8px;
+  padding: 11px;
+  border-radius: var(--radius-2xl);
+  background: var(--pt-accent-soft);
+  border: 1px solid var(--pt-accent);
 }
 
 .editHint {
-  font-size: var(--text-xs);
-  color: var(--color-warning);
+  font-size: 10.5px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--pt-accent);
 }
 
 /* ── "показать в чате" ────────────────────────────────────────────── */
@@ -216,8 +255,8 @@
   align-items: center;
   gap: var(--space-1);
   align-self: flex-start;
-  font-size: var(--text-sm);
-  color: var(--color-accent);
+  font-size: 12px;
+  color: var(--pt-accent);
 }
 
 .showInChat:hover {
@@ -225,19 +264,38 @@
 }
 
 /* ── решение: адаптив по ширине карточки (docs/UX.md §8) ─────────────
-   ≥420px — кнопки в строку;
-   320–419px — кнопки в строку, источники переносятся (уже flex-wrap выше);
-   <320px — кнопки в колонку на всю ширину. */
+   ≥280px (content-box, см. комментарий ниже) — кнопки в строку;
+   <280px — кнопки в колонку на всю ширину. */
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding-top: var(--space-1);
+  gap: 8px;
+  padding-top: 2px;
+}
+
+/* Кнопки решения (design_handoff `c.confirm`/`c.edit`/`c.reject`): акцентный
+   glow под «Подтвердить», приглушённый текст у «Отклонить». Двойной класс —
+   перебивает `Button.module.css` (вне границ этой задачи) вне зависимости
+   от порядка правил в бандле. */
+.confirmButton.confirmButton {
+  border-radius: var(--radius-xl);
+  box-shadow: 0 6px 16px var(--pt-accent-soft);
+}
+
+.editButton.editButton {
+  border-radius: var(--radius-xl);
+  background: var(--pt-glass);
+  border-color: var(--pt-line);
+}
+
+.rejectButton.rejectButton {
+  border-radius: var(--radius-xl);
+  color: var(--pt-t3);
 }
 
 /* Пороги заданы по content-box контейнера, а не по ширине панели: при штатной
-   правой колонке 360px карточка получает ~312px, поэтому порог строки кнопок
+   правой колонке 366px карточка получает ~338px, поэтому порог строки кнопок
    опущен до 280px — три коротких кнопки там помещаются (с переносом), и это
    заметно компактнее трёх кнопок на всю ширину друг под другом. */
 @container action-card (min-width: 280px) {

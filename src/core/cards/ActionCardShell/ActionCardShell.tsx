@@ -285,24 +285,24 @@ export function ActionCardShell<P>({
             <div className={styles.actions}>
               {isEditing ? (
                 <>
-                  <Button variant="primary" onClick={confirmEdit}>
+                  <Button variant="primary" className={styles.confirmButton} onClick={confirmEdit}>
                     Сохранить и подтвердить
                   </Button>
-                  <Button variant="ghost" onClick={cancelEdit}>
+                  <Button variant="secondary" className={styles.editButton} onClick={cancelEdit}>
                     Отмена
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="primary" onClick={accept}>
+                  <Button variant="primary" className={styles.confirmButton} onClick={accept}>
                     {cardType.confirmLabel ?? 'Подтвердить'}
                   </Button>
                   {cardType.EditForm && (
-                    <Button variant="secondary" onClick={startEdit}>
+                    <Button variant="secondary" className={styles.editButton} onClick={startEdit}>
                       Изменить
                     </Button>
                   )}
-                  <Button variant="ghost" onClick={reject}>
+                  <Button variant="ghost" className={styles.rejectButton} onClick={reject}>
                     Отклонить
                   </Button>
                 </>

@@ -198,7 +198,9 @@ export function CardQueue({ scope }: CardQueueProps) {
           {groups.map((group) => (
             <section key={group.priority} className={styles.group} aria-label={GROUP_LABEL[group.priority]}>
               <header className={styles.groupHeader}>
-                <span>{GROUP_LABEL[group.priority]}</span>
+                <span className={cn(styles.groupLabel, styles[`priority_${group.priority}`])}>
+                  {GROUP_LABEL[group.priority]}
+                </span>
                 <span className={styles.groupCount}>{group.items.length}</span>
               </header>
 
