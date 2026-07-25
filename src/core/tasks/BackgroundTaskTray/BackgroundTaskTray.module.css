@@ -1,75 +1,89 @@
 /**
- * Индикатор зафиксирован координатами сразу правее рейки (см. комментарий
- * в BackgroundTaskTray.tsx) — единственное место в этом модуле, где нужен
- * `@media` для окна, было бы уместно, но не требуется: позиция не зависит
- * от ширины окна, только от токена `--rail-width`.
+ * Индикатор зафиксирован координатами сразу правее рейки (design_handoff:
+ * лоток фоновых задач — стеклянная плашка `position:absolute;left:60px;
+ * bottom:16px` у рейки; здесь `position:fixed`, потому что триггер и
+ * поповер должны работать поверх ЛЮБОЙ страницы, а не только внутри
+ * стеклянной плашки `main` конкретной страницы).
  */
 
 .trigger {
   composes: focusRing from '../../../shared/styles/shared.module.css';
 
   position: fixed;
-  left: calc(var(--rail-width) + var(--space-3));
+  left: calc(var(--rail-width) + var(--space-2));
   bottom: var(--space-3);
   z-index: var(--z-panel);
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-md);
-  color: var(--color-text-secondary);
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-xl);
+  background: transparent;
+  border: none;
+  color: var(--pt-t2);
   transition:
     background-color var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out);
 }
 
 .trigger:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text);
+  background: var(--pt-glass);
+  color: var(--pt-text);
 }
 
 .badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: 3px;
+  right: 3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 16px;
-  height: 16px;
+  min-width: 14px;
+  height: 14px;
   padding: 0 3px;
-  border-radius: var(--radius-full);
-  background: var(--color-accent);
-  color: var(--color-accent-fg);
-  font-size: 10px;
-  font-weight: var(--weight-semibold);
+  border-radius: 7px;
+  background: var(--pt-accent);
+  color: var(--pt-accent-fg);
+  font-size: 9px;
+  font-weight: var(--weight-bold);
   font-variant-numeric: tabular-nums;
 }
 
-.panel {
-  width: 320px;
+/* `.panel.panel` — специфичность нарочно удвоена: перебивает
+   `Popover.module.css` (вне границ этой задачи) вне зависимости от порядка
+   правил в бандле — здесь нужно стекло, а не плоская поверхность. */
+.panel.panel {
+  width: 340px;
   max-width: calc(100vw - var(--space-8));
   max-height: 60vh;
   overflow-y: auto;
+  padding: 14px;
+  border-radius: var(--radius-panel);
+  background: var(--pt-overlay);
+  backdrop-filter: var(--pt-overlay-blur);
+  -webkit-backdrop-filter: var(--pt-overlay-blur);
+  border: 1px solid var(--pt-overlay-line);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.16),
+    var(--pt-inset-hi);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
 .panelTitle {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--color-text);
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: var(--pt-t3);
 }
 
 .empty {
   font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
 }
 
 .list {
@@ -83,8 +97,9 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-2);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-sunken);
+  border-radius: var(--radius-xl);
+  background: var(--pt-glass);
+  border: 1px solid var(--pt-line2);
 }
 
 .itemHeader {
@@ -95,9 +110,9 @@
 }
 
 .itemTitle {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--color-text);
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  color: var(--pt-text);
 }
 
 .steps {
@@ -117,34 +132,34 @@
   width: 16px;
   height: 16px;
   border-radius: var(--radius-full);
-  color: var(--color-text-muted);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  color: var(--pt-t3);
+  background: var(--pt-glass);
+  border: 1px solid var(--pt-line);
 }
 
 .step_active .stepIcon {
-  color: var(--color-accent);
-  background: var(--color-accent-subtle);
-  border-color: var(--color-accent-border);
+  color: var(--pt-accent);
+  background: var(--pt-accent-soft);
+  border-color: var(--pt-accent);
 }
 
 .step_done .stepIcon {
-  color: var(--color-success);
-  background: var(--color-success-subtle);
-  border-color: var(--color-success-border);
+  color: var(--pt-ok);
+  background: var(--pt-ok-soft);
+  border-color: var(--pt-ok);
 }
 
 .step_failed .stepIcon {
-  color: var(--color-danger);
-  background: var(--color-danger-subtle);
-  border-color: var(--color-danger-border);
+  color: var(--pt-p0);
+  background: var(--pt-p0bg);
+  border-color: var(--pt-p0);
 }
 
 .stepDotInner {
   width: 4px;
   height: 4px;
   border-radius: var(--radius-full);
-  background: var(--color-border-strong);
+  background: var(--pt-t3);
 }
 
 .spin {
@@ -174,7 +189,7 @@
 
 .statusLabel {
   font-size: var(--text-xs);
-  color: var(--color-text-secondary);
+  color: var(--pt-t2);
 }
 
 .progressWrap {
@@ -187,7 +202,7 @@
   flex: 1;
   height: 4px;
   border-radius: var(--radius-full);
-  background: var(--color-border-subtle);
+  background: var(--pt-glass);
   overflow: hidden;
 }
 
@@ -195,7 +210,7 @@
   display: block;
   height: 100%;
   border-radius: var(--radius-full);
-  background: var(--color-accent);
+  background: var(--pt-accent);
   transition: width var(--duration-base) var(--ease-out);
 }
 
@@ -203,7 +218,7 @@
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
 }
 
 .doneRow {
@@ -220,11 +235,11 @@
 
 .failedIcon {
   flex-shrink: 0;
-  color: var(--color-danger);
+  color: var(--pt-p0);
   margin-top: 1px;
 }
 
 .failedMessage {
   font-size: var(--text-xs);
-  color: var(--color-danger);
+  color: var(--pt-p0);
 }

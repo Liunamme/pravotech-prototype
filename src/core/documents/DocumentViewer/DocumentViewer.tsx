@@ -125,7 +125,7 @@ function BlockView({ block, isActive, anchor }: { block: DocBlock; isActive: boo
     case 'clause':
       return (
         <HighlightAnchor active={isActive} highlightWhole={!hasRange(anchor)} className={styles.clauseRow}>
-          <span className={styles.clauseNumber}>{block.number}</span>
+          <span className={styles.clauseNumber}>п. {block.number}</span>
           <p className={styles.clauseText}>{renderBlockText(block.text, anchor)}</p>
         </HighlightAnchor>
       );

@@ -17,7 +17,19 @@ import styles from './DocumentInspector.module.css';
  * весь экран (UX.md допускает «скрим частичный или без него» — здесь его
  * нет, чат остаётся полностью читаемым и кликабельным рядом с инспектором).
  */
-export function DocumentInspector() {
+export type DocumentInspectorProps = {
+  /**
+   * design_handoff: инспектор — стеклянный оверлей ВНУТРИ стеклянной плашки
+   * `main` (`position: absolute` относительно неё), а не поверх всего окна.
+   * Портал Radix уводит контент из потока DOM — без явного `container` он
+   * телепортируется в `document.body`, и `position: absolute` в
+   * `DocumentInspector.module.css` тогда считался бы от вьюпорта. Страницы
+   * (`TodayPage`/`WorkspacePage`) прокидывают сюда узел своей плашки `main`.
+   */
+  container?: HTMLElement | null;
+};
+
+export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
   const inspector = useStore((state) => state.inspector);
   const documents = useStore((state) => state.documents);
   const openInspector = useStore((state) => state.openInspector);
@@ -58,7 +70,7 @@ export function DocumentInspector() {
 
   return (
     <RadixDialog.Root open={open} onOpenChange={handleOpenChange}>
-      <RadixDialog.Portal>
+      <RadixDialog.Portal container={container ?? undefined}>
         <RadixDialog.Content className={styles.content} aria-describedby={undefined}>
           <RadixDialog.Title className={styles.visuallyHidden}>{doc?.title ?? 'Документ'}</RadixDialog.Title>
 

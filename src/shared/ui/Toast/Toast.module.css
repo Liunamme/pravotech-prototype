@@ -6,12 +6,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  width: 340px;
+  width: 320px;
   max-width: calc(100vw - var(--space-8));
   list-style: none;
   outline: none;
 }
 
+/* Стекло (design_handoff строки ~362-372): тост — оверлей поверх контента,
+   единственный уместный случай `backdrop-filter` для этого примитива. */
 .root {
   position: relative;
   overflow: hidden;
@@ -19,11 +21,15 @@
   grid-template-columns: 1fr auto;
   align-items: start;
   gap: var(--space-1) var(--space-3);
-  padding: var(--space-3) var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-lg);
+  padding: 14px 14px 16px;
+  border-radius: var(--radius-3xl);
+  background: var(--pt-overlay);
+  backdrop-filter: var(--pt-overlay-blur);
+  -webkit-backdrop-filter: var(--pt-overlay-blur);
+  border: 1px solid var(--pt-overlay-line);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.16),
+    var(--pt-inset-hi);
   animation: slideIn var(--duration-base) var(--ease-out);
 }
 
@@ -52,15 +58,15 @@
 }
 
 .title {
-  font-size: var(--text-base);
+  font-size: 13px;
   font-weight: var(--weight-semibold);
-  color: var(--color-text);
+  color: var(--pt-text);
 }
 
 .description {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  line-height: var(--leading-normal);
+  font-size: 12px;
+  color: var(--pt-t2);
+  line-height: 1.45;
 }
 
 .controls {
@@ -74,13 +80,13 @@
 
   border-radius: var(--radius-sm);
   padding: var(--space-1) var(--space-2);
-  color: var(--color-accent);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  color: var(--pt-accent);
+  font-size: 12.5px;
+  font-weight: var(--weight-semibold);
 }
 
 .action:hover {
-  background: var(--color-accent-subtle);
+  background: var(--pt-accent-soft);
 }
 
 .close {
@@ -92,22 +98,23 @@
   width: 24px;
   height: 24px;
   border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
 }
 
 .close:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text);
+  background: var(--pt-glass);
+  color: var(--pt-text);
 }
 
-/* Полоска обратного отсчёта — визуальный якорь того, сколько осталось до автозакрытия. */
+/* Полоска обратного отсчёта — визуальный якорь того, сколько осталось до
+   автозакрытия (design_handoff: `animation: ptTimer 6s linear forwards`). */
 .progress {
   position: absolute;
   left: 0;
   bottom: 0;
-  height: 3px;
+  height: 2px;
   width: 100%;
-  background: var(--color-border);
+  background: var(--pt-line);
   transform-origin: left;
   animation: countdown var(--toast-duration) linear forwards;
 }
@@ -117,41 +124,41 @@
 }
 
 .variant_default .progress {
-  background: var(--color-accent);
+  background: var(--pt-accent);
 }
 
 .variant_success .progress {
-  background: var(--color-success);
+  background: var(--pt-ok);
 }
 
 .variant_warning .progress {
-  background: var(--color-warning);
+  background: var(--pt-p1);
 }
 
 .variant_danger .progress {
-  background: var(--color-danger);
+  background: var(--pt-p0);
 }
 
 .variant_success .title {
-  color: var(--color-success);
+  color: var(--pt-ok);
 }
 
 .variant_warning .title {
-  color: var(--color-warning);
+  color: var(--pt-p1);
 }
 
 .variant_danger .title {
-  color: var(--color-danger);
+  color: var(--pt-p0);
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateX(16px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 

@@ -1,19 +1,31 @@
+/**
+ * Оверлей документа — стекло ВНУТРИ стеклянной плашки `main` (design_handoff,
+ * pravotex-desktop.dc.html строки ~331-360): `position: absolute` относительно
+ * `main` (страница прокидывает её узел как `container` портала — см.
+ * `DocumentInspector.tsx`), не `fixed` от вьюпорта. Ширина ровно 520px из
+ * макета — это единственное место в проекте, где стекло по-настоящему
+ * "оверлей поверх поверхности", поэтому здесь, в отличие от плоских
+ * карточек, уместен полноценный `backdrop-filter`.
+ */
+
 .content {
   composes: focusRing from '../../../shared/styles/shared.module.css';
 
-  position: fixed;
-  top: 0;
+  position: absolute;
   right: 0;
-  height: 100dvh;
-  width: min(var(--inspector-width), 100vw);
-  max-width: 100vw;
+  top: 0;
+  bottom: 0;
+  width: min(var(--inspector-width), 100%);
+  max-width: 100%;
   z-index: var(--z-dialog);
 
   display: flex;
   flex-direction: column;
-  background: var(--color-surface);
-  border-left: 1px solid var(--color-border);
-  box-shadow: var(--shadow-overlay);
+  background: var(--pt-overlay);
+  backdrop-filter: var(--pt-overlay-blur);
+  -webkit-backdrop-filter: var(--pt-overlay-blur);
+  border-left: 1px solid var(--pt-overlay-line);
+  box-shadow: -14px 0 44px rgba(0, 0, 0, 0.16);
 
   /* Инспектор: сдвиг справа 220мс вход / 150мс выход, ease-out/ease-in (docs/UX.md §7). */
   animation: slideIn 220ms var(--ease-out);
@@ -23,11 +35,24 @@
   animation: slideOut 150ms var(--ease-in);
 }
 
-.close {
+/* `.close.close` — специфичность нарочно удвоена: перебивает варианты
+   `IconButton` (ghost) вне зависимости от порядка их правил в бандле. */
+.close.close {
   position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
+  top: var(--space-4);
+  right: var(--space-5);
   z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-lg);
+  background: var(--pt-glass);
+  border: 1px solid var(--pt-line);
+  color: var(--pt-t2);
+}
+
+.close.close:hover {
+  background: var(--pt-glass2);
+  color: var(--pt-text);
 }
 
 .visuallyHidden {

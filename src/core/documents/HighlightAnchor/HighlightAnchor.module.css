@@ -1,14 +1,23 @@
 .root {
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
 }
 
+/* Вспышка при переходе (`flash`) — тёплым предупреждающим оттенком,
+   до `settled`, которая держит фон и акцентный ring, пока инспектор открыт
+   (design_handoff `CLAUSES[].highlight`: bg accent-soft, border accent,
+   ring `0 0 0 3px accent-soft`). */
 .root[data-phase='flash'].highlightWhole {
   background-color: var(--color-warning-subtle);
 }
 
 .root[data-phase='settled'].highlightWhole {
-  background-color: var(--color-accent-subtle);
-  transition: background-color 1.2s var(--ease-out);
+  background-color: var(--pt-accent-soft);
+  border-color: var(--pt-accent);
+  box-shadow: 0 0 0 3px var(--pt-accent-soft);
+  transition:
+    background-color 1.2s var(--ease-out),
+    border-color 1.2s var(--ease-out),
+    box-shadow 1.2s var(--ease-out);
 }
 
 .mark {
@@ -23,6 +32,6 @@
 }
 
 .root[data-phase='settled']:not(.highlightWhole) .mark {
-  background-color: var(--color-accent-subtle);
+  background-color: var(--pt-accent-soft);
   transition: background-color 1.2s var(--ease-out);
 }

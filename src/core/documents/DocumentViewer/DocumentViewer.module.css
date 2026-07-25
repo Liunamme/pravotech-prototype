@@ -1,6 +1,7 @@
 /**
- * Просмотрщик документа (docs/UX.md §4). Адаптив — только `@container`
- * (SPEC 4.5): ширина инспектора задаётся токеном, а не окном.
+ * Тело оверлея документа (docs/UX.md §4, design_handoff строки ~331-360).
+ * Адаптив — только `@container` (SPEC 4.5): ширина оверлея задаётся токеном,
+ * а не окном.
  */
 
 .root {
@@ -18,16 +19,15 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-8) var(--space-5) var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
+  padding: var(--space-4) 52px var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--pt-line2);
 }
 
 .kindRow {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
 }
 
 .kindIcon {
@@ -35,39 +35,37 @@
 }
 
 .kindLabel {
-  font-size: var(--text-sm);
+  font-size: 10px;
+  font-weight: var(--weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 1px;
 }
 
 .title {
-  font-family: var(--font-serif);
-  font-size: var(--text-xl);
+  font-size: 16px;
   font-weight: var(--weight-semibold);
-  line-height: var(--leading-tight);
-  color: var(--color-text);
+  line-height: 1.35;
+  letter-spacing: -0.1px;
+  color: var(--pt-text);
 }
 
 .meta {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 6px 14px;
+  font-size: 12px;
 }
 
 .metaRow {
-  display: flex;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
+  display: contents;
 }
 
 .metaKey {
-  flex-shrink: 0;
-  width: 132px;
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
 }
 
 .metaValue {
-  color: var(--color-text-secondary);
+  color: var(--pt-text);
 }
 
 .openFull {
@@ -85,24 +83,26 @@
 .prose {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
   max-width: 68ch;
-  padding: var(--space-5);
+  padding: var(--space-4) var(--space-5) var(--space-6);
+  font-family: var(--font-serif);
 }
 
 .headingBlock {
   padding: var(--space-1) var(--space-2);
-  margin: 0 calc(-1 * var(--space-2));
+  margin: 0 calc(-1 * var(--space-2)) var(--space-1);
 }
 
 .heading {
   font-family: var(--font-serif);
-  color: var(--color-text);
+  color: var(--pt-text);
 }
 
 .heading_1 {
-  font-size: var(--text-xl);
+  font-size: 15px;
   font-weight: var(--weight-semibold);
+  letter-spacing: 0.2px;
 }
 
 .heading_2 {
@@ -116,27 +116,40 @@
   font-weight: var(--weight-semibold);
 }
 
+/* Пункты договора — карточки (design_handoff `CLAUSES`): рамка/подложка по
+   умолчанию нейтральные, подсвеченный якорь получает акцентный ring —
+   см. `HighlightAnchor.module.css` (тот же компонент, значения синхронны). */
 .clauseRow {
-  display: grid;
-  grid-template-columns: 40px 1fr;
-  gap: var(--space-3);
-  padding: var(--space-1) var(--space-2);
-  margin: 0 calc(-1 * var(--space-2));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 10px 12px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--pt-line2);
+  background: transparent;
 }
 
 .clauseNumber {
-  padding-top: 2px;
+  align-self: flex-start;
+  display: inline-flex;
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid var(--pt-line);
+  color: var(--pt-t3);
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.3px;
   font-variant-numeric: tabular-nums;
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  text-align: right;
 }
 
 .clauseText {
   font-family: var(--font-serif);
-  font-size: var(--text-lg);
+  font-size: 14px;
   line-height: var(--leading-relaxed);
-  color: var(--color-text);
+  color: var(--pt-text);
 }
 
 .paragraphRow {
@@ -146,15 +159,14 @@
 
 .paragraphText {
   font-family: var(--font-serif);
-  font-size: var(--text-lg);
+  font-size: 14px;
   line-height: var(--leading-relaxed);
-  color: var(--color-text);
+  color: var(--pt-text);
 }
 
 @container (max-width: 400px) {
   .clauseRow {
-    grid-template-columns: 28px 1fr;
-    gap: var(--space-2);
+    padding: var(--space-2);
   }
 }
 
@@ -173,6 +185,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
+  font-family: var(--font-ui);
   font-size: var(--text-sm);
 }
 
@@ -180,15 +193,15 @@
 .table td {
   padding: var(--space-2) var(--space-3);
   text-align: left;
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--pt-line2);
   white-space: nowrap;
 }
 
 .table th {
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
   font-weight: var(--weight-medium);
 }
 
 .table td {
-  color: var(--color-text-secondary);
+  color: var(--pt-t2);
 }
