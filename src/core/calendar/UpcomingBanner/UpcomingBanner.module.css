@@ -1,94 +1,93 @@
 .root {
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-3);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface-raised);
+  gap: 6px;
 }
 
 .row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  min-height: 20px;
+  gap: 9px;
+  min-height: 18px;
 }
 
-.row:first-child {
-  justify-content: flex-start;
+.row + .row {
+  padding-top: 2px;
+  border-top: 1px solid var(--pt-line2);
 }
 
 .icon {
   flex-shrink: 0;
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
 }
 
 .nearest {
+  flex: 1;
   display: flex;
   align-items: baseline;
-  gap: var(--space-2);
+  gap: 8px;
   min-width: 0;
 }
 
 .nearestTitle {
   composes: truncate from '../../../shared/styles/shared.module.css';
-  font-size: var(--text-sm);
-  color: var(--color-text);
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: var(--weight-medium);
+  color: var(--pt-text);
 }
 
 .nearestEmpty {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  font-size: 12.5px;
+  color: var(--pt-t3);
 }
 
 .countdown {
   flex-shrink: 0;
-  font-size: var(--text-sm);
+  font-size: 11.5px;
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .urgency_overdue {
-  color: var(--color-danger);
+  color: var(--pt-p0);
 }
 
 .urgency_today {
-  color: var(--color-warning);
+  color: var(--pt-p1);
 }
 
 .urgency_soon {
-  color: var(--color-text);
+  color: var(--pt-text);
 }
 
 .urgency_normal {
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
   font-weight: var(--weight-regular);
 }
 
 .p0label {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
+  font-size: 11.5px;
+  color: var(--pt-t3);
 }
 
 .p0count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 var(--space-1);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
   border-radius: var(--radius-full);
-  font-size: var(--text-sm);
+  font-size: 11px;
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
-  color: var(--color-text-muted);
-  background: var(--color-surface-sunken);
+  color: var(--pt-t3);
+  background: var(--pt-glass2);
 }
 
 .p0active {
-  color: var(--color-p0-fg);
-  background: var(--color-p0);
+  color: var(--pt-p0);
+  background: var(--pt-p0bg);
 }
