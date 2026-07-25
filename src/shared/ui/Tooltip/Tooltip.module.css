@@ -1,0 +1,32 @@
+.content {
+  max-width: 260px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-text);
+  color: var(--color-text-inverted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  box-shadow: var(--shadow-md);
+  z-index: var(--z-tooltip);
+  animation-duration: var(--duration-fast);
+  animation-timing-function: var(--ease-out);
+}
+
+.content[data-state='delayed-open'] {
+  animation-name: fadeIn;
+}
+
+.arrow {
+  fill: var(--color-text);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

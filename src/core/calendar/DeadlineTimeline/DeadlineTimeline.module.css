@@ -1,0 +1,47 @@
+.root {
+  container-type: inline-size;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.empty {
+  padding: var(--space-6) var(--space-4);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+}
+
+.gapDivider {
+  padding: var(--space-2) 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  letter-spacing: 0.2em;
+}
+
+.dayHeader {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.dayItems {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1) var(--space-1) var(--space-2);
+}

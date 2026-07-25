@@ -1,0 +1,148 @@
+.root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.header {
+  flex-shrink: 0;
+  padding: var(--space-6) var(--space-8) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.back {
+  composes: focusRing from '../../shared/styles/shared.module.css';
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.back:hover {
+  color: var(--color-accent);
+}
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.hint {
+  margin-top: var(--space-1);
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  max-width: 70ch;
+}
+
+.showcase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-6) var(--space-8) var(--space-12);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.rowLabel {
+  flex-shrink: 0;
+  width: 260px;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.rowContent {
+  display: contents;
+}
+
+.demoCard {
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.demoCard strong {
+  color: var(--color-text);
+  font-size: var(--text-base);
+}
+
+.skeletonLines {
+  width: 260px;
+}
+
+.tabPanel {
+  composes: focusRing from '../../shared/styles/shared.module.css';
+
+  padding: var(--space-4) var(--space-1);
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}
+
+.dialogBody {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+}
+
+.popoverText {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}
+
+.emptyStateWrap {
+  width: 100%;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.scrollAreaDemo {
+  width: 260px;
+  height: 160px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.scrollList {
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollItem {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-subtle);
+}

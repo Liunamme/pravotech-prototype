@@ -1,0 +1,122 @@
+/**
+ * Общие стили тел карточек пространства «Обязательства». Хромировку (шапку,
+ * привязку, источники, кнопки) рисует `ActionCardShell` — здесь только то,
+ * что специфично для содержимого конкретного типа (docs/UX.md §2, задание
+ * этапа 6, п. 6.1: `Body` не дублирует `subjectRef`).
+ *
+ * Адаптив — `@container` от контейнера `action-card`, который заводит
+ * `ActionCardShell.module.css` на корневом узле карточки: контейнер
+ * распространяется на потомков независимо от границ CSS-модуля.
+ */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.factRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fact dt {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.fact dd {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+
+.amount {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.draft {
+  padding: var(--space-3);
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+/* Подсветка изменённого поля относительно предложения агента (docs/UX.md §2). */
+.field[data-changed] {
+  background: var(--color-warning-subtle);
+  border-left-color: var(--color-warning);
+}
+
+.fieldLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.input,
+.textarea {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  padding: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+/* Пара «сумма + дата» правки платежа — в строку, если хватает места. */
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@container action-card (min-width: 360px) {
+  .formRow {
+    flex-direction: row;
+  }
+
+  .formRow > * {
+    flex: 1 1 0;
+  }
+}

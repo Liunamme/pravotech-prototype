@@ -1,0 +1,51 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.inputRow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.textarea {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  flex: 1;
+  min-width: 0;
+  min-height: calc(var(--text-lg) * var(--leading-relaxed) + var(--space-3) * 2);
+  max-height: calc(var(--text-lg) * var(--leading-relaxed) * 6 + var(--space-3) * 2);
+  padding: var(--space-3);
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  resize: none;
+  overflow-y: auto;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.textarea:focus-visible {
+  border-color: var(--color-accent-border);
+}
+
+.textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.action {
+  flex-shrink: 0;
+}
+
+@container (max-width: 420px) {
+  .root {
+    padding: var(--space-3);
+  }
+}

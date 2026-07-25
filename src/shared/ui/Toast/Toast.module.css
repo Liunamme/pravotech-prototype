@@ -1,0 +1,194 @@
+.viewport {
+  position: fixed;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 340px;
+  max-width: calc(100vw - var(--space-8));
+  list-style: none;
+  outline: none;
+}
+
+.root {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  animation: slideIn var(--duration-base) var(--ease-out);
+}
+
+.root[data-state='closed'] {
+  animation: slideOut var(--duration-fast) var(--ease-in);
+}
+
+.root[data-swipe='move'] {
+  transform: translateX(var(--radix-toast-swipe-move-x));
+}
+
+.root[data-swipe='cancel'] {
+  transform: translateX(0);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.root[data-swipe='end'] {
+  animation: swipeOut var(--duration-fast) var(--ease-in);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.description {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.action {
+  composes: focusRing from '../../styles/shared.module.css';
+
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.action:hover {
+  background: var(--color-accent-subtle);
+}
+
+.close {
+  composes: focusRing from '../../styles/shared.module.css';
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+}
+
+.close:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+/* Полоска обратного отсчёта — визуальный якорь того, сколько осталось до автозакрытия. */
+.progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: var(--color-border);
+  transform-origin: left;
+  animation: countdown var(--toast-duration) linear forwards;
+}
+
+.progressPaused {
+  animation-play-state: paused;
+}
+
+.variant_default .progress {
+  background: var(--color-accent);
+}
+
+.variant_success .progress {
+  background: var(--color-success);
+}
+
+.variant_warning .progress {
+  background: var(--color-warning);
+}
+
+.variant_danger .progress {
+  background: var(--color-danger);
+}
+
+.variant_success .title {
+  color: var(--color-success);
+}
+
+.variant_warning .title {
+  color: var(--color-warning);
+}
+
+.variant_danger .title {
+  color: var(--color-danger);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(0) scale(0.96);
+  }
+}
+
+@keyframes swipeOut {
+  from {
+    opacity: 1;
+    transform: translateX(var(--radix-toast-swipe-end-x));
+  }
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--radix-toast-swipe-end-x) + var(--space-8)));
+  }
+}
+
+@keyframes countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress {
+    animation: none;
+    transform: scaleX(0.5);
+  }
+}

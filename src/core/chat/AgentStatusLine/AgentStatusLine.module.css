@@ -1,0 +1,102 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  animation: pulse calc(var(--duration-slow) * 4) var(--ease-in-out) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+  }
+}
+
+.label {
+  animation: fadeIn var(--duration-base) var(--ease-out);
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.track {
+  width: 96px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-subtle);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  transition: width var(--duration-base) var(--ease-out);
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.indeterminate {
+  width: 96px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-subtle);
+  overflow: hidden;
+}
+
+.indeterminateBar {
+  width: 40%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  animation: indeterminate 1.4s var(--ease-in-out) infinite;
+}
+
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

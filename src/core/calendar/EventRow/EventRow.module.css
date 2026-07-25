@@ -1,0 +1,63 @@
+.root {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  background: var(--color-surface-hover);
+}
+
+.time {
+  flex-shrink: 0;
+  width: 44px;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.kindIcon {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  flex-shrink: 0;
+  display: inline-flex;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+}
+
+.body {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  font-size: var(--text-base);
+  color: var(--color-text);
+}
+
+.subject {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.p0dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-p0);
+}

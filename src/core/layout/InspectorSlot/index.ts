@@ -1,0 +1,1 @@
+export { InspectorSlot } from './InspectorSlot';

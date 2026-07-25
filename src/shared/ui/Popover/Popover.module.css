@@ -1,0 +1,48 @@
+.content {
+  z-index: var(--z-panel);
+  min-width: 200px;
+  max-width: 320px;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  animation-duration: var(--duration-base);
+  animation-timing-function: var(--ease-out);
+}
+
+.content[data-state='open'] {
+  animation-name: popIn;
+}
+
+.content[data-state='closed'] {
+  animation-duration: var(--duration-fast);
+  animation-timing-function: var(--ease-in);
+  animation-name: popOut;
+}
+
+.arrow {
+  fill: var(--color-surface-raised);
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes popOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}

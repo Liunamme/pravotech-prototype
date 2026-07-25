@@ -1,0 +1,51 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.paragraph {
+  max-width: 68ch;
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.paragraph strong {
+  font-weight: var(--weight-semibold);
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: blink 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    /* Курсор не мигает под reduced-motion, но остаётся видимым — содержание
+       ("сейчас пишет") не декор, только сама анимация мигания декоративна. */
+    animation: none;
+    opacity: 1;
+  }
+}
+
+@keyframes blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  95% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

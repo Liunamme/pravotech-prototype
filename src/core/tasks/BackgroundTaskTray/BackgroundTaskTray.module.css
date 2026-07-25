@@ -1,0 +1,230 @@
+/**
+ * Индикатор зафиксирован координатами сразу правее рейки (см. комментарий
+ * в BackgroundTaskTray.tsx) — единственное место в этом модуле, где нужен
+ * `@media` для окна, было бы уместно, но не требуется: позиция не зависит
+ * от ширины окна, только от токена `--rail-width`.
+ */
+
+.trigger {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  position: fixed;
+  left: calc(var(--rail-width) + var(--space-3));
+  bottom: var(--space-3);
+  z-index: var(--z-panel);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-secondary);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.trigger:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.panel {
+  width: 320px;
+  max-width: calc(100vw - var(--space-8));
+  max-height: 60vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.panelTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.empty {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+}
+
+.itemHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.itemTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.step {
+  display: inline-flex;
+}
+
+.stepIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.step_active .stepIcon {
+  color: var(--color-accent);
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent-border);
+}
+
+.step_done .stepIcon {
+  color: var(--color-success);
+  background: var(--color-success-subtle);
+  border-color: var(--color-success-border);
+}
+
+.step_failed .stepIcon {
+  color: var(--color-danger);
+  background: var(--color-danger-subtle);
+  border-color: var(--color-danger-border);
+}
+
+.stepDotInner {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+}
+
+.spin {
+  animation: taskTraySpin 0.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
+
+@keyframes taskTraySpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.statusRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.statusLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.progressWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.track {
+  flex: 1;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-subtle);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  transition: width var(--duration-base) var(--ease-out);
+}
+
+.count {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.doneRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.failedRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.failedIcon {
+  flex-shrink: 0;
+  color: var(--color-danger);
+  margin-top: 1px;
+}
+
+.failedMessage {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}

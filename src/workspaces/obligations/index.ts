@@ -1,0 +1,1 @@
+export { obligationsManifest } from './manifest';

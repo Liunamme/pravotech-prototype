@@ -1,0 +1,131 @@
+.root {
+  composes: focusRing from '../../styles/shared.module.css';
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out);
+}
+
+.content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  composes: truncate from '../../styles/shared.module.css';
+}
+
+.spinnerWrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading .content {
+  visibility: hidden;
+}
+
+/* Размеры */
+.size_sm {
+  height: 28px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+  gap: var(--space-1);
+}
+
+.size_md {
+  height: 32px;
+  padding: 0 var(--space-4);
+  font-size: var(--text-base);
+  gap: var(--space-2);
+}
+
+/* Варианты */
+.variant_primary {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  border-color: var(--color-accent);
+}
+
+.variant_primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.variant_primary:active:not(:disabled) {
+  background: var(--color-accent-active);
+  border-color: var(--color-accent-active);
+}
+
+.variant_secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.variant_secondary:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
+}
+
+.variant_secondary:active:not(:disabled) {
+  background: var(--color-surface-active);
+}
+
+.variant_ghost {
+  background: transparent;
+  color: var(--color-text);
+  border-color: transparent;
+}
+
+.variant_ghost:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+}
+
+.variant_ghost:active:not(:disabled) {
+  background: var(--color-surface-active);
+}
+
+.variant_danger {
+  background: var(--color-danger);
+  color: var(--color-danger-fg);
+  border-color: var(--color-danger);
+}
+
+.variant_danger:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.variant_danger:active:not(:disabled) {
+  filter: brightness(0.85);
+}
+
+.root:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading {
+  cursor: wait;
+}

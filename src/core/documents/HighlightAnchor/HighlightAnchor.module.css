@@ -1,0 +1,28 @@
+.root {
+  border-radius: var(--radius-sm);
+}
+
+.root[data-phase='flash'].highlightWhole {
+  background-color: var(--color-warning-subtle);
+}
+
+.root[data-phase='settled'].highlightWhole {
+  background-color: var(--color-accent-subtle);
+  transition: background-color 1.2s var(--ease-out);
+}
+
+.mark {
+  background-color: transparent;
+  color: inherit;
+  border-radius: var(--radius-sm);
+  padding: 0 2px;
+}
+
+.root[data-phase='flash']:not(.highlightWhole) .mark {
+  background-color: var(--color-warning-subtle);
+}
+
+.root[data-phase='settled']:not(.highlightWhole) .mark {
+  background-color: var(--color-accent-subtle);
+  transition: background-color 1.2s var(--ease-out);
+}

@@ -1,0 +1,60 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  white-space: nowrap;
+}
+
+.size_sm {
+  height: 18px;
+  padding: 0 var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.size_md {
+  height: 22px;
+  padding: 0 var(--space-2);
+  font-size: var(--text-sm);
+}
+
+/* Токенов "--color-neutral-*" в SPEC нет — нейтральный вариант собран из
+   существующих поверхностных/текстовых токенов, по аналогии со статусной четвёркой. */
+.variant_neutral {
+  background: var(--color-surface-hover);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.variant_info {
+  background: var(--color-info-subtle);
+  color: var(--color-info);
+  border-color: var(--color-info-border);
+}
+
+.variant_success {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+  border-color: var(--color-success-border);
+}
+
+.variant_warning {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning);
+  border-color: var(--color-warning-border);
+}
+
+.variant_danger {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+  border-color: var(--color-danger-border);
+}
+
+.variant_accent {
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+  border-color: var(--color-accent-border);
+}

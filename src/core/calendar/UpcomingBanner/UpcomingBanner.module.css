@@ -1,0 +1,94 @@
+.root {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 20px;
+}
+
+.row:first-child {
+  justify-content: flex-start;
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.nearest {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.nearestTitle {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.nearestEmpty {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.countdown {
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.urgency_overdue {
+  color: var(--color-danger);
+}
+
+.urgency_today {
+  color: var(--color-warning);
+}
+
+.urgency_soon {
+  color: var(--color-text);
+}
+
+.urgency_normal {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.p0label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.p0count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  background: var(--color-surface-sunken);
+}
+
+.p0active {
+  color: var(--color-p0-fg);
+  background: var(--color-p0);
+}

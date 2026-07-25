@@ -1,0 +1,37 @@
+.wrap {
+  position: relative;
+  min-height: 0;
+  height: 100%;
+}
+
+.root {
+  composes: scrollArea from '../../styles/shared.module.css';
+
+  height: 100%;
+}
+
+.topShadow,
+.bottomShadow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--space-4);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+  z-index: var(--z-sticky);
+}
+
+.topShadow {
+  top: 0;
+  background: linear-gradient(to bottom, var(--color-surface), transparent);
+}
+
+.bottomShadow {
+  bottom: 0;
+  background: linear-gradient(to top, var(--color-surface), transparent);
+}
+
+.visible {
+  opacity: 1;
+}

@@ -1,0 +1,17 @@
+.root {
+  display: grid;
+  grid-template-columns: var(--rail-width) 1fr;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-canvas);
+}
+
+.content {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

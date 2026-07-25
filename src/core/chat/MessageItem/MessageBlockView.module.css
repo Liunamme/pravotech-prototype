@@ -1,0 +1,148 @@
+.textBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.citations {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* ── table ─────────────────────────────────────────────────────────── */
+
+.tableWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 100%;
+}
+
+.tableScroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.table th {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── doc_ref ───────────────────────────────────────────────────────── */
+
+.docRef {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 68ch;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.docRef:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
+}
+
+.docRefIcon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+.docRefBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.docRefTitle {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.docRefMeta {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.docRefChevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+/* ── card_ref ──────────────────────────────────────────────────────── */
+
+.cardRef {
+  max-width: 68ch;
+}
+
+/* ── clarify ───────────────────────────────────────────────────────── */
+
+.clarify {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.clarifyQuestion {
+  max-width: 68ch;
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text);
+}
+
+.clarifyOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

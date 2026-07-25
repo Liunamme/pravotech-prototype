@@ -1,0 +1,128 @@
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.avatar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.roleLabel {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.time {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.blocks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* ── роль: агент — без сдвига, без фона (не "чужая" реплика, а рабочий вывод) ── */
+.role_agent {
+  align-items: flex-start;
+}
+
+/* ── роль: пользователь — выравнивание вправо + плашка-поверхность, БЕЗ пузыря ── */
+.role_user {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+}
+
+.role_user .body {
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.role_user .meta {
+  flex-direction: row-reverse;
+}
+
+.role_user .blocks {
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-sunken);
+  border-left: 2px solid var(--color-accent);
+  border-radius: var(--radius-md);
+}
+
+/* ── роль: система — по центру, приглушённо ── */
+.role_system {
+  justify-content: center;
+}
+
+.role_system .roleLabel,
+.role_system .time {
+  color: var(--color-text-muted);
+}
+
+.errorBox {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  max-width: 68ch;
+  padding: var(--space-3);
+  background: var(--color-danger-subtle);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-lg);
+}
+
+.errorIcon {
+  flex-shrink: 0;
+  color: var(--color-danger);
+  margin-top: 2px;
+}
+
+.errorMessage {
+  flex: 1;
+  min-width: 180px;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-danger);
+}
+
+/* Панель чата ресайзится пользователем (ResizablePanels), не окно браузера —
+   раскладка подстраивается под контейнер, не под viewport (SPEC 4, п.5). */
+@container (max-width: 360px) {
+  .meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .role_user .meta {
+    align-items: flex-end;
+  }
+}

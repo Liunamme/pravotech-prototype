@@ -1,0 +1,13 @@
+.root {
+  height: 100%;
+  min-height: 0;
+}
+
+.panels {
+  height: 100%;
+}
+
+.center {
+  height: 100%;
+  min-height: 0;
+}

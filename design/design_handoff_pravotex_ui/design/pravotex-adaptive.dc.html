@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet"><style>
+body{margin:0;font-family:'Golos Text',system-ui,sans-serif}
+*{box-sizing:border-box}
+a{color:#8b5cf6}a:hover{color:#a78bfa}
+@keyframes ptSpin{to{transform:rotate(360deg)}}
+@keyframes ptUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ptIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+@keyframes ptTimer{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+*::-webkit-scrollbar{width:0;height:0}
+</style></helmet>
+<div style="--pt-bg:#0b0710;--pt-glass:rgba(255,255,255,.045);--pt-glass2:rgba(255,255,255,.07);--pt-glass3:rgba(255,255,255,.03);--pt-line:rgba(255,255,255,.09);--pt-line2:rgba(255,255,255,.055);--pt-text:#f4f0f8;--pt-t2:#bab1c7;--pt-t3:#8d8399;--pt-accent:#8b5cf6;--pt-accent-fg:#ffffff;--pt-accent-soft:rgba(139,92,246,.18);--pt-overlay:rgba(22,15,30,.6);--pt-overlay-line:rgba(255,255,255,.18);--pt-overlay-blur:blur(22px) saturate(150%);--pt-bloom1:rgba(139,92,246,.55);--pt-bloom2:rgba(217,70,239,.3);--pt-bloom3:rgba(56,189,248,.16);--pt-p0:#ff6b6b;--pt-p0bg:rgba(255,107,107,.15);--pt-p1:#f5a742;--pt-p1bg:rgba(245,167,66,.14);--pt-p2:#8ab4ff;--pt-p2bg:rgba(138,180,255,.14);--pt-p3:#a1a7b3;--pt-p3bg:rgba(255,255,255,.07);--pt-ok:#4ade80; {{ themeVars }} position:relative;width:{{ frameW }};height:{{ frameH }};overflow:hidden;background:var(--pt-bg);color:var(--pt-text);font-family:'Golos Text',system-ui,sans-serif;font-size:13px;display:flex;isolation:isolate">
+
+<div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0">
+<div style="position:absolute;left:-160px;top:-120px;width:560px;height:560px;border-radius:50%;background:var(--pt-bloom1);filter:blur(180px);opacity:.75"></div>
+<div style="position:absolute;left:-60px;bottom:-220px;width:520px;height:520px;border-radius:50%;background:var(--pt-bloom2);filter:blur(200px)"></div>
+<div style="position:absolute;right:-180px;top:220px;width:560px;height:560px;border-radius:50%;background:var(--pt-bloom3);filter:blur(210px)"></div>
+</div>
+
+<sc-if value="{{ isTablet }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:20px;top:18px;z-index:4;font-size:20px;font-weight:600;letter-spacing:-.3px;color:var(--pt-text)">право<span style="color:var(--pt-accent)">(тех)</span></div>
+<nav style="position:relative;z-index:3;width:56px;flex:none;display:flex;flex-direction:column;align-items:center;padding:64px 0 14px;gap:10px">
+  <button onClick="{{ goToday }}" title="Сегодня" style="width:38px;height:38px;border:none;cursor:pointer;border-radius:12px;display:grid;place-items:center;background:{{ railTodayBg }};color:{{ railTodayFg }}">
+    <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.6" fill="currentColor"></rect><rect x="9" y="1" width="6" height="6" rx="1.6" fill="currentColor" opacity=".5"></rect><rect x="1" y="9" width="6" height="6" rx="1.6" fill="currentColor" opacity=".5"></rect><rect x="9" y="9" width="6" height="6" rx="1.6" fill="currentColor"></rect></svg>
+  </button>
+  <div style="width:22px;height:1px;background:var(--pt-line)"></div>
+  <button onClick="{{ goObl }}" title="Обязательства" style="width:38px;height:38px;border:none;cursor:pointer;border-radius:12px;display:grid;place-items:center;background:{{ railOblBg }};color:{{ railOblFg }}">
+    <svg width="16" height="16" viewBox="0 0 16 16"><rect x="2.5" y="1" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"></rect><rect x="5" y="5" width="6" height="1.3" rx=".65" fill="currentColor"></rect><rect x="5" y="8.4" width="6" height="1.3" rx=".65" fill="currentColor"></rect></svg>
+  </button>
+  <button onClick="{{ goLit }}" title="Дела" style="width:38px;height:38px;border:none;cursor:pointer;border-radius:12px;display:grid;place-items:center;background:{{ railLitBg }};color:{{ railLitFg }}">
+    <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="3" r="1.7" fill="currentColor"></circle><rect x="7.3" y="4.2" width="1.4" height="9.6" rx=".7" fill="currentColor"></rect><rect x="2.5" y="13" width="11" height="1.4" rx=".7" fill="currentColor"></rect><rect x="2.2" y="6.4" width="11.6" height="1.2" rx=".6" fill="currentColor" opacity=".65"></rect></svg>
+  </button>
+  <div style="flex:1"></div>
+  <button onClick="{{ toggleTasks }}" title="Фоновые задачи" style="position:relative;width:38px;height:38px;border:none;cursor:pointer;border-radius:12px;display:grid;place-items:center;background:{{ railTasksBg }};color:{{ railTasksFg }}">
+    <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2.4" opacity=".3"></circle><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="27 44" transform="rotate(-90 10 10)"></circle></svg>
+    <span style="position:absolute;top:-2px;right:-2px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:var(--pt-accent);color:var(--pt-accent-fg);font-size:9px;font-weight:700;display:grid;place-items:center">{{ taskCount }}</span>
+  </button>
+  <button onClick="{{ toggleTheme }}" title="Тема" style="width:38px;height:38px;border:none;cursor:pointer;border-radius:12px;display:grid;place-items:center;background:transparent;color:var(--pt-t2)">
+    <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.9" fill="currentColor"></circle><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.9v2.2M10 15.9v2.2M1.9 10h2.2M15.9 10h2.2M4.3 4.3l1.6 1.6M14.1 14.1l1.6 1.6M15.7 4.3l-1.6 1.6M5.9 14.1l-1.6 1.6"></path></g></svg></sc-if><sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M15.6 12.4A6.4 6.4 0 0 1 7.6 4.4a6.6 6.6 0 1 0 8 8Z" fill="currentColor"></path></svg></sc-if>
+  </button>
+  <button onClick="{{ openSettings }}" title="Настройки" style="width:38px;height:38px;border:none;cursor:pointer;border-radius:12px;display:grid;place-items:center;background:{{ tabSetBg }};color:{{ tabSetFg }}">
+    <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><g fill="currentColor"><g transform="rotate(0 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(45 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(90 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(135 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(180 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(225 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(270 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(315 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g></g><circle cx="10" cy="10" r="5.4" stroke="currentColor" stroke-width="1.6"></circle><circle cx="10" cy="10" r="2.1" stroke="currentColor" stroke-width="1.5"></circle></svg>
+  </button>
+</nav>
+</sc-if>
+
+<sc-if value="{{ showAside }}" hint-placeholder-val="{{ true }}">
+<aside style="position:relative;z-index:2;width:{{ asideW }};flex:none;display:flex;flex-direction:column;padding:64px 14px 14px 0;gap:12px;overflow:hidden">
+  <sc-if value="{{ showNavBlock }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex-direction:column;gap:18px;min-height:0;font-size:13px">
+    <div style="padding:0 8px;font-size:13px;font-weight:600;color:var(--pt-t2)">{{ sidebarLabel }}</div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:12px;background:var(--pt-accent);color:var(--pt-accent-fg);font-weight:600;box-shadow:0 6px 18px var(--pt-accent-soft)">
+        <svg width="13" height="13" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.6" fill="currentColor"></rect><rect x="9" y="1" width="6" height="6" rx="1.6" fill="currentColor" opacity=".55"></rect><rect x="1" y="9" width="6" height="6" rx="1.6" fill="currentColor" opacity=".55"></rect><rect x="9" y="9" width="6" height="6" rx="1.6" fill="currentColor"></rect></svg>
+        Сегодня
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="padding:0 11px;font-size:10px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--pt-t3)">Рабочие пространства</div>
+      <button onClick="{{ goObl }}" style="display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:12px;border:1px solid transparent;background:transparent;color:var(--pt-t2);font:inherit;font-size:13px;cursor:pointer;text-align:left" style-hover="background:var(--pt-glass);color:var(--pt-text)">
+        <svg width="13" height="13" viewBox="0 0 16 16"><rect x="2.5" y="1" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"></rect><rect x="5" y="5" width="6" height="1.3" rx=".65" fill="currentColor"></rect><rect x="5" y="8.4" width="6" height="1.3" rx=".65" fill="currentColor"></rect></svg>
+        <span style="flex:1">Обязательства</span>
+        <span style="min-width:20px;height:19px;padding:0 6px;border-radius:9px;background:var(--pt-glass2);border:1px solid var(--pt-line);font-size:11px;font-weight:600;display:grid;place-items:center;font-variant-numeric:tabular-nums">6</span>
+      </button>
+      <button onClick="{{ goLit }}" style="display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:12px;border:1px solid transparent;background:transparent;color:var(--pt-t2);font:inherit;font-size:13px;cursor:pointer;text-align:left" style-hover="background:var(--pt-glass);color:var(--pt-text)">
+        <svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="3" r="1.7" fill="currentColor"></circle><rect x="7.3" y="4.2" width="1.4" height="9.6" rx=".7" fill="currentColor"></rect><rect x="2.5" y="13" width="11" height="1.4" rx=".7" fill="currentColor"></rect></svg>
+        <span style="flex:1">Дела</span>
+        <span style="min-width:20px;height:19px;padding:0 6px;border-radius:9px;background:var(--pt-glass2);border:1px solid var(--pt-line);font-size:11px;font-weight:600;display:grid;place-items:center;font-variant-numeric:tabular-nums">4</span>
+      </button>
+    </div>
+  </div>
+  </sc-if>
+  <sc-if value="{{ showConvBlock }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;gap:8px;padding:0 8px;margin-top:-2px">
+    <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--pt-t3)">Диалоги</span>
+    <div style="flex:1"></div>
+    <button style="width:22px;height:22px;border-radius:8px;border:1px solid var(--pt-line);background:var(--pt-glass);color:var(--pt-t2);cursor:pointer;font-size:13px;line-height:1">+</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:2px">
+    <sc-for list="{{ convRows }}" as="c" hint-placeholder-count="3">
+      <button onClick="{{ c.open }}" style="display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:11px;border:none;background:{{ c.bg }};color:{{ c.fg }};font:inherit;font-size:12px;font-weight:500;text-align:left;cursor:pointer;width:100%">
+        <span style="width:6px;height:6px;flex:none;border-radius:50%;background:{{ c.dot }}"></span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.title }}</span>
+      </button>
+    </sc-for>
+  </div>
+  <div style="height:1px;background:var(--pt-line);margin:2px 8px"></div>
+  <div style="display:flex;gap:4px;padding:0 6px">
+    <sc-for list="{{ docTabs }}" as="t" hint-placeholder-count="2">
+      <button onClick="{{ t.pick }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px 6px;border:1px solid {{ t.bd }};border-radius:11px;background:{{ t.bg }};color:{{ t.fg }};font:inherit;font-size:11.5px;font-weight:500;cursor:pointer">{{ t.label }}<span style="font-size:10px;color:var(--pt-t3);font-variant-numeric:tabular-nums">{{ t.count }}</span></button>
+    </sc-for>
+  </div>
+  </sc-if>
+  <sc-if value="{{ showAsideDocs }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:0 2px 24px;mask-image:linear-gradient(180deg,transparent 0,#000 8px,#000 calc(100% - 30px),transparent 100%);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 8px,#000 calc(100% - 30px),transparent 100%)">
+    <sc-for list="{{ docRows }}" as="d" hint-placeholder-count="3">
+      <button onClick="{{ d.open }}" style="text-align:left;font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:10px 11px;border-radius:14px;background:var(--pt-glass);border:1px solid var(--pt-line2);color:var(--pt-text)">
+        <span style="font-size:12px;font-weight:600;line-height:1.3">{{ d.title }}</span>
+        <span style="font-size:10.5px;color:var(--pt-t3);line-height:1.4">{{ d.parties }}</span>
+      </button>
+    </sc-for>
+  </div>
+  </sc-if>
+  <div style="flex:1;min-height:0"></div>
+  <div style="display:flex;align-items:center;gap:9px;padding:10px 8px 0;margin-top:auto;border-top:1px solid var(--pt-line)">
+    <span style="width:28px;height:28px;border-radius:50%;background:var(--pt-accent);color:var(--pt-accent-fg);font-size:11px;font-weight:500;letter-spacing:.4px;display:grid;place-items:center">ЭЗ</span>
+    <span style="display:flex;flex-direction:column;line-height:1.25"><span style="font-size:12px;font-weight:600">Э. Задорожный</span><span style="font-size:10.5px;color:var(--pt-t3)">Юрист</span></span>
+  </div>
+</aside>
+</sc-if>
+
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;top:0;height:52px;z-index:4;display:flex;align-items:center;gap:10px;padding:0 18px">
+  <span style="flex:1;font-size:17px;font-weight:600;letter-spacing:-.3px">право<span style="color:var(--pt-accent)">(тех)</span></span>
+  <button onClick="{{ toggleConv }}" title="Диалоги" style="width:34px;height:34px;border-radius:12px;border:1px solid var(--pt-line);background:{{ convBtnBg }};color:{{ convBtnFg }};cursor:pointer;display:grid;place-items:center">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3.6 4.6h12.8M3.6 9h12.8M3.6 13.4h8.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+  </button>
+  <button onClick="{{ toggleTasks }}" title="Фоновые задачи" style="position:relative;width:34px;height:34px;border-radius:12px;border:1px solid var(--pt-line);background:{{ tasksBtnBg }};color:{{ tasksBtnFg }};cursor:pointer;display:grid;place-items:center">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2.4" opacity=".3"></circle><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="27 44" transform="rotate(-90 10 10)"></circle></svg>
+    <span style="position:absolute;top:-3px;right:-3px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:var(--pt-accent);color:var(--pt-accent-fg);font-size:9px;font-weight:700;display:grid;place-items:center">{{ taskCount }}</span>
+  </button>
+</div>
+</sc-if>
+
+<main style="position:relative;z-index:2;flex:1;min-width:0;margin:{{ mainMargin }};border-radius:{{ mainRadius }};background:var(--pt-glass);border-top:1px solid var(--pt-line);border-right:{{ mainSideBorder }};border-bottom:{{ mainSideBorder }};border-left:{{ mainSideBorder }};box-shadow:{{ mainShadow }};display:flex;flex-direction:column;overflow:hidden">
+
+  <header style="flex:none;display:flex;align-items:center;gap:9px;padding:{{ headerPad }};border-bottom:1px solid var(--pt-line2);min-height:48px">
+    <h1 style="margin:0;font-size:{{ titleSize }};font-weight:600;letter-spacing:-.2px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ chatTitle }}</h1>
+  </header>
+
+  <sc-if value="{{ showContextTabs }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:none;display:flex;align-items:center;gap:8px;padding:8px 12px 10px">
+      <div ref="{{ tabsRef }}" onScroll="{{ onTabsScroll }}" style="flex:1;min-width:0;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px;mask-image:{{ tabsMask }};-webkit-mask-image:{{ tabsMask }}">
+        <sc-for list="{{ ctxTabs }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.pick }}" style="flex:none;display:flex;align-items:center;gap:5px;padding:8px 12px;border:1px solid {{ t.bd }};border-radius:999px;background:{{ t.bg }};color:{{ t.fg }};font:inherit;font-size:11.5px;font-weight:500;white-space:nowrap;cursor:pointer">{{ t.label }}<span style="font-size:10.5px;color:var(--pt-t3);font-variant-numeric:tabular-nums">{{ t.count }}</span></button>
+        </sc-for>
+      </div>
+      <span style="flex:none;width:1px;height:20px;background:var(--pt-line)"></span>
+      <button onClick="{{ toggleQueue }}" style="flex:none;display:flex;align-items:center;gap:5px;padding:8px 11px;border:1px solid {{ queueBtnBd }};border-radius:999px;background:{{ queueBtnBg }};color:{{ queueBtnFg }};font:inherit;font-size:11.5px;font-weight:500;white-space:nowrap;cursor:pointer">Очередь<span style="padding:1px 5px;border-radius:7px;background:var(--pt-p0bg);color:var(--pt-p0);font-size:10px;font-weight:700;font-variant-numeric:tabular-nums">{{ queueCount }}</span></button>
+    </div>
+  </sc-if>
+
+  <div style="flex:1;min-height:0;overflow:auto;padding:{{ bodyPad }};mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 26px),transparent 100%);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 26px),transparent 100%)">
+    <sc-if value="{{ showEmptyChat }}" hint-placeholder-val="{{ false }}">
+      <div style="min-height:340px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center">
+        <span style="width:42px;height:42px;border-radius:15px;background:var(--pt-glass2);border:1px solid var(--pt-line);display:grid;place-items:center;color:var(--pt-t2);font-size:18px">?</span>
+        <span style="font-size:16px;font-weight:600">О чём поговорим?</span>
+        <span style="font-size:12.5px;color:var(--pt-t3);max-width:280px;line-height:1.5">Спросите что угодно о делах и договорах — или начните с подсказки.</span>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:4px">
+          <sc-for list="{{ skills }}" as="s" hint-placeholder-count="3">
+            <button onClick="{{ s.run }}" style="padding:8px 13px;border-radius:999px;border:1px solid var(--pt-line);background:var(--pt-glass2);color:var(--pt-text);font:inherit;font-size:12px;cursor:pointer">{{ s.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showDocs }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <sc-for list="{{ docRows }}" as="d" hint-placeholder-count="3">
+          <button onClick="{{ d.open }}" style="text-align:left;font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:13px 14px;border-radius:16px;background:var(--pt-glass2);border:1px solid var(--pt-line);color:var(--pt-text)">
+            <span style="font-size:13px;font-weight:600;line-height:1.32">{{ d.title }}</span>
+            <span style="font-size:11.5px;color:var(--pt-t3);line-height:1.45">{{ d.parties }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showDates }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <sc-for list="{{ days }}" as="day" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <span style="display:flex;align-items:center;gap:9px;padding:2px 2px 0"><span style="font-size:10.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--pt-t3);white-space:nowrap">{{ day.label }}</span><span style="flex:1;height:1px;background:var(--pt-line2)"></span></span>
+            <sc-for list="{{ day.events }}" as="e" hint-placeholder-count="2">
+              <div style="display:flex;gap:11px;padding:11px 13px;border-radius:14px;background:var(--pt-glass2);border:1px solid var(--pt-line2)">
+                <span style="font-size:11.5px;font-weight:600;color:var(--pt-t2);font-variant-numeric:tabular-nums;padding-top:1px">{{ e.time }}</span>
+                <span style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:12.5px;line-height:1.35">{{ e.title }}</span><span style="font-size:11px;color:var(--pt-t3)">{{ e.subject }}</span></span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <sc-for list="{{ messages }}" as="m" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:{{ m.align }}">
+          <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;max-width:88%">
+              <span style="font-size:10.5px;color:var(--pt-t3);font-variant-numeric:tabular-nums">{{ m.time }} · Вы</span>
+              <span style="padding:10px 14px;border-radius:16px 16px 4px 16px;background:var(--pt-accent);color:var(--pt-accent-fg);font-size:13.5px;line-height:1.45">{{ m.text }}</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ m.isAgent }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:9px;width:100%">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="width:22px;height:22px;border-radius:7px;background:var(--pt-accent-soft);border:1px solid var(--pt-line);color:var(--pt-accent);font-size:10.5px;font-weight:600;display:grid;place-items:center">П</span>
+                <span style="font-size:12px;font-weight:600">ПравоТех</span>
+                <span style="font-size:10.5px;color:var(--pt-t3);font-variant-numeric:tabular-nums">{{ m.time }}</span>
+              </div>
+              <div style="font-size:13.5px;line-height:1.6;text-wrap:pretty;display:flex;flex-direction:column;gap:10px">
+                <span>{{ m.text }}<sc-for list="{{ m.cites }}" as="c" hint-placeholder-count="0"><sup style="margin-left:2px"><a href="#" onClick="{{ c.open }}" style="text-decoration:none;color:var(--pt-accent);background:var(--pt-accent-soft);border-radius:4px;padding:1px 4px;font-size:9.5px">{{ c.n }}</a></sup></sc-for></span>
+                <sc-if value="{{ m.text2 }}" hint-placeholder-val="{{ false }}"><span>{{ m.text2 }}</span></sc-if>
+              </div>
+              <sc-if value="{{ m.card }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:12px 13px;border-radius:14px;background:var(--pt-glass3);border:1px solid var(--pt-line2);display:flex;flex-direction:column;gap:6px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="padding:2px 7px;border-radius:6px;background:{{ m.card.pbg }};color:{{ m.card.pcolor }};font-size:9.5px;font-weight:700;letter-spacing:.4px">{{ m.card.priority }}</span>
+                    <span style="font-size:11px;color:var(--pt-t3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.card.typeLabel }}</span>
+                    <span style="font-size:11px;color:var(--pt-t3)">{{ m.card.due }}</span>
+                  </div>
+                  <span style="font-size:13px;font-weight:600;line-height:1.35">{{ m.card.title }}</span>
+                  <span style="font-size:12px;color:var(--pt-t2);line-height:1.45">{{ m.card.summary }}</span>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <sc-if value="{{ showComposer }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:none;padding:{{ composerPad }}">
+    <div style="display:flex;align-items:flex-end;gap:8px;padding:6px 6px 6px 14px;border-radius:18px;background:var(--pt-glass2);border:1px solid var(--pt-line)">
+      <textarea value="{{ draft }}" onChange="{{ onDraft }}" rows="1" placeholder="Спросите агента или опишите задачу…" style="flex:1;resize:none;border:none;outline:none;background:transparent;color:var(--pt-text);font:inherit;font-size:13.5px;line-height:1.5;padding:7px 0"></textarea>
+      <button onClick="{{ onSend }}" style="width:34px;height:34px;flex:none;border:none;border-radius:12px;background:var(--pt-accent);color:var(--pt-accent-fg);cursor:pointer;display:grid;place-items:center">
+        <svg width="15" height="15" viewBox="0 0 16 16"><rect x="7.2" y="3" width="1.6" height="10" rx=".8" fill="currentColor"></rect><path d="M8 2.4 L12.4 6.8 L11.2 8 L8 4.8 L4.8 8 L3.6 6.8 Z" fill="currentColor"></path></svg>
+      </button>
+    </div>
+  </div>
+  </sc-if>
+</main>
+
+<sc-if value="{{ queueOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="z-index:8;display:flex;flex-direction:column;{{ sheetPos }};background:{{ sheetBg }};backdrop-filter:{{ sheetBlur }};border:{{ sheetBorder }};border-radius:{{ sheetRadius }};box-shadow:{{ sheetShadow }};overflow:hidden;animation:{{ sheetAnim }}">
+    <sc-if value="{{ showSheetHeader }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:none;display:flex;align-items:center;gap:10px;padding:14px 16px 10px">
+      <span style="font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--pt-t3)">Очередь решений</span>
+      <div style="flex:1"></div>
+      <button onClick="{{ closeQueue }}" style="width:26px;height:26px;border-radius:9px;border:1px solid var(--pt-line);background:var(--pt-glass);color:var(--pt-t2);cursor:pointer;font-size:12px;line-height:1">✕</button>
+    </div>
+    </sc-if>
+    <div style="flex:1;min-height:0;overflow:auto;padding:{{ sheetListPad }};display:flex;flex-direction:column;gap:12px;mask-image:linear-gradient(180deg,transparent 0,#000 8px,#000 calc(100% - 26px),transparent 100%);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 8px,#000 calc(100% - 26px),transparent 100%)">
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:8px;padding:0 2px">
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:{{ g.color }}">{{ g.label }}</span>
+            <div style="flex:1;height:1px;background:var(--pt-line2)"></div>
+            <span style="font-size:10.5px;color:var(--pt-t3);font-variant-numeric:tabular-nums">{{ g.count }}</span>
+          </div>
+          <sc-for list="{{ g.cards }}" as="c" hint-placeholder-count="2">
+            <div style="border-radius:16px;padding:12px 13px;background:var(--pt-glass2);border:1px solid {{ c.bd }};box-shadow:{{ c.ring }};display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+                <span style="padding:2px 7px;border-radius:6px;background:{{ c.pbg }};color:{{ c.pcolor }};font-size:9.5px;font-weight:700;letter-spacing:.4px">{{ c.priority }}</span>
+                <span style="font-size:10.5px;color:var(--pt-t3)">{{ c.typeLabel }}</span>
+                <div style="flex:1"></div>
+                <span style="font-size:10.5px;color:{{ c.dueColor }};font-variant-numeric:tabular-nums">{{ c.due }}</span>
+              </div>
+              <button onClick="{{ c.toggle }}" style="text-align:left;border:none;background:transparent;padding:0;color:var(--pt-text);font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:5px">
+                <span style="font-size:13.5px;font-weight:600;line-height:1.32">{{ c.title }}</span>
+                <span style="font-size:12px;color:var(--pt-t2);line-height:1.45">{{ c.summary }}</span>
+              </button>
+              <sc-if value="{{ c.showDetails }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+                    <span style="font-size:11px;color:var(--pt-t2)">{{ c.subject }}</span>
+                    <sc-for list="{{ c.sources }}" as="s" hint-placeholder-count="2">
+                      <span style="padding:2px 7px;border-radius:8px;border:1px solid var(--pt-line);background:var(--pt-accent-soft);color:var(--pt-accent);font-size:10px">{{ s }}</span>
+                    </sc-for>
+                  </div>
+                  <div style="padding:10px 12px;border-radius:12px;background:var(--pt-glass);border:1px solid var(--pt-line2);font-family:'Source Serif 4',Georgia,serif;font-size:12.5px;line-height:1.5;color:var(--pt-t2)">{{ c.draft }}</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ c.executing }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <sc-for list="{{ c.steps }}" as="st" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:{{ st.color }}"><span style="{{ st.mark }}"></span><span>{{ st.label }}</span></div>
+                  </sc-for>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="flex:1;height:4px;border-radius:999px;background:var(--pt-glass);overflow:hidden"><div style="height:100%;border-radius:999px;background:var(--pt-accent);width:{{ c.progress }}"></div></div>
+                    <span style="font-size:10.5px;color:var(--pt-t3);font-variant-numeric:tabular-nums">{{ c.progressLabel }}</span>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ c.done }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--pt-ok)"><span style="width:14px;height:14px;border-radius:50%;border:1.5px solid currentColor;display:grid;place-items:center;font-size:8px">✓</span>Выполнено</div>
+              </sc-if>
+              <sc-if value="{{ c.showActions }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:7px">
+                  <button onClick="{{ c.confirm }}" style="flex:1;padding:10px;border:none;border-radius:12px;background:var(--pt-accent);color:var(--pt-accent-fg);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer">Подтвердить</button>
+                  <button style="padding:10px 13px;border:1px solid var(--pt-line);border-radius:12px;background:var(--pt-glass);color:var(--pt-text);font:inherit;font-size:12.5px;cursor:pointer">Изменить</button>
+                  <button onClick="{{ c.reject }}" style="padding:10px 11px;border:none;border-radius:12px;background:transparent;color:var(--pt-t3);font:inherit;font-size:12.5px;cursor:pointer">Отклонить</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</sc-if>
+
+
+
+<sc-if value="{{ tasksOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;{{ tasksPos }};z-index:9;padding:14px 15px;border-radius:18px;background:var(--pt-overlay);backdrop-filter:var(--pt-overlay-blur);border:1px solid var(--pt-overlay-line);box-shadow:0 14px 40px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.18);display:flex;flex-direction:column;gap:9px;animation:ptUp .22s ease-out">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--pt-t3)">Фоновые задачи</span>
+      <div style="flex:1"></div>
+      <button onClick="{{ closeTasks }}" style="width:24px;height:24px;border-radius:9px;border:1px solid var(--pt-line);background:var(--pt-glass);color:var(--pt-t2);cursor:pointer;font-size:11px;line-height:1">✕</button>
+    </div>
+    <span style="font-size:13px;font-weight:600;line-height:1.35">{{ taskTitle }}</span>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <sc-for list="{{ taskSteps }}" as="st" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:{{ st.color }}"><span style="{{ st.mark }}"></span><span>{{ st.label }}</span></div>
+      </sc-for>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="flex:1;height:4px;border-radius:999px;background:var(--pt-glass);overflow:hidden"><div style="height:100%;border-radius:999px;background:var(--pt-accent);width:58%"></div></div>
+      <span style="font-size:10.5px;color:var(--pt-t3);font-variant-numeric:tabular-nums">7 из 12</span>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ convOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:12px;right:12px;top:58px;z-index:9;padding:12px 13px;border-radius:18px;background:var(--pt-overlay);backdrop-filter:var(--pt-overlay-blur);border:1px solid var(--pt-overlay-line);box-shadow:0 14px 40px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.18);display:flex;flex-direction:column;gap:8px;animation:ptUp .22s ease-out">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--pt-t3)">Диалоги</span>
+      <div style="flex:1"></div>
+      <button style="width:24px;height:24px;border-radius:9px;border:1px solid var(--pt-line);background:var(--pt-glass);color:var(--pt-t2);cursor:pointer;font-size:13px;line-height:1">+</button>
+      <button onClick="{{ closeConv }}" style="width:24px;height:24px;border-radius:9px;border:1px solid var(--pt-line);background:var(--pt-glass);color:var(--pt-t2);cursor:pointer;font-size:11px;line-height:1">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ convRows }}" as="c" hint-placeholder-count="3">
+        <button onClick="{{ c.open }}" style="display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:12px;border:none;background:{{ c.bg }};color:{{ c.fg }};font:inherit;font-size:12.5px;font-weight:500;text-align:left;cursor:pointer;width:100%">
+          <span style="width:6px;height:6px;flex:none;border-radius:50%;background:{{ c.dot }}"></span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.title }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:7;display:flex;gap:4px;padding:6px 8px 10px">
+  <button onClick="{{ goToday }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px 6px;border:none;border-radius:14px;background:{{ tabTodayBg }};color:{{ tabTodayFg }};font:inherit;font-size:10px;font-weight:500;cursor:pointer">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="2.5" width="6" height="6" rx="2" fill="currentColor"></rect><rect x="11.5" y="2.5" width="6" height="6" rx="2" fill="currentColor" opacity=".45"></rect><rect x="2.5" y="11.5" width="6" height="6" rx="2" fill="currentColor" opacity=".45"></rect><rect x="11.5" y="11.5" width="6" height="6" rx="2" fill="currentColor"></rect></svg>
+    <span>Сегодня</span>
+  </button>
+  <button onClick="{{ goObl }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px 6px;border:none;border-radius:14px;background:{{ tabOblBg }};color:{{ tabOblFg }};font:inherit;font-size:10px;font-weight:500;cursor:pointer">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none"><path d="M4.5 2.75h7.2l4 4v10.5a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V3.5a.75.75 0 0 1 .75-.75Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M11.5 2.9V6.5a.5.5 0 0 0 .5.5h3.6" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M7.2 10.6h5.6M7.2 13.6h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+    <span>Обязательства</span>
+  </button>
+  <button onClick="{{ goLit }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px 6px;border:none;border-radius:14px;background:{{ tabLitBg }};color:{{ tabLitFg }};font:inherit;font-size:10px;font-weight:500;cursor:pointer">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none"><path d="M10 3v14M6 17h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M3.4 6.6h13.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M5.4 6.8 3 11.4h4.8L5.4 6.8Zm9.2 0L12.2 11.4H17l-2.4-4.6Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>
+    <span>Дела</span>
+  </button>
+  <button onClick="{{ openSettings }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px 6px;border:none;border-radius:14px;background:{{ tabSetBg }};color:{{ tabSetFg }};font:inherit;font-size:10px;font-weight:500;cursor:pointer">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none"><g fill="currentColor"><g transform="rotate(0 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(45 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(90 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(135 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(180 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(225 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(270 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g><g transform="rotate(315 10 10)"><rect x="8.7" y="1.5" width="2.6" height="4" rx="1.1"></rect></g></g><circle cx="10" cy="10" r="5.4" stroke="currentColor" stroke-width="1.6"></circle><circle cx="10" cy="10" r="2.1" stroke="currentColor" stroke-width="1.5"></circle></svg>
+    <span>Настройки</span>
+  </button>
+</div>
+</sc-if>
+
+<sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="{{ setWrap }}">
+    <sc-if value="{{ showSetScrim }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeSettings }}" style="position:absolute;inset:0;background:rgba(0,0,0,.34);backdrop-filter:blur(2px)"></div>
+    </sc-if>
+    <div style="{{ setPanel }}">
+      <sc-if value="{{ showSetHandle }}" hint-placeholder-val="{{ false }}">
+      <div onPointerDown="{{ dragStart }}" onPointerMove="{{ dragMove }}" onPointerUp="{{ dragEnd }}" onPointerCancel="{{ dragEnd }}" style="padding:10px 16px 6px;display:flex;align-items:center;cursor:grab;touch-action:none">
+        <div style="flex:1;display:flex;justify-content:center"><span style="width:40px;height:4px;border-radius:3px;background:var(--pt-t3);opacity:.55;display:block"></span></div>
+      </div>
+      </sc-if>
+      <button onClick="{{ closeSettings }}" style="position:absolute;right:14px;top:12px;z-index:2;width:26px;height:26px;border-radius:9px;border:1px solid var(--pt-line);background:var(--pt-glass);color:var(--pt-t2);cursor:pointer;font-size:11px;line-height:1">✕</button>
+      <div style="padding:{{ setPad }};display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="width:46px;height:46px;flex:none;border-radius:50%;background:var(--pt-accent);color:var(--pt-accent-fg);font-size:15px;font-weight:500;letter-spacing:.5px;display:grid;place-items:center">ЭЗ</span>
+          <span style="display:flex;flex-direction:column;gap:3px;line-height:1.25;min-width:0">
+            <span style="font-size:14.5px;font-weight:600">Э. Задорожный</span>
+            <span style="font-size:12px;color:var(--pt-t3)">Юрист · ООО «Меридиан Групп»</span>
+          </span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--pt-t3)">Тема</span>
+          <div style="display:flex;gap:5px">
+            <button onClick="{{ setLight }}" style="flex:1;padding:9px;border:1px solid {{ thLightBd }};border-radius:12px;background:{{ thLightBg }};color:{{ thLightFg }};font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.4" stroke="currentColor" stroke-width="1.4"></circle><path d="M10 2.4v1.8M10 15.8v1.8M2.4 10h1.8M15.8 10h1.8M4.7 4.7l1.3 1.3M14 14l1.3 1.3M15.3 4.7 14 6M6 14l-1.3 1.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>Светлая</button>
+            <button onClick="{{ setDark }}" style="flex:1;padding:9px;border:1px solid {{ thDarkBd }};border-radius:12px;background:{{ thDarkBg }};color:{{ thDarkFg }};font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M16.4 12.6A6.8 6.8 0 0 1 7.4 3.6a6.8 6.8 0 1 0 9 9Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path></svg>Тёмная</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;padding-top:2px;border-top:1px solid var(--pt-line)">
+          <sc-for list="{{ settingsRows }}" as="r" hint-placeholder-count="2">
+            <button onClick="{{ r.open }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 2px;border:none;background:transparent;color:var(--pt-text);font:inherit;font-size:13.5px;text-align:left;cursor:pointer">
+              <span style="flex:1">{{ r.label }}</span>
+              <span style="font-size:12.5px;color:var(--pt-t2)">{{ r.value }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <span style="font-size:11px;color:var(--pt-t3);text-align:center">ПравоТех · версия 0.9.4</span>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;{{ toastInset }};z-index:10;padding:13px 14px;border-radius:16px;background:var(--pt-overlay);backdrop-filter:var(--pt-overlay-blur);border:1px solid var(--pt-overlay-line);box-shadow:0 10px 28px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.18);display:flex;flex-direction:column;gap:6px;overflow:hidden;animation:ptUp .22s ease-out">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="flex:1;font-size:12.5px;font-weight:600">Подтверждено</span>
+      <button onClick="{{ undo }}" style="border:none;background:transparent;color:var(--pt-accent);font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:0">Отменить</button>
+    </div>
+    <span style="font-size:11.5px;color:var(--pt-t2);line-height:1.4">{{ toastBody }}</span>
+    <div style="height:2px;border-radius:2px;background:var(--pt-accent);transform-origin:left;animation:ptTimer 6s linear forwards"></div>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:834,&quot;height&quot;:1112},&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tablet&quot;,&quot;mobile&quot;],&quot;default&quot;:&quot;tablet&quot;,&quot;tsType&quot;:&quot;'tablet' | 'mobile'&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark' | 'light'&quot;},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;today&quot;,&quot;obligations&quot;,&quot;litigation&quot;],&quot;default&quot;:&quot;today&quot;,&quot;tsType&quot;:&quot;'today' | 'obligations' | 'litigation'&quot;}}">
+const LIGHT = {
+  '--pt-bg': '#f2eff8',
+  '--pt-glass': 'rgba(255,255,255,.5)',
+  '--pt-glass2': 'rgba(255,255,255,.68)',
+  '--pt-glass3': 'rgba(255,255,255,.34)',
+  '--pt-line': 'rgba(26,14,44,.10)',
+  '--pt-line2': 'rgba(26,14,44,.06)',
+  '--pt-text': '#1a1226',
+  '--pt-t2': '#574c66',
+  '--pt-t3': '#7d7389',
+  '--pt-accent-fg': '#ffffff',
+  '--pt-overlay': 'rgba(255,255,255,.72)',
+  '--pt-overlay-line': 'rgba(26,14,44,.10)',
+  '--pt-overlay-blur': 'blur(20px) saturate(150%)',
+  '--pt-bloom1': 'rgba(124,58,237,.34)',
+  '--pt-bloom2': 'rgba(236,72,153,.22)',
+  '--pt-bloom3': 'rgba(56,189,248,.20)',
+  '--pt-p0': '#d93030',
+  '--pt-p0bg': 'rgba(217,48,48,.10)',
+  '--pt-p1': '#b45309',
+  '--pt-p1bg': 'rgba(180,83,9,.10)',
+  '--pt-p2': '#2563eb',
+  '--pt-p2bg': 'rgba(37,99,235,.10)',
+  '--pt-p3': '#6b7280',
+  '--pt-p3bg': 'rgba(26,14,44,.05)',
+  '--pt-ok': '#15803d',
+};
+
+const CARDS = [
+  {
+    id: 'renewal-44', ws: 'obligations', priority: 'P0', typeLabel: 'Уведомление', due: 'Завтра, 26 июля', urgent: true,
+    title: 'Направить отказ от пролонгации по №44-АР',
+    summary: 'Срок направления отказа истекает завтра — договор иначе продлится на 11 месяцев.',
+    subject: 'Договор №44-АР', sources: ['п. 7.3', 'п. 7.2'],
+    draft: 'Уведомляем о намерении не продлевать действие Договора аренды нежилого помещения №44-АР от 12.03.2024 на новый срок в соответствии с п. 7.2, 7.3 Договора.',
+    steps: ['Формирую уведомление по п. 7.3', 'Отправляю на подпись', 'Регистрирую исходящее письмо'],
+    open: true,
+  },
+  {
+    id: 'hearing-a40', ws: 'litigation', priority: 'P0', typeLabel: 'Заседание', due: '6 августа, 11:00', urgent: true,
+    title: 'Утвердить позицию к заседанию 05.08',
+    summary: 'Позиция на оба довода отзыва готова — требует вашей проверки перед заседанием.',
+    subject: 'Дело №А40-118742/2026', sources: ['довод о пропуске срока', 'п. 14'],
+    draft: 'Довод о пропуске срока исковой давности отклоняется со ссылкой на п. 14 Обзора практики ВС РФ №2 (2024).',
+    steps: ['Сверяю позицию с материалами дела', 'Формирую комплект для заседания', 'Уведомляю ответственных'],
+  },
+  {
+    id: 'vektor-price', ws: 'obligations', priority: 'P1', typeLabel: 'Нарушение обязательства', due: '1 августа',
+    title: 'Ответить на требование «Вектора» о повышении цены',
+    summary: 'Одностороннее изменение цены договором не предусмотрено — есть основания отказать.',
+    subject: 'Договор поставки №118/П', sources: ['письмо от 24.07'],
+    draft: 'Уведомление о повышении цены не может быть принято: договор не предусматривает право Поставщика на одностороннее изменение цены.',
+    steps: ['Готовлю письмо-отказ', 'Согласую с руководителем', 'Отправляю контрагенту'],
+  },
+  {
+    id: 'filing-a40', ws: 'litigation', priority: 'P1', typeLabel: 'Процессуальный срок', due: '29 июля',
+    title: 'Подать возражения на отзыв до 29.07',
+    summary: 'Срок подачи возражений на отзыв ответчика по делу №А40-118742/2026.',
+    subject: 'Дело №А40-118742/2026', sources: ['отзыв от 19.07'],
+    draft: 'Возражения на отзыв ответчика необходимо подать в суд не позднее 29 июля 2026 года.',
+    steps: ['Готовлю возражения', 'Формирую приложения', 'Подаю через «Мой арбитр»'],
+  },
+  {
+    id: 'payment-4471', ws: 'obligations', priority: 'P2', typeLabel: 'Оплата', due: '4 августа',
+    title: 'Согласовать оплату по счёту №4471',
+    summary: 'Счёт выставлен в соответствии со спецификацией — цена зафиксирована.',
+    subject: 'Договор поставки №118/П', sources: ['п. 4.2'],
+    draft: 'Оплата по счёту №4471 на сумму 1 284 000 ₽ в соответствии со спецификацией к Договору поставки №118/П.',
+    steps: ['Проверяю счёт', 'Ставлю в реестр платежей', 'Уведомляю финансовый отдел'],
+  },
+];
+
+const GROUP_LABEL = { P0: 'P0 · Срочно', P1: 'P1 · На этой неделе', P2: 'P2 · Позже', P3: 'P3 · Фоном' };
+
+const DOC_ROWS = {
+  today: [
+    { title: 'Договор аренды нежилого помещения №44-АР от 12.03.2024', parties: 'Уведомить до 26 июля 2026' },
+    { title: 'Дело №А40-118742/2026', parties: 'Заседание 6 августа, 11:00' },
+  ],
+  obligations: [
+    { title: 'Договор аренды нежилого помещения №44-АР от 12.03.2024', parties: 'ООО «Меридиан Групп» · ООО «Прайм Ритейл»' },
+    { title: 'Договор оказания услуг №27-У от 15.01.2025', parties: 'ИП Соколов А. В. · ООО «Меридиан Групп»' },
+    { title: 'Договор поставки №118/П от 01.06.2025', parties: 'ООО «Вектор» · ООО «Меридиан Групп»' },
+    { title: 'Договор поставки №203/П от 20.02.2026', parties: 'АО «Северный логистический альянс» · ООО «Меридиан Групп»' },
+  ],
+  litigation: [
+    { title: 'Исковое заявление по делу №А40-118742/2026', parties: 'Истец: ООО «Вектор» · Рассмотрение по существу' },
+    { title: 'Исковое заявление по делу №А41-9930/2026', parties: 'Истец: ООО «Прайм Ритейл» · Подготовка к заседанию' },
+    { title: 'Отзыв ответчика от 19.07.2026', parties: 'ООО «Меридиан Групп»' },
+  ],
+};
+
+const CONVERSATIONS = {
+  today: ['Неустойка по договору №118/П', 'Автопролонгации в портфеле', 'Письмо «Вектора» о повышении цены'],
+  obligations: ['Неустойка по договору №118/П', 'Автопролонгации в портфеле', 'Письмо «Вектора» о повышении цены'],
+  litigation: ['Доказательства к заседанию 05.08', 'Позиция по делу А40-118742', 'Дело А41-9930: односторонний отказ'],
+};
+
+const TAB_ROWS = {
+  obligations: [
+    { title: 'Оплата по счёту №4471 до 04.08.2026', parties: 'Договор поставки №118/П · п. 4.2' },
+    { title: 'Отказ от автопролонгации до 26.07.2026', parties: 'Договор №44-АР · п. 7.3' },
+    { title: 'Ответ на требование о повышении цены', parties: 'Договор поставки №118/П · срок 01.08.2026' },
+    { title: 'Акт сдачи-приёмки за июль', parties: 'Договор оказания услуг №27-У · п. 3.1' },
+  ],
+  hearings: [
+    { title: 'Судебное заседание 6 августа 2026, 11:00', parties: 'Дело №А40-118742/2026 · Арбитражный суд г. Москвы' },
+    { title: 'Предварительное заседание 14 августа 2026, 10:00', parties: 'Дело №А41-9930/2026 · АС Московской области' },
+  ],
+};
+
+const TASK = {
+  title: 'Подготовка позиции по делу А40-118742',
+  steps: ['Проверяю комплект документов к заседанию', 'Сверяю позицию с материалами дела', 'Формирую комплект для заседания', 'Уведомляю ответственных о готовности'],
+};
+
+const SKILLS = {
+  litigation: ['Подготовить позицию по делу', 'Что нового по делу', 'Проверить процессуальные сроки'],
+  obligations: ['Автопролонгации в портфеле', 'Письмо о повышении цены', 'Утренний дайджест'],
+};
+
+const DAYS = {
+  today: [
+    { label: 'Сегодня, 25 июля', events: [{ time: '17:00', title: 'Согласовать проект ответа «Вектору»', subject: 'Договор поставки №118/П' }] },
+    { label: 'Завтра, 26 июля', events: [{ time: '09:00', title: 'Направить отказ от пролонгации по №44-АР', subject: 'Договор №44-АР' }] },
+    { label: 'Вторник, 28 июля', events: [{ time: '09:00', title: 'Заявить ходатайство об истребовании доказательств', subject: 'Дело №А40-118742/2026' }] },
+    { label: 'Четверг, 6 августа', events: [{ time: '11:00', title: 'Судебное заседание по делу А40-118742', subject: 'Арбитражный суд г. Москвы' }] },
+  ],
+  obligations: [
+    { label: 'Сегодня, 25 июля', events: [{ time: '17:00', title: 'Согласовать проект ответа «Вектору»', subject: 'Договор поставки №118/П' }] },
+    { label: 'Завтра, 26 июля', events: [{ time: '09:00', title: 'Направить отказ от пролонгации по №44-АР', subject: 'Договор №44-АР' }] },
+    { label: 'Понедельник, 17 августа', events: [{ time: '09:00', title: 'Решить по автопролонгации №27-У', subject: 'Договор №27-У' }] },
+  ],
+  litigation: [
+    { label: 'Вторник, 28 июля', events: [{ time: '09:00', title: 'Заявить ходатайство об истребовании доказательств', subject: 'Дело №А40-118742/2026' }] },
+    { label: 'Четверг, 30 июля', events: [{ time: '09:00', title: 'Подать возражения на отзыв', subject: 'Дело №А40-118742/2026' }] },
+    { label: 'Четверг, 6 августа', events: [{ time: '11:00', title: 'Судебное заседание по делу А40-118742', subject: 'Арбитражный суд г. Москвы' }] },
+  ],
+};
+
+const REPLY = 'Проверил портфель: три договора продлятся автоматически. Ближайший срок — №44-АР, отказ нужно направить до 26 июля.';
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      theme: props.theme === 'light' ? 'light' : 'dark',
+      screen: props.screen || 'today',
+      mobileView: 'chat',
+      docTab: 'primary',
+      queueOpen: props.layout === 'tablet',
+      cardState: {},
+      openIds: { 'renewal-44': true },
+      draft: '',
+      extra: [],
+      toast: null,
+    };
+    this.timers = [];
+  }
+
+  componentWillUnmount() { this.timers.forEach(clearTimeout); }
+  after(ms, fn) { this.timers.push(setTimeout(fn, ms)); }
+
+  setCard(id, patch) {
+    this.setState((s) => ({ cardState: { ...s.cardState, [id]: { ...(s.cardState[id] || {}), ...patch } } }));
+  }
+
+  confirmCard(card) {
+    this.setCard(card.id, { state: 'executing', step: 0 });
+    this.setState((s) => ({ openIds: { ...s.openIds, [card.id]: true } }));
+    const tick = (i) => {
+      if (i >= card.steps.length) {
+        this.setCard(card.id, { state: 'done' });
+        this.setState({ toast: { body: card.title } });
+        this.after(6000, () => this.setState({ toast: null }));
+        this.after(1400, () => this.setCard(card.id, { state: 'gone' }));
+        return;
+      }
+      this.setCard(card.id, { step: i });
+      this.after(900, () => tick(i + 1));
+    };
+    tick(0);
+  }
+
+  send(text) {
+    const t = (text || '').trim();
+    if (!t) return;
+    this.setState((s) => ({ draft: '', extra: [...s.extra, { role: 'user', text: t, time: '15:41' }] }));
+    this.after(500, () => this.setState((s) => ({ extra: [...s.extra, { role: 'agent', text: REPLY, time: '15:41' }] })));
+  }
+
+  stepMark(st) {
+    if (st === 'done') return 'width:13px;height:13px;flex:none;border-radius:50%;background:var(--pt-ok);opacity:.85';
+    if (st === 'active') return 'width:13px;height:13px;flex:none;border-radius:50%;border:2px solid var(--pt-line);border-top-color:var(--pt-accent);animation:ptSpin .8s linear infinite';
+    return 'width:13px;height:13px;flex:none;border-radius:50%;border:1.5px solid var(--pt-line)';
+  }
+
+  measureTabs() {
+    const el = this._tabsEl;
+    if (!el) return;
+    const left = el.scrollLeft > 2;
+    const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 2;
+    const a = left ? 'rgba(0,0,0,.15) 0,#000 44px' : '#000 0';
+    const b = right ? '#000 calc(100% - 52px),rgba(0,0,0,.15) 100%' : '#000 100%';
+    const mask = left || right ? 'linear-gradient(90deg,' + a + ',' + b + ')' : 'none';
+    if (mask !== this.state.tabsMask) this.setState({ tabsMask: mask });
+  }
+  componentDidUpdate() { this.measureTabs(); }
+  renderVals() {
+    const s = this.state;
+    const mobile = (this.props.layout || 'tablet') === 'mobile';
+    const light = s.theme === 'light';
+    const themeVars = light ? Object.entries(LIGHT).map(([k, v]) => k + ':' + v).join(';') + ';' : '';
+    const pv = (p) => 'var(--pt-' + p.toLowerCase() + ')';
+    const pbgv = (p) => 'var(--pt-' + p.toLowerCase() + 'bg)';
+    const isToday = s.screen === 'today';
+    const isLit = s.screen === 'litigation';
+
+    const visible = CARDS.filter((c) => {
+      const st = (s.cardState[c.id] || {}).state;
+      if (st === 'gone') return false;
+      return isToday || c.ws === s.screen;
+    });
+
+    const groups = ['P0', 'P1', 'P2', 'P3'].map((p) => {
+      const cards = visible.filter((c) => c.priority === p).map((c) => {
+        const cs = s.cardState[c.id] || {};
+        const executing = cs.state === 'executing';
+        const done = cs.state === 'done';
+        const expanded = !!s.openIds[c.id] || executing;
+        const stepIdx = cs.step || 0;
+        return {
+          ...c,
+          pcolor: pv(c.priority), pbg: pbgv(c.priority),
+          bd: c.priority === 'P0' ? 'var(--pt-p0)' : 'var(--pt-line)',
+          ring: c.priority === 'P0' ? '0 0 0 3px var(--pt-p0bg)' : 'none',
+          dueColor: c.urgent ? 'var(--pt-p0)' : 'var(--pt-t3)',
+          showDetails: expanded && !done && !executing,
+          executing, done,
+          showActions: expanded && !executing && !done,
+          steps: c.steps.map((label, i) => {
+            const st = i < stepIdx ? 'done' : i === stepIdx ? 'active' : 'pending';
+            return { label, mark: this.stepMark(st), color: st === 'pending' ? 'var(--pt-t3)' : 'var(--pt-t2)' };
+          }),
+          progress: Math.round(((stepIdx + 0.5) / c.steps.length) * 100) + '%',
+          progressLabel: Math.min(stepIdx + 1, c.steps.length) + ' из ' + c.steps.length,
+          toggle: () => this.setState((st) => ({ openIds: { ...st.openIds, [c.id]: !st.openIds[c.id] } })),
+          confirm: () => this.confirmCard(c),
+          reject: () => { this.setCard(c.id, { state: 'gone' }); },
+        };
+      });
+      return { key: p, label: GROUP_LABEL[p], count: cards.length, color: pv(p), cards };
+    }).filter((g) => g.count > 0);
+
+    const seeded = isLit ? [] : [
+      { role: 'user', text: 'Проверить письмо контрагента о повышении цены', time: '15:22' },
+      {
+        role: 'agent', time: '15:22',
+        text: '«Вектор» просит повысить цену на 12% с 2 сентября. Права на одностороннее изменение цены у Поставщика нет — изменение допускается только по соглашению Сторон.',
+        text2: 'Подготовил проект ответа с отказом принять новую цену в одностороннем порядке.',
+        cites: [1, 2],
+        card: { priority: 'P1', typeLabel: 'Нарушение обязательства', due: '1 августа', title: 'Ответить на требование «Вектора» о повышении цены', summary: 'Одностороннее изменение цены договором не предусмотрено.' },
+      },
+    ];
+
+    const messages = [...seeded, ...s.extra].map((m) => ({
+      isUser: m.role === 'user', isAgent: m.role === 'agent',
+      align: m.role === 'user' ? 'flex-end' : 'flex-start',
+      time: m.time, text: m.text, text2: m.text2 || null,
+      cites: (m.cites || []).map((n) => ({ n, open: () => {} })),
+      card: m.card ? { ...m.card, pcolor: pv(m.card.priority), pbg: pbgv(m.card.priority) } : null,
+    }));
+
+    const navRows = [
+      { id: 'today', title: 'Сегодня', count: '', dot: 'var(--pt-accent)' },
+      { id: 'obligations', title: 'Обязательства', count: '6', dot: 'var(--pt-p1)' },
+      { id: 'litigation', title: 'Дела', count: '4', dot: 'var(--pt-ok)' },
+    ].map((n) => ({
+      ...n,
+      bg: s.screen === n.id ? 'var(--pt-accent)' : 'transparent',
+      fg: s.screen === n.id ? 'var(--pt-accent-fg)' : 'var(--pt-t2)',
+      open: () => this.setState({ screen: n.id, mobileView: 'chat', queueOpen: false }),
+    }));
+
+    const litTabs = isLit;
+    const primaryLabel = isLit ? 'Дела' : isToday ? 'Портфель' : 'Договоры';
+    const secondaryLabel = isLit ? 'Заседания' : 'Обязательства';
+    const secondaryRows = isLit ? TAB_ROWS.hearings : TAB_ROWS.obligations;
+    const primaryRows = DOC_ROWS[s.screen] || [];
+    const onSecondary = s.docTab === 'secondary';
+    const activeDocRows = onSecondary ? secondaryRows : primaryRows;
+    const docTabs = [
+      { key: 'primary', label: primaryLabel, count: String(primaryRows.length) },
+      { key: 'secondary', label: secondaryLabel, count: String(secondaryRows.length) },
+    ].map((t) => ({
+      ...t,
+      bg: (s.docTab === t.key) ? 'var(--pt-accent-soft)' : 'transparent',
+      fg: (s.docTab === t.key) ? 'var(--pt-accent)' : 'var(--pt-t2)',
+      bd: (s.docTab === t.key) ? 'transparent' : 'var(--pt-line2)',
+      pick: () => this.setState({ docTab: t.key }),
+    }));
+    const convRows = (CONVERSATIONS[s.screen] || CONVERSATIONS.today).map((title, i) => ({
+      title,
+      dot: i === 0 ? 'var(--pt-p1)' : 'var(--pt-ok)',
+      bg: i === 2 ? 'var(--pt-glass2)' : 'transparent',
+      fg: i === 2 ? 'var(--pt-text)' : 'var(--pt-t2)',
+      open: () => this.setState({ mobileView: 'chat', queueOpen: false, convOpen: false }),
+    }));
+    const taskSteps = TASK.steps.map((label, i) => ({
+      label,
+      mark: this.stepMark(i < 3 ? 'done' : 'active'),
+      color: i < 3 ? 'var(--pt-t2)' : 'var(--pt-text)',
+    }));
+
+    const queueCount = visible.length;
+    const view = mobile ? (s.queueOpen ? 'queue' : s.mobileView) : 'chat';
+    const chatView = view === 'chat';
+    const sel = (on) => ({
+      bg: on ? 'var(--pt-accent-soft)' : 'transparent',
+      fg: on ? 'var(--pt-accent)' : 'var(--pt-t3)',
+      bd: on ? 'transparent' : 'var(--pt-line2)',
+    });
+    const vChat = sel(chatView);
+    const vDocs = sel(view === 'docs');
+    const vDates = sel(view === 'dates');
+
+    return {
+      themeVars,
+      isTablet: !mobile,
+      showAside: !mobile,
+      asideW: '212px',
+      isMobile: mobile,
+      frameW: '100%',
+      frameH: '100%',
+      mainMargin: mobile ? '52px 0 72px' : '10px 10px 10px 0',
+      mainRadius: '22px',
+      mainSideBorder: '1px solid var(--pt-line)',
+      mainShadow: mobile ? 'none' : '0 10px 30px rgba(0,0,0,.18)',
+      headerPad: mobile ? '0 16px' : '0 18px',
+      titleSize: mobile ? '15px' : '16px',
+      bodyPad: mobile ? '16px 14px' : '18px',
+      composerPad: mobile ? '10px 12px 12px' : '10px 18px 16px',
+
+      chatTitle: isToday ? 'Сегодня' : s.screen === 'obligations' ? 'Письмо «Вектора» о повышении цены' : 'Новый разговор',
+      sidebarLabel: 'Суббота, 25 июля',
+      tabsMask: s.tabsMask || 'none',
+      tabsRef: (el) => { this._tabsEl = el; if (el) requestAnimationFrame(() => this.measureTabs()); },
+      onTabsScroll: () => this.measureTabs(),
+      navRows: navRows.filter((n) => n.id !== 'today'),
+      showNavBlock: !mobile && isToday,
+      showConvBlock: !mobile && !isToday,
+      showAsideDocs: !mobile && !isToday,
+      docRows: activeDocRows.map((d) => ({ ...d, open: () => {} })),
+      docTabs,
+      convRows,
+      taskSteps,
+      taskTitle: TASK.title,
+      taskCount: '1',
+      tasksOpen: !!s.tasksOpen,
+      toggleTasks: () => this.setState({ tasksOpen: !s.tasksOpen, convOpen: false }),
+      closeTasks: () => this.setState({ tasksOpen: false }),
+      tasksPos: mobile ? 'left:12px;right:12px;top:58px' : 'left:62px;bottom:14px;width:330px',
+      railTasksBg: s.tasksOpen ? 'var(--pt-accent-soft)' : 'transparent',
+      railTasksFg: s.tasksOpen ? 'var(--pt-accent)' : 'var(--pt-t2)',
+      tasksBtnBg: s.tasksOpen ? 'var(--pt-accent-soft)' : 'var(--pt-glass)',
+      tasksBtnFg: s.tasksOpen ? 'var(--pt-accent)' : 'var(--pt-t2)',
+      convOpen: !!s.convOpen,
+      toggleConv: () => this.setState({ convOpen: !s.convOpen, tasksOpen: false }),
+      closeConv: () => this.setState({ convOpen: false }),
+      convBtnBg: s.convOpen ? 'var(--pt-accent-soft)' : 'var(--pt-glass)',
+      convBtnFg: s.convOpen ? 'var(--pt-accent)' : 'var(--pt-t2)',
+      showEmptyChat: chatView && isLit && s.extra.length === 0,
+      showDocs: view === 'docs',
+      showDates: view === 'dates',
+      showComposer: chatView,
+      days: DAYS[s.screen] || DAYS.today,
+      docsLabel: isLit ? 'Дела' : isToday ? 'Портфель' : 'Договоры',
+      ctxTabs: (() => {
+        const on = (v, k) => (view === v && (v !== 'docs' || s.docTab === k));
+        const pill = (active) => ({
+          bg: active ? 'var(--pt-accent-soft)' : 'transparent',
+          fg: active ? 'var(--pt-accent)' : 'var(--pt-t2)',
+          bd: active ? 'transparent' : 'var(--pt-line2)',
+        });
+        const rows = [{ label: 'Диалог', count: '', active: view === 'chat', go: () => this.setState({ mobileView: 'chat', queueOpen: false }) }];
+        if (mobile && !isToday) {
+          rows.push({ label: primaryLabel, count: String(primaryRows.length), active: on('docs', 'primary'), go: () => this.setState({ mobileView: 'docs', docTab: 'primary', queueOpen: false }) });
+          rows.push({ label: secondaryLabel, count: String(secondaryRows.length), active: on('docs', 'secondary'), go: () => this.setState({ mobileView: 'docs', docTab: 'secondary', queueOpen: false }) });
+        }
+        rows.push({ label: 'Сроки', count: '', active: view === 'dates', go: () => this.setState({ mobileView: 'dates', queueOpen: false }) });
+        return rows.map((r) => ({ label: r.label, count: r.count, ...pill(r.active), pick: r.go }));
+      })(),
+      viewChat: () => this.setState({ mobileView: 'chat', queueOpen: false }),
+      viewDocs: () => this.setState({ mobileView: 'docs', queueOpen: false }),
+      viewDates: () => this.setState({ mobileView: 'dates', queueOpen: false }),
+      vChatBg: vChat.bg, vChatFg: vChat.fg, vChatBd: vChat.bd,
+      vDocsBg: vDocs.bg, vDocsFg: vDocs.fg, vDocsBd: vDocs.bd,
+      docsBtnBg: vDocs.bg === 'transparent' ? 'var(--pt-glass2)' : vDocs.bg,
+      docsBtnFg: view === 'docs' ? 'var(--pt-accent)' : 'var(--pt-t2)',
+      docsBtnBd: view === 'docs' ? 'transparent' : 'var(--pt-line)',
+      vDatesBg: vDates.bg, vDatesFg: vDates.fg, vDatesBd: vDates.bd,
+      tabTodayBg: isToday ? 'var(--pt-accent-soft)' : 'transparent',
+      tabTodayFg: isToday ? 'var(--pt-accent)' : 'var(--pt-text)',
+      tabOblBg: s.screen === 'obligations' ? 'var(--pt-accent-soft)' : 'transparent',
+      tabOblFg: s.screen === 'obligations' ? 'var(--pt-accent)' : 'var(--pt-text)',
+      tabLitBg: isLit ? 'var(--pt-accent-soft)' : 'transparent',
+      tabLitFg: isLit ? 'var(--pt-accent)' : 'var(--pt-text)',
+
+      skills: (SKILLS[isLit ? 'litigation' : 'obligations']).map((label) => ({ label, run: () => this.send(label) })),
+      messages: chatView ? messages : [],
+
+      draft: s.draft,
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      onSend: () => this.send(s.draft),
+
+      railTodayBg: isToday ? 'var(--pt-accent-soft)' : 'transparent',
+      railOblBg: s.screen === 'obligations' ? 'var(--pt-accent-soft)' : 'transparent',
+      railLitBg: isLit ? 'var(--pt-accent-soft)' : 'transparent',
+      railTodayFg: isToday ? 'var(--pt-accent)' : 'var(--pt-t2)',
+      railOblFg: s.screen === 'obligations' ? 'var(--pt-accent)' : 'var(--pt-t2)',
+      railLitFg: isLit ? 'var(--pt-accent)' : 'var(--pt-t2)',
+      goToday: () => this.setState({ screen: 'today' }),
+      goObl: () => this.setState({ screen: 'obligations' }),
+      goLit: () => this.setState({ screen: 'litigation' }),
+      isLight: light,
+      isDark: !light,
+      toggleTheme: () => this.setState({ theme: light ? 'dark' : 'light' }),
+
+      queueCount,
+      queueOpen: s.queueOpen,
+      showSheetHeader: !mobile,
+      showContextTabs: true,
+      showDocsTab: mobile,
+      sheetBg: mobile ? 'transparent' : 'var(--pt-overlay)',
+      sheetBlur: mobile ? 'none' : 'var(--pt-overlay-blur)',
+      sheetBorder: mobile ? 'none' : '1px solid var(--pt-overlay-line)',
+      sheetShadow: mobile ? 'none' : '0 14px 44px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.18)',
+      sheetListPad: mobile ? '0 12px 20px' : '0 12px 20px',
+      toggleQueue: () => this.setState({ queueOpen: !s.queueOpen }),
+      closeQueue: () => this.setState({ queueOpen: false }),
+      queueBtnBg: s.queueOpen ? 'var(--pt-accent-soft)' : 'var(--pt-glass2)',
+      queueBtnFg: s.queueOpen ? 'var(--pt-accent)' : 'var(--pt-text)',
+      queueBtnBd: s.queueOpen ? 'var(--pt-accent)' : 'var(--pt-line)',
+      sheetPos: mobile
+        ? 'position:absolute;left:0;right:0;top:162px;bottom:78px'
+        : 'position:absolute;left:268px;right:10px;top:10px;bottom:10px',
+      sheetRadius: '22px',
+      sheetAnim: mobile ? 'ptUp .24s ease-out' : 'ptIn .24s ease-out',
+      groups,
+
+      settingsOpen: !!s.settings,
+      showSetScrim: mobile,
+      showSetHandle: mobile,
+      setPad: mobile ? '6px 18px 20px' : '16px 16px 16px',
+      setWrap: mobile
+        ? 'position:absolute;inset:0;z-index:11;display:flex;flex-direction:column;justify-content:flex-end'
+        : 'position:absolute;left:62px;bottom:14px;width:300px;z-index:11',
+      setPanel: mobile
+        ? 'position:relative;margin:0 8px 8px;transform:' + (s.dragY ? 'translateY(' + s.dragY + 'px)' : 'none') + ';background:var(--pt-overlay);backdrop-filter:var(--pt-overlay-blur);border:1px solid var(--pt-overlay-line);border-radius:24px;box-shadow:0 -18px 50px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.16);overflow:hidden;animation:ptUp .24s cubic-bezier(.22,.9,.28,1)'
+        : 'position:relative;background:var(--pt-overlay);backdrop-filter:var(--pt-overlay-blur);border:1px solid var(--pt-overlay-line);border-radius:18px;box-shadow:0 18px 44px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.16);overflow:hidden;animation:ptUp .2s ease-out',
+      openSettings: () => this.setState({ settings: true, dragY: 0 }),
+      closeSettings: () => this.setState({ settings: false, dragY: 0 }),
+      tabSetBg: s.settings ? 'var(--pt-accent-soft)' : 'transparent',
+      tabSetFg: s.settings ? 'var(--pt-accent)' : 'var(--pt-text)',
+      setSheetTransform: 'translateY(' + (s.dragY || 0) + 'px)',
+      setSheetTransition: s.dragging ? 'none' : 'transform .22s cubic-bezier(.22,.9,.28,1)',
+      dragStart: (e) => { e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId); this._y0 = e.clientY; this.setState({ dragging: true }); },
+      dragMove: (e) => { if (!this.state.dragging) return; this.setState({ dragY: Math.max(-180, e.clientY - this._y0) }); },
+      dragEnd: () => { const y = this.state.dragY || 0; if (y > 110) this.setState({ settings: false, dragging: false, dragY: 0 }); else this.setState({ dragging: false, dragY: y < -40 ? -140 : 0 }); },
+      thLightBg: light ? 'var(--pt-accent-soft)' : 'transparent',
+      thLightBd: light ? 'transparent' : 'var(--pt-line2)',
+      thLightFg: light ? 'var(--pt-accent)' : 'var(--pt-text)',
+      thDarkBg: light ? 'transparent' : 'var(--pt-accent-soft)',
+      thDarkBd: light ? 'var(--pt-line2)' : 'transparent',
+      thDarkFg: light ? 'var(--pt-text)' : 'var(--pt-accent)',
+      setLight: () => this.setState({ theme: 'light' }),
+      setDark: () => this.setState({ theme: 'dark' }),
+      settingsRows: [],
+
+      toast: !!s.toast,
+      toastBody: s.toast ? s.toast.body : '',
+      toastInset: mobile ? 'left:12px;right:12px;bottom:82px' : 'right:16px;bottom:16px;width:300px',
+      undo: () => this.setState({ toast: null, cardState: {} }),
+    };
+  }
+}
+</script>
+</body>
+</html>

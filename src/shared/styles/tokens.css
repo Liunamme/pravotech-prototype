@@ -1,0 +1,238 @@
+/**
+ * Токены дизайн-системы ПравоТех.
+ *
+ * Визуальный язык из design_handoff: фиолетовый акцент, стекло на оверлеях,
+ * bloom-фон, Golos Text. Тёмная тема — базовая (`:root`), светлая переопределяет.
+ *
+ * Два слоя:
+ *  1. `--pt-*` — первичная палитра дизайн-макета (обе темы), значения точь-в-точь
+ *     из хендоффа. Их используют компоненты редизайна напрямую.
+ *  2. `--color-*` / `--font-*` и пр. — семантический слой прежней системы,
+ *     перемаппленный на `--pt-*`. Благодаря этому примитивы (`shared/ui`),
+ *     написанные на `--color-*`, автоматически живут в новой палитре.
+ *
+ * Маппинг `--color-* → var(--pt-*)` задаётся ОДИН раз в `:root`: сами `--pt-*`
+ * темозависимы, поэтому семантический слой меняет тему вместе с ними.
+ */
+
+:root {
+  /* ─────────── Палитра макета --pt-* : ТЁМНАЯ (по умолчанию) ─────────── */
+  --pt-bg: #0b0710;
+  --pt-glass: rgba(255, 255, 255, 0.045);
+  --pt-glass2: rgba(255, 255, 255, 0.07);
+  --pt-glass3: rgba(255, 255, 255, 0.03);
+  --pt-line: rgba(255, 255, 255, 0.09);
+  --pt-line2: rgba(255, 255, 255, 0.055);
+  --pt-text: #f4f0f8;
+  --pt-t2: #bab1c7;
+  --pt-t3: #8d8399;
+  --pt-accent: #8b5cf6;
+  --pt-accent-hover: #a78bfa;
+  --pt-accent-fg: #ffffff;
+  --pt-accent-soft: rgba(139, 92, 246, 0.18);
+  --pt-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --pt-bloom1: rgba(139, 92, 246, 0.55);
+  --pt-bloom2: rgba(217, 70, 239, 0.3);
+  --pt-bloom3: rgba(56, 189, 248, 0.16);
+  --pt-p0: #ff6b6b;
+  --pt-p0bg: rgba(255, 107, 107, 0.15);
+  --pt-p1: #f5a742;
+  --pt-p1bg: rgba(245, 167, 66, 0.14);
+  --pt-p2: #8ab4ff;
+  --pt-p2bg: rgba(138, 180, 255, 0.14);
+  --pt-p3: #a1a7b3;
+  --pt-p3bg: rgba(255, 255, 255, 0.07);
+  --pt-ok: #4ade80;
+  --pt-ok-soft: rgba(74, 222, 128, 0.14);
+  --pt-overlay: rgba(22, 15, 30, 0.6);
+  --pt-overlay-line: rgba(255, 255, 255, 0.18);
+  --pt-overlay-blur: blur(22px) saturate(150%);
+  /* Световой кант сверху у стеклянных поверхностей. */
+  --pt-inset-hi: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+
+  /* ─────────────── Семантический слой (маппинг на --pt-*) ─────────────── */
+  /* Поверхности */
+  --color-canvas: var(--pt-bg);
+  --color-surface: var(--pt-glass2);
+  --color-surface-raised: var(--pt-glass2);
+  --color-surface-sunken: var(--pt-glass3);
+  --color-surface-hover: var(--pt-glass);
+  --color-surface-active: var(--pt-glass2);
+  --color-surface-selected: var(--pt-accent-soft);
+
+  /* Текст */
+  --color-text: var(--pt-text);
+  --color-text-secondary: var(--pt-t2);
+  --color-text-muted: var(--pt-t3);
+  --color-text-inverted: var(--pt-accent-fg);
+
+  /* Границы */
+  --color-border: var(--pt-line);
+  --color-border-strong: var(--pt-line);
+  --color-border-subtle: var(--pt-line2);
+
+  /* Акцент */
+  --color-accent: var(--pt-accent);
+  --color-accent-hover: var(--pt-accent-hover);
+  --color-accent-active: var(--pt-accent);
+  --color-accent-fg: var(--pt-accent-fg);
+  --color-accent-subtle: var(--pt-accent-soft);
+  --color-accent-border: var(--pt-line);
+
+  /* Статусы (перемаплены на приоритетные оттенки макета) */
+  --color-danger: var(--pt-p0);
+  --color-danger-fg: #ffffff;
+  --color-danger-subtle: var(--pt-p0bg);
+  --color-danger-border: var(--pt-line);
+
+  --color-warning: var(--pt-p1);
+  --color-warning-fg: #ffffff;
+  --color-warning-subtle: var(--pt-p1bg);
+  --color-warning-border: var(--pt-line);
+
+  --color-success: var(--pt-ok);
+  --color-success-fg: #ffffff;
+  --color-success-subtle: var(--pt-ok-soft);
+  --color-success-border: var(--pt-line);
+
+  --color-info: var(--pt-p2);
+  --color-info-fg: #ffffff;
+  --color-info-subtle: var(--pt-p2bg);
+  --color-info-border: var(--pt-line);
+
+  /* Приоритеты P0-P3 */
+  --color-p0: var(--pt-p0);
+  --color-p0-fg: #ffffff;
+  --color-p0-subtle: var(--pt-p0bg);
+  --color-p0-border: var(--pt-line);
+
+  --color-p1: var(--pt-p1);
+  --color-p1-fg: #ffffff;
+  --color-p1-subtle: var(--pt-p1bg);
+  --color-p1-border: var(--pt-line);
+
+  --color-p2: var(--pt-p2);
+  --color-p2-fg: #ffffff;
+  --color-p2-subtle: var(--pt-p2bg);
+  --color-p2-border: var(--pt-line);
+
+  --color-p3: var(--pt-p3);
+  --color-p3-fg: #ffffff;
+  --color-p3-subtle: var(--pt-p3bg);
+  --color-p3-border: var(--pt-line);
+
+  /* Фокус */
+  --color-focus-ring: var(--pt-accent);
+  --focus-ring: 0 0 0 2px var(--pt-bg), 0 0 0 4px var(--color-focus-ring);
+
+  /* Тени → на макетную */
+  --shadow-sm: var(--pt-shadow);
+  --shadow-md: var(--pt-shadow);
+  --shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.3);
+  --shadow-overlay: 0 18px 48px rgba(0, 0, 0, 0.4);
+
+  /* ───────────────────────── Нецветные токены ───────────────────────── */
+  /* Отступы — макет кратен 2 (6/8/10/12/14/20/24) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Радиусы — макет: кнопки 11-13, карточки 14-16, рабочая область 22, пилюли 999 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-3xl: 16px;
+  --radius-panel: 22px;
+  --radius-full: 999px;
+
+  /* Типографика — Golos Text, база 13px */
+  --font-ui: 'Golos Text Variable', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Source Serif 4 Variable', Georgia, serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 15px;
+  --text-xl: 17px;
+  --text-2xl: 20px;
+  --text-3xl: 24px;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.45;
+  --leading-relaxed: 1.62;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Движение */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 260ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Раскладка */
+  --rail-width: 56px;
+  --sidebar-width: 250px;
+  --header-height: 52px;
+  --row-height: 34px;
+  --panel-min-width: 260px;
+  --inspector-panel-width: 366px;
+  --inspector-width: 520px;
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-panel: 20;
+  --z-overlay: 40;
+  --z-dialog: 50;
+  --z-toast: 60;
+  --z-tooltip: 70;
+}
+
+/* ───────────────────────────── СВЕТЛАЯ ТЕМА ───────────────────────────── */
+/* Переопределяет только --pt-*; семантический слой наследует автоматически. */
+[data-theme='light'] {
+  --pt-bg: #f2eff8;
+  --pt-glass: rgba(255, 255, 255, 0.5);
+  --pt-glass2: rgba(255, 255, 255, 0.68);
+  --pt-glass3: rgba(255, 255, 255, 0.34);
+  --pt-line: rgba(26, 14, 44, 0.1);
+  --pt-line2: rgba(26, 14, 44, 0.06);
+  --pt-text: #1a1226;
+  --pt-t2: #574c66;
+  --pt-t3: #7d7389;
+  --pt-accent: #8b5cf6;
+  --pt-accent-hover: #7c3aed;
+  --pt-accent-fg: #ffffff;
+  --pt-accent-soft: rgba(139, 92, 246, 0.14);
+  --pt-shadow: 0 10px 34px rgba(60, 30, 110, 0.12);
+  --pt-bloom1: rgba(124, 58, 237, 0.34);
+  --pt-bloom2: rgba(236, 72, 153, 0.22);
+  --pt-bloom3: rgba(56, 189, 248, 0.2);
+  --pt-p0: #d93030;
+  --pt-p0bg: rgba(217, 48, 48, 0.1);
+  --pt-p1: #b45309;
+  --pt-p1bg: rgba(180, 83, 9, 0.1);
+  --pt-p2: #2563eb;
+  --pt-p2bg: rgba(37, 99, 235, 0.1);
+  --pt-p3: #6b7280;
+  --pt-p3bg: rgba(26, 14, 44, 0.05);
+  --pt-ok: #15803d;
+  --pt-ok-soft: rgba(21, 128, 61, 0.1);
+  --pt-overlay: rgba(255, 255, 255, 0.72);
+  --pt-overlay-line: rgba(26, 14, 44, 0.1);
+  --pt-overlay-blur: blur(20px) saturate(150%);
+  --pt-inset-hi: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}

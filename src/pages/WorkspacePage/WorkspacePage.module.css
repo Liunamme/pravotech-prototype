@@ -1,0 +1,64 @@
+.root {
+  height: 100%;
+  min-height: 0;
+}
+
+.panels {
+  height: 100%;
+}
+
+.center {
+  height: 100%;
+  min-height: 0;
+}
+
+.notFound {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.invite {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+
+.skillChips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  max-width: 60ch;
+}
+
+.skillChip {
+  composes: focusRing from '../../shared/styles/shared.module.css';
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.skillChip:hover {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent-border);
+  color: var(--color-accent);
+}

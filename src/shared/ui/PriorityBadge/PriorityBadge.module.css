@@ -1,0 +1,50 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 18px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Только когда метка скрыта — компактная точка-индикатор без текста. */
+.dotOnly {
+  min-width: 8px;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: var(--radius-full);
+}
+
+/* P0 — критично: сплошная заливка, контрастный текст. */
+.priority_P0 {
+  background: var(--color-p0);
+  color: var(--color-p0-fg);
+  border: 1px solid var(--color-p0);
+}
+
+/* P1/P2 — подложка + рамка, без сплошной заливки. */
+.priority_P1 {
+  background: var(--color-p1-subtle);
+  color: var(--color-p1);
+  border: 1px solid var(--color-p1-border);
+}
+
+.priority_P2 {
+  background: var(--color-p2-subtle);
+  color: var(--color-p2);
+  border: 1px solid var(--color-p2-border);
+}
+
+/* P3 — только рамка, без заливки. */
+.priority_P3 {
+  background: transparent;
+  color: var(--color-p3);
+  border: 1px solid var(--color-p3-border);
+}

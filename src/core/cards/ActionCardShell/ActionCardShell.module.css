@@ -1,0 +1,266 @@
+/**
+ * Хромировка карточки действия. Адаптив — только `@container` (SPEC 4.5,
+ * docs/UX.md §8): карточка не знает, в узкой она колонке или широкой,
+ * только сколько места у неё самой.
+ */
+
+.root {
+  container-type: inline-size;
+  container-name: action-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  cursor: pointer;
+  transform-origin: top center;
+  /* Фиксированный потолок нужен, чтобы `max-height` было от чего анимировать
+     до 0 в `.exiting` — от `none` transition не интерполирует. С запасом
+     больше любой реальной высоты карточки в очереди. */
+  max-height: 640px;
+  /* Появление (карточка от агента / первый рендер очереди) — сдвиг сверху -8px, 200мс ease-out. */
+  animation: cardEnter var(--duration-base) var(--ease-out);
+  transition:
+    transform var(--duration-base) var(--ease-in),
+    opacity var(--duration-base) var(--ease-in),
+    max-height var(--duration-base) var(--ease-in),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.root[data-priority='P0'] {
+  border-left: 3px solid var(--color-p0);
+}
+
+/*
+ * «Карточка решена» — сжатие по высоте + затухание, 220мс ease-in
+ * (docs/UX.md §7). Класс навешивает `useCardDecision` (`isExiting`).
+ * `box-sizing: border-box` (reset.css, глобально) — `max-height: 0` вместе
+ * с `overflow: hidden` схлопывает бордер-бокс целиком, включая паддинги
+ * `.root` из `Card.module.css`, без необходимости переопределять их здесь
+ * (а порядок каскада между двумя разными CSS-модулями — не то, на что
+ * стоит полагаться).
+ */
+.exiting {
+  overflow: hidden;
+  max-height: 0;
+  transform: scaleY(0.92);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    animation: none;
+  }
+}
+
+/* ── идентификация ────────────────────────────────────────────────── */
+
+.idRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.idLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.typeIcon {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+}
+
+.typeLabel {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  /* Прячется первым при нехватке места — см. @container ниже. */
+  display: none;
+}
+
+.workspaceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.deadline {
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.deadline_overdue {
+  color: var(--color-danger);
+  font-weight: var(--weight-semibold);
+}
+
+.deadline_today {
+  color: var(--color-warning);
+  font-weight: var(--weight-semibold);
+}
+
+.deadline_soon {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.deadline_normal {
+  color: var(--color-text-muted);
+}
+
+/* ── заголовок / суть ─────────────────────────────────────────────── */
+
+.title {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  line-height: var(--leading-tight);
+}
+
+.summary {
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text-secondary);
+}
+
+/* ── раскрытие: grid-template-rows 0fr → 1fr, без reflow соседей ───── */
+
+.collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-base) var(--ease-in-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapsible {
+    transition: none;
+  }
+}
+
+.collapsibleInner {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ── привязка / diff / источники ──────────────────────────────────── */
+
+.subjectRef {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+  composes: truncate from '../../../shared/styles/shared.module.css';
+
+  align-self: flex-start;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  border-bottom: 1px dashed var(--color-border-strong);
+}
+
+.subjectRef:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.diffNote {
+  font-size: var(--text-sm);
+  color: var(--color-warning);
+}
+
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* ── форма правки ─────────────────────────────────────────────────── */
+
+.editArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.editHint {
+  font-size: var(--text-xs);
+  color: var(--color-warning);
+}
+
+/* ── "показать в чате" ────────────────────────────────────────────── */
+
+.showInChat {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-start;
+  font-size: var(--text-sm);
+  color: var(--color-accent);
+}
+
+.showInChat:hover {
+  text-decoration: underline;
+}
+
+/* ── решение: адаптив по ширине карточки (docs/UX.md §8) ─────────────
+   ≥420px — кнопки в строку;
+   320–419px — кнопки в строку, источники переносятся (уже flex-wrap выше);
+   <320px — кнопки в колонку на всю ширину. */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-1);
+}
+
+/* Пороги заданы по content-box контейнера, а не по ширине панели: при штатной
+   правой колонке 360px карточка получает ~312px, поэтому порог строки кнопок
+   опущен до 280px — три коротких кнопки там помещаются (с переносом), и это
+   заметно компактнее трёх кнопок на всю ширину друг под другом. */
+@container action-card (min-width: 280px) {
+  .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .actions > * {
+    flex: 1 1 auto;
+  }
+}
+
+@container action-card (max-width: 279.98px) {
+  .actions > * {
+    width: 100%;
+  }
+}
+
+/* Название типа появляется только когда в строке идентификации реально есть
+   место: иначе оно усекается в бессмысленный обрубок. */
+@container action-card (min-width: 360px) {
+  .typeLabel {
+    display: inline;
+  }
+}

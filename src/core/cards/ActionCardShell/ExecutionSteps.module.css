@@ -1,0 +1,166 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.step_active {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+
+.step_done {
+  color: var(--color-text-secondary);
+}
+
+.step_failed {
+  color: var(--color-danger);
+  font-weight: var(--weight-medium);
+}
+
+.stepIcon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  color: inherit;
+}
+
+.step_done .stepIcon {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+}
+
+.step_active .stepIcon {
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+.step_failed .stepIcon {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+}
+
+.stepDot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+}
+
+.stepLabel {
+  min-width: 0;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+}
+
+.indeterminateLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.track {
+  flex: 1;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-subtle);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  transition: width var(--duration-base) var(--ease-out);
+}
+
+.count {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.doneRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.doneIcon {
+  color: var(--color-success);
+}
+
+.failedRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-danger-subtle);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-md);
+}
+
+.failedIcon {
+  flex-shrink: 0;
+  color: var(--color-danger);
+}
+
+.failedMessage {
+  flex: 1;
+  min-width: 120px;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}
