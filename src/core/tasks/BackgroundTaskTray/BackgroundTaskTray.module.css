@@ -1,60 +1,22 @@
 /**
- * Индикатор зафиксирован координатами сразу правее рейки (design_handoff:
- * лоток фоновых задач — стеклянная плашка `position:absolute;left:60px;
- * bottom:16px` у рейки; здесь `position:fixed`, потому что триггер и
- * поповер должны работать поверх ЛЮБОЙ страницы, а не только внутри
- * стеклянной плашки `main` конкретной страницы).
+ * Лоток — стеклянный оверлей у нижнего края рейки (design_handoff:
+ * `position:absolute;left:60px;bottom:16px`). `position:fixed`, чтобы работать
+ * поверх любой страницы. Открывается кнопкой в рейке (uiSlice.trayOpen).
  */
 
-.trigger {
-  composes: focusRing from '../../../shared/styles/shared.module.css';
-
+/* Прозрачный слой для закрытия кликом вне панели. */
+.scrim {
   position: fixed;
-  left: calc(var(--rail-width) + var(--space-2));
-  bottom: var(--space-3);
-  z-index: var(--z-panel);
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-xl);
-  background: transparent;
-  border: none;
-  color: var(--pt-t2);
-  transition:
-    background-color var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
+  inset: 0;
+  z-index: var(--z-overlay);
 }
 
-.trigger:hover {
-  background: var(--pt-glass);
-  color: var(--pt-text);
-}
+.panel {
+  position: fixed;
+  left: calc(var(--rail-width) + var(--space-1));
+  bottom: 16px;
+  z-index: var(--z-dialog);
 
-.badge {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 14px;
-  height: 14px;
-  padding: 0 3px;
-  border-radius: 7px;
-  background: var(--pt-accent);
-  color: var(--pt-accent-fg);
-  font-size: 9px;
-  font-weight: var(--weight-bold);
-  font-variant-numeric: tabular-nums;
-}
-
-/* `.panel.panel` — специфичность нарочно удвоена: перебивает
-   `Popover.module.css` (вне границ этой задачи) вне зависимости от порядка
-   правил в бандле — здесь нужно стекло, а не плоская поверхность. */
-.panel.panel {
   width: 340px;
   max-width: calc(100vw - var(--space-8));
   max-height: 60vh;
@@ -70,6 +32,25 @@
     var(--pt-inset-hi);
   display: flex;
   flex-direction: column;
+  gap: var(--space-2);
+  animation: trayUp var(--duration-base) var(--ease-out);
+}
+
+@keyframes trayUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-2);
 }
 

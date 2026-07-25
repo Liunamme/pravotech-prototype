@@ -1,42 +1,48 @@
-import { Check, ListTodo, LoaderCircle, TriangleAlert, X } from 'lucide-react';
+import { useEffect } from 'react';
+import { Check, LoaderCircle, TriangleAlert, X } from 'lucide-react';
 import type { BackgroundTask, TaskStep } from '@/types/domain';
-import { Badge, Button, IconButton, Popover, PopoverContent, PopoverTrigger } from '@/shared/ui';
+import { Badge, Button, IconButton } from '@/shared/ui';
 import { cn } from '@/shared/lib/cn';
+import { useStore } from '@/store';
 import { useBackgroundTask } from '../useBackgroundTask';
 import styles from './BackgroundTaskTray.module.css';
 
 /**
  * Лоток фоновых задач (docs/DOMAIN.md §6, docs/UX.md §8). Долгие операции
- * (>3с — casePosition) уходят сюда через `handoff`; юрист свободен и может
- * заниматься другим, задача продолжается независимо от текущей страницы.
+ * (>3с — casePosition) уходят сюда через `handoff`; юрист свободен, задача
+ * продолжается независимо от страницы.
  *
- * Решение «рейка vs панель» (7.3 задания этапа): компактный индикатор,
- * визуально закреплённый у нижнего края рейки, по клику — поповер со
- * списком. `Rail.tsx` — вне границ этой задачи (готов на этапе 1/3), поэтому
- * индикатор не встроен В рейку буквально, а зафиксирован координатами сразу
- * правее неё (`left: calc(var(--rail-width) + ...)`, см. модуль стилей) —
- * читается как её продолжение, не требуя правки чужого компонента и не
- * рискуя наложиться на её собственные иконки темы/настроек в нижней части.
- * Полноэкранная панель снизу (альтернатива из задания) отклонена: она
- * забрала бы куда больше внимания ради задачи, которая по определению не
- * требует немедленного участия юриста («юрист свободен»).
+ * Открывается кнопкой-колёсиком в рейке (`Rail` → `toggleTray` в `uiSlice`),
+ * а не собственным триггером — так у него один источник открытия, без
+ * дубликата у аккаунта. Плашка — стеклянный оверлей у нижнего края рейки
+ * (design_handoff: `left:60px;bottom:16px`), закрывается ✕, `Esc` и кликом вне.
  */
 export function BackgroundTaskTray() {
-  const { tasks, activeCount, openResult, dismissTask } = useBackgroundTask();
+  const { tasks, openResult, dismissTask } = useBackgroundTask();
+  const trayOpen = useStore((state) => state.trayOpen);
+  const closeTray = useStore((state) => state.closeTray);
 
-  const triggerLabel =
-    activeCount > 0 ? `Фоновые задачи, активных: ${activeCount}` : 'Фоновые задачи';
+  useEffect(() => {
+    if (!trayOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') closeTray();
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [trayOpen, closeTray]);
+
+  if (!trayOpen) return null;
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button type="button" className={styles.trigger} aria-label={triggerLabel}>
-          <ListTodo size={18} strokeWidth={1.75} aria-hidden="true" />
-          {activeCount > 0 && <span className={styles.badge}>{activeCount}</span>}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent side="top" align="start" className={styles.panel}>
-        <p className={styles.panelTitle}>Фоновые задачи</p>
+    <>
+      <div className={styles.scrim} onClick={closeTray} aria-hidden="true" />
+      <div className={styles.panel} role="dialog" aria-label="Фоновые задачи">
+        <div className={styles.panelHeader}>
+          <p className={styles.panelTitle}>Фоновые задачи</p>
+          <IconButton aria-label="Закрыть лоток задач" variant="ghost" size="sm" onClick={closeTray}>
+            <X size={13} strokeWidth={2} />
+          </IconButton>
+        </div>
 
         {tasks.length === 0 ? (
           <p className={styles.empty}>Здесь появятся долгие операции агента.</p>
@@ -47,8 +53,8 @@ export function BackgroundTaskTray() {
             ))}
           </ul>
         )}
-      </PopoverContent>
-    </Popover>
+      </div>
+    </>
   );
 }
 
