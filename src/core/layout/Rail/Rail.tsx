@@ -24,17 +24,12 @@ function RailTooltip({ label, children }: { label: string; children: ReactNode }
   );
 }
 
-export type RailProps = {
-  onOpenTasks?: () => void;
-  onOpenSettings?: () => void;
-  tasksActive?: boolean;
-  settingsActive?: boolean;
-};
-
-export function Rail({ onOpenTasks, onOpenSettings, tasksActive, settingsActive }: RailProps) {
+export function Rail() {
   const { theme, toggle } = useTheme();
   const activeTasks = useStore(selectActiveTasks);
   const taskCount = activeTasks.length;
+  const trayOpen = useStore((state) => state.trayOpen);
+  const toggleTray = useStore((state) => state.toggleTray);
 
   return (
     <Tooltip.Provider delayDuration={300}>
@@ -49,8 +44,6 @@ export function Rail({ onOpenTasks, onOpenSettings, tasksActive, settingsActive 
               <TodayIcon size={18} />
             </NavLink>
           </RailTooltip>
-
-          <div className={styles.divider} role="separator" aria-orientation="horizontal" />
 
           {workspaces.map((workspace) => {
             const Icon = workspace.icon;
@@ -74,9 +67,10 @@ export function Rail({ onOpenTasks, onOpenSettings, tasksActive, settingsActive 
           <RailTooltip label="Фоновые задачи">
             <button
               type="button"
-              className={cn(styles.item, tasksActive && styles.active)}
+              className={cn(styles.item, trayOpen && styles.active)}
               aria-label="Фоновые задачи"
-              onClick={onOpenTasks}
+              aria-pressed={trayOpen}
+              onClick={toggleTray}
             >
               <LoaderCircle size={16} strokeWidth={1.8} />
               {taskCount > 0 && <span className={styles.badge}>{taskCount}</span>}
@@ -95,14 +89,13 @@ export function Rail({ onOpenTasks, onOpenSettings, tasksActive, settingsActive 
           </RailTooltip>
 
           <RailTooltip label="Настройки">
-            <button
-              type="button"
-              className={cn(styles.item, settingsActive && styles.active)}
+            <NavLink
+              to="/settings"
+              className={({ isActive }) => cn(styles.item, isActive && styles.active)}
               aria-label="Настройки"
-              onClick={onOpenSettings}
             >
               <Settings size={16} strokeWidth={1.8} />
-            </button>
+            </NavLink>
           </RailTooltip>
         </div>
       </nav>
