@@ -81,27 +81,32 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
           onKeyDown={handleKeyDown}
         />
 
+        {/* Круглая кнопка-иконка (design_handoff: 38px, только пиктограмма) —
+            `Button` без `children` не рендерит текстовую подпись, `aria-label`
+            остаётся единственным описанием для a11y. */}
         {isStreaming ? (
           <Button
-            variant="secondary"
-            iconLeft={<Square size={15} strokeWidth={2} />}
+            variant="primary"
+            iconLeft={<Square size={11} strokeWidth={2} fill="currentColor" />}
             onClick={onStop}
             className={styles.action}
-          >
-            Остановить
-          </Button>
+            aria-label="Остановить"
+          />
         ) : (
           <Button
             variant="primary"
-            iconLeft={<Send size={15} strokeWidth={2} />}
+            iconLeft={<Send size={16} strokeWidth={2} />}
             onClick={handleSend}
             disabled={!canSend}
             className={styles.action}
-          >
-            Отправить
-          </Button>
+            aria-label="Отправить"
+          />
         )}
       </div>
+
+      <p className={styles.hint}>
+        {isStreaming ? 'Агент отвечает — можно остановить' : 'Enter — отправить · Shift+Enter — перенос строки'}
+      </p>
     </div>
   );
 });

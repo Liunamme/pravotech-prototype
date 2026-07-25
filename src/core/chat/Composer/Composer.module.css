@@ -1,16 +1,18 @@
 .root {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-6);
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+  padding: 12px 20px 16px;
 }
 
 .inputRow {
   display: flex;
   align-items: flex-end;
-  gap: var(--space-3);
+  gap: 10px;
+  padding: 8px 8px 8px 16px;
+  border-radius: var(--radius-2xl);
+  background: var(--pt-glass2);
+  border: 1px solid var(--pt-line);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .textarea {
@@ -18,30 +20,40 @@
 
   flex: 1;
   min-width: 0;
-  min-height: calc(var(--text-lg) * var(--leading-relaxed) + var(--space-3) * 2);
-  max-height: calc(var(--text-lg) * var(--leading-relaxed) * 6 + var(--space-3) * 2);
-  padding: var(--space-3);
-  background: var(--color-surface-sunken);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  color: var(--color-text);
-  font-size: var(--text-lg);
-  line-height: var(--leading-relaxed);
+  min-height: calc(14px * 1.5 + 16px);
+  max-height: calc(14px * 1.5 * 6 + 16px);
+  padding: 8px 0;
+  background: transparent;
+  border: none;
+  color: var(--pt-text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
   resize: none;
   overflow-y: auto;
-  transition: border-color var(--duration-fast) var(--ease-out);
-}
-
-.textarea:focus-visible {
-  border-color: var(--color-accent-border);
 }
 
 .textarea::placeholder {
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
 }
 
-.action {
+/* `.action.action` — специфичность нарочно удвоена: перебивает
+   `Button.module.css` (вне границ этой задачи) вне зависимости от порядка
+   правил в бандле — кнопка отправки здесь круглая 38px, а не прямоугольная. */
+.action.action {
   flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 6px 18px var(--pt-accent-soft);
+}
+
+.hint {
+  margin: 8px 0 0;
+  padding-left: 6px;
+  font-size: 11px;
+  color: var(--pt-t3);
 }
 
 @container (max-width: 420px) {

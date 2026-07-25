@@ -6,9 +6,10 @@
 
 .paragraph {
   max-width: 68ch;
-  font-size: var(--text-lg);
+  /* 14.5px — значение из design_handoff (тело реплики агента), не токен сетки. */
+  font-size: 14.5px;
   line-height: var(--leading-relaxed);
-  color: var(--color-text);
+  color: var(--pt-text);
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
@@ -23,7 +24,7 @@
   height: 1em;
   margin-left: 1px;
   vertical-align: text-bottom;
-  background: currentColor;
+  background: var(--pt-accent);
   animation: blink 1s step-end infinite;
 }
 

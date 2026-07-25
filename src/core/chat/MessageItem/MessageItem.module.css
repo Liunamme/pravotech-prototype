@@ -1,8 +1,7 @@
 .row {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-2) 0;
+  gap: 9px;
 }
 
 .avatar {
@@ -10,59 +9,67 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-full);
-  background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-md);
+  background: var(--pt-accent-soft);
+  border: 1px solid var(--pt-line);
+  color: var(--pt-accent);
+  font-size: 11px;
+  font-weight: var(--weight-bold);
 }
 
 .body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 10px;
   min-width: 0;
   max-width: 100%;
 }
 
 .meta {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
+  align-items: center;
+  gap: 9px;
 }
 
 .roleLabel {
-  font-size: var(--text-sm);
+  font-size: 12.5px;
   font-weight: var(--weight-semibold);
-  color: var(--color-text-secondary);
+  color: var(--pt-text);
 }
 
 .time {
   font-variant-numeric: tabular-nums;
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
+  font-size: 11px;
+  color: var(--pt-t3);
 }
 
 .blocks {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 12px;
   min-width: 0;
 }
 
-/* ── роль: агент — без сдвига, без фона (не "чужая" реплика, а рабочий вывод) ── */
+/* ── роль: агент — аватар «П» + имя + время, текст без обёртки (design_handoff строки ~154-184) ── */
 .role_agent {
   align-items: flex-start;
+  width: 100%;
 }
 
-/* ── роль: пользователь — выравнивание вправо + плашка-поверхность, БЕЗ пузыря ── */
+.role_agent .body {
+  width: 100%;
+}
+
+/* ── роль: пользователь — пузырь акцентом справа, без аватара (design_handoff строки ~148-153) ── */
 .role_user {
-  flex-direction: row-reverse;
-  justify-content: flex-start;
+  justify-content: flex-end;
 }
 
 .role_user .body {
   align-items: flex-end;
+  max-width: 520px;
   margin-left: auto;
 }
 
@@ -70,11 +77,29 @@
   flex-direction: row-reverse;
 }
 
+.role_user .roleLabel {
+  font-size: 11px;
+  font-weight: var(--weight-regular);
+  color: var(--pt-t3);
+}
+
 .role_user .blocks {
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-surface-sunken);
-  border-left: 2px solid var(--color-accent);
-  border-radius: var(--radius-md);
+  padding: 11px 16px;
+  background: var(--pt-accent);
+  color: var(--pt-accent-fg);
+  border-radius: 16px 16px 4px 16px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* `StreamingText`/`MessageBlockView` (соседние модули этой же задачи) задают
+   параграфу собственные `font-size`/`color` — здесь их нужно перебить внутри
+   пузыря пользователя. Селектор по тегу `p`, не по хешированному классу
+   `.paragraph`, специфичность (0,2,1) достаточна без `!important`. */
+.role_user .blocks p {
+  font-size: 14px;
+  line-height: 1.45;
+  color: inherit;
 }
 
 /* ── роль: система — по центру, приглушённо ── */
@@ -84,7 +109,7 @@
 
 .role_system .roleLabel,
 .role_system .time {
-  color: var(--color-text-muted);
+  color: var(--pt-t3);
 }
 
 .errorBox {
@@ -94,14 +119,14 @@
   gap: var(--space-2);
   max-width: 68ch;
   padding: var(--space-3);
-  background: var(--color-danger-subtle);
-  border: 1px solid var(--color-danger-border);
+  background: var(--pt-p0bg);
+  border: 1px solid var(--pt-line);
   border-radius: var(--radius-lg);
 }
 
 .errorIcon {
   flex-shrink: 0;
-  color: var(--color-danger);
+  color: var(--pt-p0);
   margin-top: 2px;
 }
 
@@ -110,7 +135,7 @@
   min-width: 180px;
   font-size: var(--text-base);
   line-height: var(--leading-normal);
-  color: var(--color-danger);
+  color: var(--pt-p0);
 }
 
 /* Панель чата ресайзится пользователем (ResizablePanels), не окно браузера —
