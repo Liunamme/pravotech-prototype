@@ -4,6 +4,7 @@ import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { ChatView } from '@/core/chat/ChatView';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
 import { useStore } from '@/store';
+import { cn } from '@/shared/lib/cn';
 import { DayNav } from './DayNav';
 import { RightPanel } from './RightPanel';
 import styles from './TodayPage.module.css';
@@ -24,6 +25,8 @@ const TODAY_THREAD_ID = 'thread-today';
 export function TodayPage() {
   const threadExists = useStore((state) => Boolean(state.threads[TODAY_THREAD_ID]));
   const createThread = useStore((state) => state.createThread);
+  /** Открытый документный оверлей полностью накрывает очередь — см. `.behindInspector` в CSS. */
+  const inspectorOpen = useStore((state) => Boolean(state.inspector));
   /** Узел стеклянной плашки `main` — портал документного инспектора рендерится
       внутрь него (design_handoff: оверлей лежит НАД содержимым `main`, не окна). */
   const [mainEl, setMainEl] = useState<HTMLDivElement | null>(null);
@@ -53,7 +56,7 @@ export function TodayPage() {
           {threadExists && <ChatView threadId={TODAY_THREAD_ID} scope={TODAY_SCOPE} autoRunOnEmpty="дайджест" />}
         </div>
 
-        <div className={styles.right}>
+        <div className={cn(styles.right, inspectorOpen && styles.behindInspector)}>
           <RightPanel />
         </div>
 

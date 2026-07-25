@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { useSearchParams } from 'react-router-dom';
 import { X } from 'lucide-react';
@@ -29,12 +29,55 @@ export type DocumentInspectorProps = {
   container?: HTMLElement | null;
 };
 
+/**
+ * Колесо мыши над инспектором крутит ТОЛЬКО тело инспектора.
+ *
+ * Без этого прокрутка над панелью уходила в то, что лежит под ней (список
+ * договоров, лента чата): курсор над шапкой или полями панели — это
+ * непрокручиваемая зона, и браузер отдаёт колесо дальше по цепочке; а после
+ * возврата фокуса из другого окна первое событие колеса могло прийти с целью
+ * из-под панели. Слушатель на фазе перехвата решает по РЕАЛЬНОЙ позиции
+ * курсора (`elementFromPoint`), а не по цели события: курсор над панелью →
+ * дельта уходит в тело инспектора, что бы ни было целью.
+ *
+ * `passive: false` обязателен — иначе `preventDefault()` игнорируется (React
+ * вешает `onWheel` пассивно, поэтому слушатель нативный).
+ */
+function useInspectorWheelGuard(contentRef: RefObject<HTMLDivElement | null>, open: boolean) {
+  useEffect(() => {
+    if (!open) return;
+
+    function onWheel(event: WheelEvent) {
+      const panel = contentRef.current;
+      if (!panel) return;
+
+      const under = document.elementFromPoint(event.clientX, event.clientY);
+      if (!under || !panel.contains(under)) return; // курсор не над инспектором — не вмешиваемся
+
+      const body = panel.querySelector<HTMLElement>('[data-inspector-body]');
+      if (!body) return;
+
+      // Цель события уже внутри тела — родная прокрутка отработает сама
+      // (chaining у краёв закрыт `overscroll-behavior: contain` в CSS).
+      if (event.target instanceof Node && body.contains(event.target)) return;
+
+      // Иначе (шапка, поля панели, «промазавшая» цель) — крутим тело сами.
+      event.preventDefault();
+      body.scrollTop += event.deltaY;
+    }
+
+    document.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    return () => document.removeEventListener('wheel', onWheel, { capture: true });
+  }, [contentRef, open]);
+}
+
 export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
   const inspector = useStore((state) => state.inspector);
   const documents = useStore((state) => state.documents);
   const openInspector = useStore((state) => state.openInspector);
   const closeInspector = useStore((state) => state.closeInspector);
   const [searchParams, setSearchParams] = useSearchParams();
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Загрузка страницы с `?doc=&anchor=` в URL открывает инспектор ровно один
   // раз при монтировании — сид грузится синхронно до первого рендера
@@ -53,6 +96,8 @@ export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
 
   const doc = inspector ? documents[inspector.docId] : undefined;
   const open = Boolean(inspector && doc);
+
+  useInspectorWheelGuard(contentRef, open);
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) return; // открытие всегда идёт через `openInspector` (CitationChip и т.п.), не отсюда
@@ -77,6 +122,7 @@ export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
     <RadixDialog.Root open={open} onOpenChange={handleOpenChange} modal={false}>
       <RadixDialog.Portal container={container ?? undefined}>
         <RadixDialog.Content
+          ref={contentRef}
           className={styles.content}
           aria-describedby={undefined}
           onInteractOutside={(e) => e.preventDefault()}

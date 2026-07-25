@@ -47,6 +47,13 @@
   flex-direction: column;
 }
 
+/* См. тот же `.behindInspector` в `TodayPage.module.css`: документный оверлей
+   накрывает колонку целиком, и на время его показа она не принимает ввод —
+   иначе колесо мыши над оверлеем уходило в список за ним. */
+.behindInspector {
+  pointer-events: none;
+}
+
 .notFound {
   height: 100%;
   display: flex;

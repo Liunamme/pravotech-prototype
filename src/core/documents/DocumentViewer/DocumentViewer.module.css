@@ -79,6 +79,9 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  /* Докрутили тело до края — прокрутка НЕ уходит дальше в то, что под панелью
+     (scroll chaining). */
+  overscroll-behavior: contain;
   /* Динамическое затухание текста у краёв (useScrollFade, та же схема, что у
      списка договоров): --fade-top/-bottom = 28px только когда за краем есть
      скрытый текст, иначе 0. Без backdrop-filter — чистое затухание в фон. */

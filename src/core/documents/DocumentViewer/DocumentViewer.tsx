@@ -101,7 +101,9 @@ export function DocumentViewer({ document, activeAnchorId }: DocumentViewerProps
         </Button>
       </header>
 
-      <div className={styles.scroll} ref={fade.ref} onScroll={fade.onScroll}>
+      {/* `data-inspector-body` — по нему `DocumentInspector` находит прокручиваемое
+          тело, чтобы направлять в него колесо мыши (см. там же). */}
+      <div className={styles.scroll} data-inspector-body="" ref={fade.ref} onScroll={fade.onScroll}>
         <div className={styles.prose}>
           {document.blocks.map((block) => {
             const isActive = block.id === activeAnchor?.blockId;

@@ -5,6 +5,7 @@ import type { AgentSkill } from '@/workspaces/types';
 import type { Id } from '@/types/domain';
 import { getWorkspace } from '@/workspaces/registry';
 import { useStore } from '@/store';
+import { cn } from '@/shared/lib/cn';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { ChatView } from '@/core/chat/ChatView';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
@@ -29,6 +30,8 @@ export function WorkspacePage() {
   const manifest = workspaceId ? getWorkspace(workspaceId) : undefined;
   const thread = useStore((state) => (threadId ? state.threads[threadId] : undefined));
   const createThread = useStore((state) => state.createThread);
+  /** Открытый документный оверлей полностью накрывает правую колонку — см. `.behindInspector` в CSS. */
+  const inspectorOpen = useStore((state) => Boolean(state.inspector));
   const navigate = useNavigate();
 
   /**
@@ -93,7 +96,7 @@ export function WorkspacePage() {
           )}
         </div>
 
-        <div className={styles.right}>
+        <div className={cn(styles.right, inspectorOpen && styles.behindInspector)}>
           <WorkspaceRightPanel workspaceId={manifest.id} />
         </div>
 
