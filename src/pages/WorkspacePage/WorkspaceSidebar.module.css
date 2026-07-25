@@ -1,8 +1,21 @@
+/**
+ * Сайдбар пространства (design_handoff строки ~81-117) — лежит прямо на
+ * bloom-фоне, без собственной поверхности (тот же приём, что и `DayNav`/
+ * `Rail`).
+ */
+
 .root {
+  position: relative;
+  z-index: 2;
+  width: var(--sidebar-width);
+  flex: none;
   height: 100%;
   min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  gap: 14px;
+  padding: 64px 12px 12px 6px;
 }
 
 /* ── разговоры ─────────────────────────────────────────────────────── */
@@ -10,10 +23,9 @@
 .threadsSection {
   flex: 0 1 auto;
   max-height: 42%;
-  min-height: 120px;
+  min-height: 90px;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid var(--color-border);
 }
 
 .threadsHeader {
@@ -21,18 +33,33 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-3) var(--space-3) var(--space-1);
+  padding: 0 8px;
 }
 
 .sectionLabel {
-  font-size: var(--text-xs);
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.9px;
+  color: var(--pt-t3);
+}
+
+.newThreadButton.newThreadButton {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--pt-line);
+  background: var(--pt-glass);
+  color: var(--pt-t2);
+}
+
+.newThreadButton.newThreadButton:hover {
+  background: var(--pt-glass2);
+  color: var(--pt-text);
 }
 
 .threadsEmpty {
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-1);
 }
 
 .threadsList {
@@ -41,7 +68,8 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  padding: 0 var(--space-2) var(--space-2);
+  gap: 2px;
+  padding: 2px 0 var(--space-2);
 }
 
 .threadItem {
@@ -49,20 +77,18 @@
 
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2);
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 11px;
+  color: var(--pt-text);
 }
 
 .threadItem:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text);
+  background: var(--pt-glass);
 }
 
 .threadActive {
-  background: var(--color-surface-selected);
-  color: var(--color-text);
+  background: var(--pt-glass2);
 }
 
 .statusDot {
@@ -70,30 +96,30 @@
   width: 6px;
   height: 6px;
   border-radius: var(--radius-full);
-  background: var(--color-border-strong);
+  background: var(--pt-t3);
 }
 
 .status_active {
-  background: var(--color-success);
+  background: var(--pt-ok);
 }
 
 .status_awaiting {
-  background: var(--color-warning);
+  background: var(--pt-p1);
 }
 
 .status_working {
-  background: var(--color-accent);
+  background: var(--pt-accent);
 }
 
 .status_done {
-  background: var(--color-border-strong);
+  background: var(--pt-t3);
 }
 
 .threadTitle {
   composes: truncate from '../../shared/styles/shared.module.css';
   flex: 1;
   min-width: 0;
-  font-size: var(--text-sm);
+  font-size: 12.5px;
 }
 
 .unreadDot {
@@ -101,7 +127,7 @@
   width: 6px;
   height: 6px;
   border-radius: var(--radius-full);
-  background: var(--color-accent);
+  background: var(--pt-accent);
 }
 
 /* ── вкладки контекста ─────────────────────────────────────────────── */
@@ -111,13 +137,51 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 0 var(--space-3);
+  gap: 8px;
+  padding-top: 2px;
 }
 
-.tabsList {
+/* Разделитель перед вкладками (design_handoff строка 95). */
+.tabsRoot::before {
+  content: '';
   flex-shrink: 0;
-  padding-top: var(--space-2);
-  flex-wrap: wrap;
+  height: 1px;
+  margin: 0 8px;
+  background: var(--pt-line);
+}
+
+/* `.tabsList.tabsList` — двойной класс перебивает `Tabs.module.css` (вне
+   границ этой задачи: подчёркнутые вкладки страницы там не подходят —
+   здесь пара переключателей-кнопок, design_handoff строки ~96-100). */
+.tabsList.tabsList {
+  flex-shrink: 0;
+  gap: 4px;
+  padding: 0 4px;
+  border-bottom: none;
+}
+
+.tabTrigger.tabTrigger {
+  flex: 1;
+  justify-content: center;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  border-bottom: 1px solid transparent;
+  color: var(--pt-t3);
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+}
+
+.tabTrigger.tabTrigger:hover {
+  color: var(--pt-text);
+  border-bottom-color: transparent;
+}
+
+.tabTrigger.tabTrigger[data-state='active'] {
+  background: var(--pt-glass2);
+  border-color: var(--pt-line);
+  border-bottom-color: var(--pt-line);
+  color: var(--pt-text);
 }
 
 .tabContent {
@@ -125,5 +189,61 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--space-2) 0;
+  padding: 0 2px 26px;
+  /* Лента карточек документов затухает по краям (README «что важно не
+     потерять» §6, design_handoff строка 101). */
+  mask-image: linear-gradient(180deg, transparent 0, black 10px, black calc(100% - 20px), transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    black 10px,
+    black calc(100% - 20px),
+    transparent 100%
+  );
+}
+
+/* ── аккаунт ───────────────────────────────────────────────────────── */
+
+.account {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 8px 0;
+  margin-top: auto;
+  border-top: 1px solid var(--pt-line);
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--pt-accent);
+  color: var(--pt-accent-fg);
+  font-size: 11.5px;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.4px;
+  display: grid;
+  place-items: center;
+}
+
+.accountBody {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.accountName {
+  composes: truncate from '../../shared/styles/shared.module.css';
+  font-size: 12.5px;
+  font-weight: var(--weight-semibold);
+  color: var(--pt-text);
+}
+
+.accountRole {
+  composes: truncate from '../../shared/styles/shared.module.css';
+  font-size: 11px;
+  color: var(--pt-t3);
 }

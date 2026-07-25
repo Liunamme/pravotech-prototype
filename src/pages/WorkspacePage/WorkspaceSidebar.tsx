@@ -60,8 +60,14 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
       <div className={styles.threadsSection}>
         <div className={styles.threadsHeader}>
           <p className={styles.sectionLabel}>Разговоры</p>
-          <IconButton aria-label="Новый разговор" variant="ghost" size="sm" onClick={handleNewThread}>
-            <Plus size={15} strokeWidth={2} />
+          <IconButton
+            aria-label="Новый разговор"
+            variant="ghost"
+            size="sm"
+            className={styles.newThreadButton}
+            onClick={handleNewThread}
+          >
+            <Plus size={13} strokeWidth={2} />
           </IconButton>
         </div>
 
@@ -104,7 +110,12 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
             {manifest.contextTabs.map((tab) => {
               const Icon = tab.icon;
               return (
-                <TabsTrigger key={tab.id} value={tab.id} icon={<Icon size={14} strokeWidth={2} />}>
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  className={styles.tabTrigger}
+                  icon={<Icon size={14} strokeWidth={2} />}
+                >
                   {tab.label}
                 </TabsTrigger>
               );
@@ -120,6 +131,19 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
           })}
         </Tabs>
       )}
+
+      {/* Аккаунт внизу колонки (design_handoff строки ~113-116) — статичная
+          визуальная деталь, как и в самом макете: в проекте нет модели
+          пользователя/аутентификации (вне границ этой задачи). */}
+      <div className={styles.account}>
+        <span className={styles.avatar} aria-hidden="true">
+          ЭЗ
+        </span>
+        <span className={styles.accountBody}>
+          <span className={styles.accountName}>Э. Задорожный</span>
+          <span className={styles.accountRole}>Юрист</span>
+        </span>
+      </div>
     </div>
   );
 }

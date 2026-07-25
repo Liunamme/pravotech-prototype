@@ -54,6 +54,19 @@ export function DayNav() {
           })}
         </div>
       )}
+
+      {/* Аккаунт внизу колонки (design_handoff строки ~113-116) — в проекте
+          нет модели пользователя/аутентификации (вне границ задачи), поэтому
+          это статичная визуальная деталь раскладки, как и в самом макете. */}
+      <div className={styles.account}>
+        <span className={styles.avatar} aria-hidden="true">
+          ЭЗ
+        </span>
+        <span className={styles.accountBody}>
+          <span className={styles.accountName}>Э. Задорожный</span>
+          <span className={styles.accountRole}>Юрист</span>
+        </span>
+      </div>
     </nav>
   );
 }

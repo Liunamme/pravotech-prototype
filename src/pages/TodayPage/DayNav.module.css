@@ -1,21 +1,32 @@
+/**
+ * Сайдбар «Сегодня» (design_handoff строки ~56-78) — лежит прямо на
+ * bloom-фоне, без собственной поверхности: см. `Rail.module.css` для того
+ * же приёма в этом проекте.
+ */
+
 .root {
+  position: relative;
+  z-index: 2;
+  width: var(--sidebar-width);
+  flex: none;
   height: 100%;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-3);
+  gap: 18px;
+  /* Верхний отступ 64px — место под логотип «право(тех)» (см. `AppShell`). */
+  padding: 64px 12px 12px 6px;
 }
 
 .dateBlock {
-  padding: 0 var(--space-1);
+  padding: 0 8px;
 }
 
 .date {
-  font-size: var(--text-md);
+  font-size: 13px;
   font-weight: var(--weight-semibold);
-  color: var(--color-text);
+  color: var(--pt-t2);
 }
 
 .todayLink {
@@ -23,27 +34,29 @@
 
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-selected);
-  color: var(--color-accent);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  gap: 9px;
+  padding: 9px 11px;
+  border-radius: var(--radius-xl);
+  background: var(--pt-accent);
+  color: var(--pt-accent-fg);
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  box-shadow: 0 6px 18px var(--pt-accent-soft);
 }
 
 .workspaceList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 6px;
 }
 
 .sectionLabel {
-  padding: 0 var(--space-1);
-  font-size: var(--text-xs);
+  padding: 0 11px;
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.9px;
+  color: var(--pt-t3);
 }
 
 .workspaceItem {
@@ -51,16 +64,19 @@
 
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
-  transition: background-color var(--duration-fast) var(--ease-out);
+  gap: 9px;
+  padding: 9px 11px;
+  border-radius: var(--radius-xl);
+  border: 1px solid transparent;
+  color: var(--pt-t2);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 
 .workspaceItem:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text);
+  background: var(--pt-glass);
+  color: var(--pt-text);
 }
 
 .workspaceIcon {
@@ -70,7 +86,7 @@
 .workspaceLabel {
   composes: truncate from '../../shared/styles/shared.module.css';
   flex: 1;
-  font-size: var(--text-sm);
+  font-size: 13px;
 }
 
 .workspaceCount {
@@ -78,12 +94,58 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 var(--space-1);
-  border-radius: var(--radius-full);
-  background: var(--color-surface-sunken);
-  color: var(--color-text-muted);
-  font-size: var(--text-xs);
+  min-width: 20px;
+  height: 19px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: var(--pt-glass2);
+  border: 1px solid var(--pt-line);
+  color: var(--pt-text);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
+}
+
+/* Аккаунт внизу — прижат к низу колонки (design_handoff строки ~113-116). */
+.account {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 8px 0;
+  margin-top: auto;
+  border-top: 1px solid var(--pt-line);
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--pt-accent);
+  color: var(--pt-accent-fg);
+  font-size: 11.5px;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.4px;
+  display: grid;
+  place-items: center;
+}
+
+.accountBody {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.accountName {
+  composes: truncate from '../../shared/styles/shared.module.css';
+  font-size: 12.5px;
+  font-weight: var(--weight-semibold);
+  color: var(--pt-text);
+}
+
+.accountRole {
+  composes: truncate from '../../shared/styles/shared.module.css';
+  font-size: 11px;
+  color: var(--pt-t3);
 }

@@ -25,9 +25,9 @@ export function RightPanel() {
 
   return (
     <div className={styles.root}>
-      <UpcomingBanner />
+      <div className={styles.topBlock}>
+        <UpcomingBanner />
 
-      <div className={styles.segmentRow}>
         <SegmentedControl
           aria-label="Режим правой колонки"
           value={activeSegment}
