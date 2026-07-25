@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { TODAY_SCOPE } from '@/types/domain';
-import { ResizablePanels } from '@/core/layout/ResizablePanels';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { ChatView } from '@/core/chat/ChatView';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
@@ -25,6 +24,9 @@ const TODAY_THREAD_ID = 'thread-today';
 export function TodayPage() {
   const threadExists = useStore((state) => Boolean(state.threads[TODAY_THREAD_ID]));
   const createThread = useStore((state) => state.createThread);
+  /** Узел стеклянной плашки `main` — портал документного инспектора рендерится
+      внутрь него (design_handoff: оверлей лежит НАД содержимым `main`, не окна). */
+  const [mainEl, setMainEl] = useState<HTMLDivElement | null>(null);
 
   // Тред «Сегодня» создаётся один раз при первом заходе на страницу в этой
   // сессии стора — если он уже есть (повторный заход, HMR), не трогаем его.
@@ -44,25 +46,20 @@ export function TodayPage() {
 
   return (
     <div className={styles.root}>
-      <ResizablePanels
-        storageKey="today"
-        className={styles.panels}
-        panels={[
-          { id: 'left', defaultWidth: 240, minWidth: 200 },
-          { id: 'center', flex: true },
-          { id: 'right', defaultWidth: 360, minWidth: 300 },
-        ]}
-      >
-        <DayNav />
+      <DayNav />
 
+      <div className={styles.main} ref={setMainEl}>
         <div className={styles.center}>
           {threadExists && <ChatView threadId={TODAY_THREAD_ID} scope={TODAY_SCOPE} autoRunOnEmpty="дайджест" />}
         </div>
 
-        <RightPanel />
-      </ResizablePanels>
+        <div className={styles.right}>
+          <RightPanel />
+        </div>
 
-      <InspectorSlot />
+        <InspectorSlot container={mainEl} />
+      </div>
+
       <BackgroundTaskTray />
     </div>
   );

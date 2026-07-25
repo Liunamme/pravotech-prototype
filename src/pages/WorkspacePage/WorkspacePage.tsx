@@ -5,7 +5,6 @@ import type { AgentSkill } from '@/workspaces/types';
 import type { Id } from '@/types/domain';
 import { getWorkspace } from '@/workspaces/registry';
 import { useStore } from '@/store';
-import { ResizablePanels } from '@/core/layout/ResizablePanels';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { ChatView } from '@/core/chat/ChatView';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
@@ -41,6 +40,9 @@ export function WorkspacePage() {
    * переключатель ветки рендера, иначе автозапуск потеряется.
    */
   const [pendingAutoRun, setPendingAutoRun] = useState<PendingAutoRun | null>(null);
+  /** Узел стеклянной плашки `main` — портал документного инспектора рендерится
+      внутрь него (design_handoff: оверлей лежит НАД содержимым `main`, не окна). */
+  const [mainEl, setMainEl] = useState<HTMLDivElement | null>(null);
 
   if (!workspaceId) return <Navigate to="/today" replace />;
 
@@ -76,17 +78,9 @@ export function WorkspacePage() {
 
   return (
     <div className={styles.root}>
-      <ResizablePanels
-        storageKey={`workspace-${manifest.id}`}
-        className={styles.panels}
-        panels={[
-          { id: 'left', defaultWidth: 280, minWidth: 240 },
-          { id: 'center', flex: true },
-          { id: 'right', defaultWidth: 360, minWidth: 300 },
-        ]}
-      >
-        <WorkspaceSidebar manifest={manifest} activeThreadId={validThread?.id} activeTabId={tabId} />
+      <WorkspaceSidebar manifest={manifest} activeThreadId={validThread?.id} activeTabId={tabId} />
 
+      <div className={styles.main} ref={setMainEl}>
         <div className={styles.center}>
           {validThread ? (
             <ChatView
@@ -99,10 +93,13 @@ export function WorkspacePage() {
           )}
         </div>
 
-        <WorkspaceRightPanel workspaceId={manifest.id} />
-      </ResizablePanels>
+        <div className={styles.right}>
+          <WorkspaceRightPanel workspaceId={manifest.id} />
+        </div>
 
-      <InspectorSlot />
+        <InspectorSlot container={mainEl} />
+      </div>
+
       <BackgroundTaskTray />
     </div>
   );

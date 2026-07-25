@@ -1,13 +1,51 @@
+/**
+ * Раскладка уровня 1 (design_handoff: рейка на фоне + сайдбар на фоне +
+ * стеклянная плашка `main`). Рейка живёт в `AppShell` (вне границ этой
+ * задачи) — здесь только сайдбар и `main`.
+ */
+
 .root {
   height: 100%;
   min-height: 0;
+  display: flex;
 }
 
-.panels {
-  height: 100%;
+/* Стеклянная рабочая область (design_handoff строка 119): чат + инспектор-
+   панель внутри неё, документный оверлей — абсолютно позиционирован
+   относительно этого узла (см. `container` в `InspectorSlot`). */
+.main {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  margin: 10px 10px 10px 0;
+  border-radius: var(--radius-panel);
+  background: var(--pt-glass);
+  border: 1px solid var(--pt-line);
+  box-shadow: var(--pt-shadow);
+  display: flex;
+  overflow: hidden;
 }
 
 .center {
-  height: 100%;
+  flex: 1;
+  min-width: 0;
   min-height: 0;
+  display: flex;
+}
+
+/* `.center` — flex-контейнер по горизонтали: единственный ребёнок (`ChatView`)
+   сам по себе не растягивается по главной оси без явного `flex: 1`. */
+.center > * {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Инспектор-панель — правая секция внутри `main` (design_handoff строка 202). */
+.right {
+  width: var(--inspector-panel-width);
+  flex: none;
+  border-left: 1px solid var(--pt-line2);
+  background: var(--pt-glass3);
+  display: flex;
+  flex-direction: column;
 }
