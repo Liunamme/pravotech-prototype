@@ -189,15 +189,16 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0 2px 26px;
-  /* Лента карточек документов затухает по краям (README «что важно не
-     потерять» §6, design_handoff строка 101). */
-  mask-image: linear-gradient(180deg, transparent 0, black 10px, black calc(100% - 20px), transparent 100%);
+  padding: 4px 2px 30px;
+  /* Плавное длинное затухание сверху И снизу (design review): короткая зона
+     (10px) выглядела резкой «высветленной полосой» — растянута до 36px, чтобы
+     карточки мягко растворялись у краёв при скролле. */
+  mask-image: linear-gradient(180deg, transparent 0, black 36px, black calc(100% - 36px), transparent 100%);
   -webkit-mask-image: linear-gradient(
     180deg,
     transparent 0,
-    black 10px,
-    black calc(100% - 20px),
+    black 36px,
+    black calc(100% - 36px),
     transparent 100%
   );
 }
