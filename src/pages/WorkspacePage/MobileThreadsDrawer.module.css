@@ -1,0 +1,196 @@
+/**
+ * Список диалогов на телефоне. Выезжает слева — оттуда, где на десктопе
+ * стоит сайдбар: направление подсказывает, что это, ещё до того как панель
+ * доехала. Стекло и устройство — как у `QueueDrawer`.
+ */
+.content {
+  composes: focusRing from '../../shared/styles/shared.module.css';
+
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: min(320px, 88%);
+  z-index: var(--z-dialog);
+
+  display: flex;
+  flex-direction: column;
+  box-shadow: 14px 0 44px rgba(0, 0, 0, 0.16);
+
+  animation: slideInLeft 220ms var(--ease-out);
+  will-change: transform;
+}
+
+.content[data-state='closed'] {
+  animation: slideOutLeft 150ms var(--ease-in);
+}
+
+/* Инертный слой со стеклом — см. комментарий в `QueueDrawer.tsx`. */
+.glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--pt-overlay);
+  -webkit-backdrop-filter: var(--pt-overlay-blur);
+  backdrop-filter: var(--pt-overlay-blur);
+  border-right: 1px solid var(--pt-overlay-line);
+}
+
+.header {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-2) var(--space-4);
+}
+
+.heading {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--pt-t3);
+}
+
+.close.close {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-lg);
+  background: var(--pt-glass);
+  border: 1px solid var(--pt-line);
+  color: var(--pt-t2);
+}
+
+.list {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 var(--space-2) var(--space-2);
+}
+
+.item {
+  composes: focusRing from '../../shared/styles/shared.module.css';
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* 44px — рекомендованный минимум цели для пальца. */
+  min-height: 44px;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  text-align: left;
+  color: var(--pt-t2);
+  cursor: pointer;
+}
+
+.item:hover {
+  background: var(--pt-glass2);
+}
+
+.itemActive {
+  background: var(--pt-glass2);
+  color: var(--pt-text);
+}
+
+.status {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+}
+
+/* Цвета совпадают с точками в сайдбаре десктопа (`WorkspaceSidebar.module.css`)
+   и с бейджем статуса в шапке чата — один статус читается одинаково везде. */
+.statusActive {
+  background: var(--pt-ok);
+}
+
+.statusAwaiting {
+  background: var(--pt-p1);
+}
+
+.statusWorking {
+  background: var(--pt-accent);
+}
+
+.statusDone {
+  background: var(--pt-t3);
+}
+
+.title {
+  composes: truncate from '../../shared/styles/shared.module.css';
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-4) var(--space-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--pt-t3);
+}
+
+.footer {
+  position: relative;
+  flex: none;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+}
+
+.newThread {
+  width: 100%;
+}
+
+/* Кнопка открытия в верхней полосе — те же размеры, что у кнопки задач. */
+.trigger {
+  composes: focusRing from '../../shared/styles/shared.module.css';
+
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-lg);
+  background: var(--pt-glass2);
+  border: 1px solid var(--pt-line);
+  color: var(--pt-t2);
+  cursor: pointer;
+}
+
+.trigger[aria-expanded='true'] {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent-border);
+  color: var(--pt-text);
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content,
+  .content[data-state='closed'] {
+    animation: none;
+  }
+}

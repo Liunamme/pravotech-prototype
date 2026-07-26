@@ -10,6 +10,9 @@ import { cn } from '@/shared/lib/cn';
 import { NEW_THREAD_TITLE } from '@/shared/lib/threadTitle';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { QueueDrawer, QueueTrigger } from '@/core/layout/QueueDrawer';
+import { MobileViewBar } from '@/core/layout/MobileChrome';
+import { DeadlineTimeline } from '@/core/calendar/DeadlineTimeline';
+import { MobileThreadsDrawer, MobileThreadsTrigger } from './MobileThreadsDrawer';
 import { ChatView } from '@/core/chat/ChatView';
 import { Composer } from '@/core/chat/Composer';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
@@ -63,8 +66,17 @@ export function WorkspacePage() {
    * На планшете три колонки не помещаются: очередь уезжает в выдвижную панель
    * поверх рабочей области, а её место забирает чат (docs/UX.md §8).
    */
-  const isTablet = useDeviceClass() === 'tablet';
+  const device = useDeviceClass();
+  const isTablet = device === 'tablet';
+  const isMobile = device === 'mobile';
   const [queueOpen, setQueueOpen] = useState(false);
+  const [threadsOpen, setThreadsOpen] = useState(false);
+  /**
+   * Что показывает единственная колонка на телефоне: переписка, одна из
+   * вкладок контекста пространства или сроки. Очередь сюда не входит —
+   * она открывается поверх (см. `TodayPage`).
+   */
+  const [mobileView, setMobileView] = useState<string>('chat');
   const queueCount = useStore((state) => (workspaceId ? selectWorkspaceQueue(state, workspaceId).length : 0));
 
   if (!workspaceId) return <Navigate to="/today" replace />;
@@ -140,6 +152,75 @@ export function WorkspacePage() {
   const queueTrigger = (
     <QueueTrigger open={queueOpen} onToggle={() => setQueueOpen((open) => !open)} count={queueCount} />
   );
+
+  if (isMobile) {
+    const activeTab = manifest.contextTabs.find((tab) => tab.id === mobileView);
+    const TabComponent = activeTab?.Component;
+
+    return (
+      <div className={styles.mobileRoot} ref={setMainEl}>
+        <MobileViewBar
+          title={manifest.shortTitle}
+          leading={<MobileThreadsTrigger open={threadsOpen} onToggle={() => setThreadsOpen((open) => !open)} />}
+          options={[
+            { value: 'chat', label: 'Диалог' },
+            ...manifest.contextTabs.map((tab) => ({ value: tab.id, label: tab.label })),
+            { value: 'dates', label: 'Сроки' },
+          ]}
+          value={mobileView}
+          onValueChange={setMobileView}
+          action={queueTrigger}
+        />
+
+        <div className={styles.mobileBody}>
+          {mobileView === 'chat' ? (
+            validThread ? (
+              <ChatView
+                threadId={validThread.id}
+                scope={manifest.id}
+                showHeader={false}
+                autoRunOnEmpty={
+                  pendingAutoRun?.threadId === validThread.id && pendingAutoRun.mode === 'trigger'
+                    ? pendingAutoRun.prompt
+                    : undefined
+                }
+                autoSendOnEmpty={
+                  pendingAutoRun?.threadId === validThread.id && pendingAutoRun.mode === 'send'
+                    ? pendingAutoRun.prompt
+                    : undefined
+                }
+              />
+            ) : (
+              <WorkspaceInvite skills={manifest.skills} onPickSkill={handlePickSkill} onSend={handleInviteSend} />
+            )
+          ) : TabComponent ? (
+            <div className={styles.mobileTab}>
+              <TabComponent workspaceId={manifest.id} />
+            </div>
+          ) : (
+            <div className={styles.mobileTab}>
+              <DeadlineTimeline scope={manifest.id} />
+            </div>
+          )}
+        </div>
+
+        <MobileThreadsDrawer
+          workspaceId={manifest.id}
+          activeThreadId={validThread?.id}
+          open={threadsOpen}
+          onOpenChange={setThreadsOpen}
+          container={mainEl}
+        />
+
+        <QueueDrawer asDrawer open={queueOpen} onOpenChange={setQueueOpen} container={mainEl}>
+          <WorkspaceRightPanel workspaceId={manifest.id} />
+        </QueueDrawer>
+
+        <InspectorSlot container={mainEl} />
+        <BackgroundTaskTray />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.root}>
