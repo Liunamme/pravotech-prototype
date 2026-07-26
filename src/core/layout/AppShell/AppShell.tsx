@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { Outlet } from 'react-router';
 import { useDeviceClass } from '@/shared/lib/useDeviceClass';
-import { UnsupportedViewport } from '../UnsupportedViewport';
 import { MobileTabBar, MobileTopBar } from '../MobileChrome';
 import { Rail } from '../Rail/Rail';
 import styles from './AppShell.module.css';
@@ -18,24 +16,9 @@ import styles from './AppShell.module.css';
  * • десктоп и планшет — вертикальная рейка слева, логотип поверх стыка;
  * • телефон — верхняя полоса с логотипом и нижние вкладки. Рейка отъедала бы
  *   56px из 393-х и всё равно оставалась бы недосягаемой для большого пальца.
- *
- * Заглушка `UnsupportedViewport` остаётся видна на мобильной ширине, пока
- * мобильная раскладка страниц не готова: каркас уже мобильный, а сами
- * страницы всё ещё трёхколоночные.
  */
 export function AppShell() {
-  const device = useDeviceClass();
-  const isMobile = device === 'mobile';
-  /**
-   * Согласие «всё равно открыть» живёт в состоянии компонента: переходы
-   * между страницами его сохраняют (`AppShell` не размонтируется), а
-   * перезагрузка сбрасывает — следующий гость снова увидит предупреждение.
-   */
-  const [dismissed, setDismissed] = useState(false);
-
-  if (isMobile && !dismissed) {
-    return <UnsupportedViewport onDismiss={() => setDismissed(true)} />;
-  }
+  const isMobile = useDeviceClass() === 'mobile';
 
   const bloom = (
     <div className={styles.bloom} aria-hidden="true">
