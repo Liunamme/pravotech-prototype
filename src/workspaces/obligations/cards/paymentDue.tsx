@@ -74,9 +74,10 @@ function EditForm({
         <label className={styles.field} data-changed={changed.has('amount') || undefined}>
           <span className={styles.fieldLabel}>Сумма, {payload.currency}</span>
           {/* Пустое поле раньше давало `Number('') || 0` — то есть платёж на
-              ноль, который спокойно уходил в исполнение. Теперь пустое
-              остаётся `NaN`, поле показывается пустым, а `validate` не даёт
-              подтвердить, пока сумму не вписали. */}
+              ноль, который спокойно уходил в исполнение. Пустую строку
+              переводим в `NaN` явно (`Number('')` сам по себе дал бы тот же
+              ноль): поле остаётся пустым, а `validate` говорит «укажите
+              сумму», а не «сумма должна быть больше нуля». */}
           <input
             className={styles.input}
             type="number"
@@ -85,7 +86,7 @@ function EditForm({
             inputMode="decimal"
             value={Number.isFinite(payload.amount) ? payload.amount : ''}
             aria-invalid={Boolean(errors.amount) || undefined}
-            onChange={(e) => onChange({ ...payload, amount: Number(e.target.value) })}
+            onChange={(e) => onChange({ ...payload, amount: e.target.value === '' ? Number.NaN : Number(e.target.value) })}
           />
           <FieldError message={errors.amount} />
         </label>

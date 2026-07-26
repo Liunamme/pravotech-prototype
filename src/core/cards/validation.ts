@@ -46,14 +46,22 @@ export function checkText(value: unknown, opts: { what: string; max: number }): 
 
 /**
  * Денежная сумма: конечное положительное число не больше лимита и не точнее
- * копейки. `Number('')` даёт `NaN`, поэтому пустое поле сюда и приходит как
- * `NaN` — раньше оно превращалось в `0` и уходило как «платёж на ноль».
+ * копейки.
+ *
+ * Пустое поле формы приходит сюда как `NaN` (осознанно: `Number('')` дало бы
+ * `0`, то есть «платёж на ноль» вместо «сумму не вписали»).
+ *
+ * Точность считается через сравнение с копейками по допуску: `10.005 * 100`
+ * в двоичной плавающей точке равно `1000.4999…`, поэтому прямое сравнение
+ * округлений здесь ничего не ловит.
  */
 export function checkAmount(value: unknown): string | undefined {
   if (typeof value !== 'number' || !Number.isFinite(value)) return 'Укажите сумму.';
   if (value <= 0) return 'Сумма должна быть больше нуля.';
   if (value > FIELD_LIMITS.amount) return 'Сумма выглядит ошибочной — проверьте разряды.';
-  if (Math.round(value * 100) !== Number((value * 100).toFixed(0))) return 'Не больше двух знаков после запятой.';
+
+  const kopecks = value * 100;
+  if (Math.abs(kopecks - Math.round(kopecks)) > 1e-6) return 'Не больше двух знаков после запятой.';
   return undefined;
 }
 
