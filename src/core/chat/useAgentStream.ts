@@ -11,6 +11,7 @@
 import { useCallback, useRef, useState } from 'react';
 import type { AgentContext, AgentEvent, BackgroundTask, Id, Message, ThreadScope } from '@/types/domain';
 import { useAgentTransport } from '@/core/agent/transport';
+import { describeTransportFailure, isAbortError } from '@/core/agent/transportError';
 import { useStore } from '@/store';
 import { selectThreadMessages } from '@/store/selectors';
 import { NEW_THREAD_TITLE, threadTitleFromMessage } from '@/shared/lib/threadTitle';
@@ -115,6 +116,20 @@ export function useAgentStream(threadId: Id, scope: ThreadScope): UseAgentStream
       try {
         for await (const event of transport.send(input, ctx)) {
           handleEvent(event);
+        }
+      } catch (error) {
+        // Отмена штатная — её доводит `finally` ниже, ровно как раньше.
+        // Всё остальное — настоящий сбой транспорта, и молчать о нём нельзя:
+        // без этой ветки исключение закрывало сообщение как `complete`, и
+        // юрист получал обрезанный ответ без причины и без «Повторить».
+        if (!isAbortError(error)) {
+          const failure = describeTransportFailure(error);
+          setMessageError(agentMessageId, failure);
+          setMessageStatus(agentMessageId, 'error');
+          setStatusLine(agentMessageId, undefined);
+          if (handoffTaskRef.current) failTask(handoffTaskRef.current.id, failure.message);
+          setThreadStatus(threadId, 'awaiting_user');
+          terminal = true;
         }
       } finally {
         if (!terminal) {
