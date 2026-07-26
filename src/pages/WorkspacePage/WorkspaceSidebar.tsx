@@ -7,6 +7,7 @@ import { useStore } from '@/store';
 import { selectWorkspaceThreads } from '@/store/selectors';
 import { Button, EmptyState, IconButton, Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui';
 import { cn } from '@/shared/lib/cn';
+import { NEW_THREAD_TITLE } from '@/shared/lib/threadTitle';
 import { useScrollFade } from '@/shared/lib/useScrollFade';
 import styles from './WorkspaceSidebar.module.css';
 
@@ -68,7 +69,7 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
     createThread({
       id,
       workspaceId: manifest.id,
-      title: 'Новый разговор',
+      title: NEW_THREAD_TITLE,
       status: 'active',
       createdAt: now,
       updatedAt: now,

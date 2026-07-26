@@ -47,11 +47,18 @@ const STATUS_LABEL: Record<ThreadStatus, string> = {
   done: 'Завершён',
 };
 
+/**
+ * Цвет бейджа = цвет точки этого же треда в списке диалогов
+ * (`WorkspaceSidebar.module.css`, `.status_*`): активен — зелёный (`--pt-ok`),
+ * ждёт вас — оранжевый (`--pt-p1`), агент работает — фиолетовый (`--pt-accent`),
+ * завершён — серый. Раньше «Активен» был серым при зелёной точке, а «Завершён»
+ * — зелёным при серой.
+ */
 const STATUS_VARIANT: Record<ThreadStatus, BadgeVariant> = {
-  active: 'neutral',
+  active: 'success',
   awaiting_user: 'warning',
   working: 'accent',
-  done: 'success',
+  done: 'neutral',
 };
 
 /**

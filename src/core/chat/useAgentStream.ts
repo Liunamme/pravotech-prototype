@@ -13,6 +13,7 @@ import type { AgentContext, AgentEvent, BackgroundTask, Id, Message, ThreadScope
 import { useAgentTransport } from '@/core/agent/transport';
 import { useStore } from '@/store';
 import { selectThreadMessages } from '@/store/selectors';
+import { NEW_THREAD_TITLE, threadTitleFromMessage } from '@/shared/lib/threadTitle';
 
 export type UseAgentStreamResult = {
   /** Идёт ли сейчас поток, запущенный этим хуком (этим треда). */
@@ -72,6 +73,7 @@ export function useAgentStream(threadId: Id, scope: ThreadScope): UseAgentStream
         setStatusLine,
         setMessageError,
         setMessageStatus,
+        setThreadStatus,
         upsertCard,
         startTask,
         taskStep,
@@ -81,6 +83,9 @@ export function useAgentStream(threadId: Id, scope: ThreadScope): UseAgentStream
         cancelTask,
       } = useStore.getState();
       const ctx: AgentContext = { workspaceId: scope, threadId, history };
+
+      // Пока идёт прогон — тред честно «Агент работает» (docs/DOMAIN.md §8).
+      setThreadStatus(threadId, 'working');
 
       /** Получено ли терминальное событие (`done`/`error`) — иначе поток прерван `cancel()`. */
       let terminal = false;
@@ -121,6 +126,8 @@ export function useAgentStream(threadId: Id, scope: ThreadScope): UseAgentStream
             state.setStatusLine(agentMessageId, undefined);
             state.setMessageStatus(agentMessageId, 'complete');
           }
+          // Прогон оборван — тред больше не «работает».
+          state.setThreadStatus(threadId, 'active');
           // Поток прерван `cancel()`, а не завершился штатным `done`/`error` —
           // объявленная фоновая задача (если была) тоже не доведена до конца:
           // честно помечаем её отменённой, а не оставляем «зависшей» в
@@ -188,12 +195,15 @@ export function useAgentStream(threadId: Id, scope: ThreadScope): UseAgentStream
             setMessageError(agentMessageId, { message: event.message, retryable: event.retryable });
             setMessageStatus(agentMessageId, 'error');
             if (handoffTaskRef.current) failTask(handoffTaskRef.current.id, event.message);
+            // Сорвавшийся прогон ждёт решения юриста — «Повторить» или новая реплика.
+            setThreadStatus(threadId, 'awaiting_user');
             terminal = true;
             return;
           case 'done':
             setStatusLine(agentMessageId, undefined);
             setMessageStatus(agentMessageId, 'complete');
             if (handoffTaskRef.current) finishTask(handoffTaskRef.current.id, { kind: 'thread', id: threadId });
+            setThreadStatus(threadId, needsUser(agentMessageId) ? 'awaiting_user' : 'active');
             terminal = true;
             return;
           default: {
@@ -201,6 +211,22 @@ export function useAgentStream(threadId: Id, scope: ThreadScope): UseAgentStream
             void exhaustive;
           }
         }
+      }
+
+      /**
+       * Требует ли ответ агента хода юриста: он либо задал уточняющий вопрос
+       * (`clarify`), либо предложил карточку, которую надо подтвердить или
+       * отклонить. Иначе тред просто «активен».
+       */
+      function needsUser(messageId: Id): boolean {
+        const state = useStore.getState();
+        const message = state.messages[messageId];
+        if (!message) return false;
+        return message.blocks.some(
+          (block) =>
+            block.type === 'clarify' ||
+            (block.type === 'card_ref' && state.cards[block.cardId]?.state === 'pending'),
+        );
       }
     },
     [threadId, scope, transport],
@@ -211,7 +237,15 @@ export function useAgentStream(threadId: Id, scope: ThreadScope): UseAgentStream
       const trimmed = text.trim();
       if (!trimmed || isStreaming) return;
 
-      const { appendMessage } = useStore.getState();
+      const { appendMessage, renameThread, threads } = useStore.getState();
+
+      // Тема треда — из первой реплики пользователя. Переименовываем только
+      // безымянный тред («Новый разговор» из кнопки «+»): у дневного чата и у
+      // тредов из сида названия осмысленные, их трогать нельзя.
+      if (threads[threadId]?.title === NEW_THREAD_TITLE) {
+        renameThread(threadId, threadTitleFromMessage(trimmed));
+      }
+
       appendMessage({
         id: nextId('u'),
         threadId,

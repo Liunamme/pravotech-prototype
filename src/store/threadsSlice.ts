@@ -7,6 +7,7 @@ import type {
   MessageStatus,
   SourceRef,
   Thread,
+  ThreadStatus,
 } from '@/types/domain';
 import type { StoreState } from './index';
 
@@ -17,6 +18,13 @@ export type ThreadsSlice = {
   messageIdsByThread: Record<Id, Id[]>;
 
   createThread: (thread: Thread) => void;
+  /**
+   * Статус треда — живой: `useAgentStream` переводит его в `working` на время
+   * прогона агента и в `active`/`awaiting_user` по его итогу (docs/DOMAIN.md §8).
+   */
+  setThreadStatus: (threadId: Id, status: ThreadStatus) => void;
+  /** Тема треда из первой реплики пользователя (см. `threadTitleFromMessage`). */
+  renameThread: (threadId: Id, title: string) => void;
   appendMessage: (message: Message) => void;
   /** Дописывает в последний text-блок сообщения, создаёт его при необходимости. */
   appendToken: (messageId: Id, text: string) => void;
@@ -44,6 +52,20 @@ export const createThreadsSlice: StateCreator<StoreState, [], [], ThreadsSlice> 
         [thread.id]: state.messageIdsByThread[thread.id] ?? [],
       },
     })),
+
+  setThreadStatus: (threadId, status) =>
+    set((state) => {
+      const thread = state.threads[threadId];
+      if (!thread || thread.status === status) return state;
+      return { threads: { ...state.threads, [threadId]: { ...thread, status } } };
+    }),
+
+  renameThread: (threadId, title) =>
+    set((state) => {
+      const thread = state.threads[threadId];
+      if (!thread || thread.title === title) return state;
+      return { threads: { ...state.threads, [threadId]: { ...thread, title } } };
+    }),
 
   appendMessage: (message) =>
     set((state) => {
