@@ -3,8 +3,6 @@ import { TODAY_SCOPE } from '@/types/domain';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { QueueDrawer, QueueTrigger } from '@/core/layout/QueueDrawer';
 import { MobileViewBar } from '@/core/layout/MobileChrome';
-import { DeadlineTimeline } from '@/core/calendar/DeadlineTimeline';
-import { UpcomingBanner } from '@/core/calendar/UpcomingBanner';
 import { ChatView } from '@/core/chat/ChatView';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
 import { useStore } from '@/store';
@@ -48,12 +46,6 @@ export function TodayPage() {
   const counts = useStore(selectQueueCounts);
   const queueCount = counts.P0 + counts.P1 + counts.P2 + counts.P3;
 
-  /**
-   * Что показывает единственная колонка на телефоне. Очередь сюда не входит:
-   * она открывается ПОВЕРХ, а не вместо, — иначе юрист терял бы переписку
-   * каждый раз, когда хочет свериться со списком дел.
-   */
-  const [mobileView, setMobileView] = useState<'chat' | 'dates'>('chat');
 
   // Тред «Сегодня» создаётся один раз при первом заходе на страницу в этой
   // сессии стора — если он уже есть (повторный заход, HMR), не трогаем его.
@@ -78,28 +70,15 @@ export function TodayPage() {
   if (isMobile) {
     return (
       <div className={styles.mobileRoot} ref={setMainEl}>
-        <MobileViewBar
-          title="Сегодня"
-          options={[
-            { value: 'chat', label: 'Диалог' },
-            { value: 'dates', label: 'Сроки' },
-          ]}
-          value={mobileView}
-          onValueChange={(value) => setMobileView(value as 'chat' | 'dates')}
-          action={queueTrigger}
-        />
+        {/* Вкладок на «Сегодня» нет: сроки живут внутри очереди (сегмент
+            «Очередь · Сроки»), и единственная оставшаяся поверхность — диалог.
+            Одна вкладка — это не выбор, а строка, отнятая у переписки. */}
+        <MobileViewBar title="Сегодня" options={[]} value="chat" onValueChange={() => {}} action={queueTrigger} />
 
         <div className={styles.mobileBody}>
-          {mobileView === 'chat'
-            ? threadExists && (
-                <ChatView threadId={TODAY_THREAD_ID} scope={TODAY_SCOPE} autoRunOnEmpty="дайджест" showHeader={false} />
-              )
-            : (
-              <div className={styles.mobileDates}>
-                <UpcomingBanner />
-                <DeadlineTimeline scope={TODAY_SCOPE} />
-              </div>
-            )}
+          {threadExists && (
+            <ChatView threadId={TODAY_THREAD_ID} scope={TODAY_SCOPE} autoRunOnEmpty="дайджест" showHeader={false} />
+          )}
         </div>
 
         <QueueDrawer asDrawer open={queueOpen} onOpenChange={setQueueOpen} container={mainEl}>

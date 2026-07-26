@@ -11,7 +11,6 @@ import { NEW_THREAD_TITLE } from '@/shared/lib/threadTitle';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { QueueDrawer, QueueTrigger } from '@/core/layout/QueueDrawer';
 import { MobileViewBar } from '@/core/layout/MobileChrome';
-import { DeadlineTimeline } from '@/core/calendar/DeadlineTimeline';
 import { MobileThreadsDrawer, MobileThreadsTrigger } from './MobileThreadsDrawer';
 import { ChatView } from '@/core/chat/ChatView';
 import { Composer } from '@/core/chat/Composer';
@@ -72,9 +71,9 @@ export function WorkspacePage() {
   const [queueOpen, setQueueOpen] = useState(false);
   const [threadsOpen, setThreadsOpen] = useState(false);
   /**
-   * Что показывает единственная колонка на телефоне: переписка, одна из
-   * вкладок контекста пространства или сроки. Очередь сюда не входит —
-   * она открывается поверх (см. `TodayPage`).
+   * Что показывает единственная колонка на телефоне: переписка или одна из
+   * вкладок контекста пространства. Ни очередь, ни сроки сюда не входят —
+   * они живут в панели очереди, которая открывается поверх.
    */
   const [mobileView, setMobileView] = useState<string>('chat');
   const queueCount = useStore((state) => (workspaceId ? selectWorkspaceQueue(state, workspaceId).length : 0));
@@ -165,7 +164,6 @@ export function WorkspacePage() {
           options={[
             { value: 'chat', label: 'Диалог' },
             ...manifest.contextTabs.map((tab) => ({ value: tab.id, label: tab.label })),
-            { value: 'dates', label: 'Сроки' },
           ]}
           value={mobileView}
           onValueChange={setMobileView}
@@ -193,14 +191,12 @@ export function WorkspacePage() {
             ) : (
               <WorkspaceInvite skills={manifest.skills} onPickSkill={handlePickSkill} onSend={handleInviteSend} />
             )
-          ) : TabComponent ? (
-            <div className={styles.mobileTab}>
-              <TabComponent workspaceId={manifest.id} />
-            </div>
           ) : (
-            <div className={styles.mobileTab}>
-              <DeadlineTimeline scope={manifest.id} />
-            </div>
+            TabComponent && (
+              <div className={styles.mobileTab}>
+                <TabComponent workspaceId={manifest.id} />
+              </div>
+            )
           )}
         </div>
 

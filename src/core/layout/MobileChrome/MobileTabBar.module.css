@@ -29,7 +29,7 @@
   gap: 3px;
   /* 52px + подпись: цель нажатия выше рекомендованных 44px даже без учёта
      подписи, поэтому промахнуться пальцем сложно. */
-  height: 56px;
+  height: 60px;
   padding: 0 var(--space-1);
   color: var(--pt-t3);
   text-decoration: none;
@@ -51,7 +51,7 @@
 .item[aria-current='page']::after {
   content: '';
   position: absolute;
-  inset: 6px 8px;
+  inset: 2px 6px;
   z-index: -1;
   border-radius: var(--radius-lg);
   background: var(--color-accent-subtle);

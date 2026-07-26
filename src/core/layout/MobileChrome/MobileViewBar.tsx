@@ -13,7 +13,7 @@ export type MobileViewBarProps = {
   options: MobileViewOption[];
   value: string;
   onValueChange: (value: string) => void;
-  /** Кнопка «Очередь» справа от ленты. */
+  /** Кнопка «Очередь» — в правом конце строки заголовка. */
   action?: ReactNode;
   /** Действие слева от заголовка — на пространстве это список диалогов. */
   leading?: ReactNode;
@@ -25,6 +25,14 @@ export type MobileViewBarProps = {
  *
  * На телефоне колонок нет вовсе — вместо них по одной поверхности за раз, и
  * лента заменяет то, что на десктопе видно одновременно.
+ *
+ * Кнопка очереди стоит в строке заголовка: справа от него всё равно пусто, а
+ * лента вкладок ниже получает всю ширину — иначе она обрывалась бы уже на
+ * второй вкладке.
+ *
+ * Лента не рисуется вовсе, когда переключать нечего: на «Сегодня» осталась
+ * одна поверхность («Диалог»), а вкладка в единственном числе — это не выбор,
+ * а украшение, которое отнимает строку у переписки.
  *
  * Вкладки — отдельные «таблетки», а не слитный сегментный переключатель, как
  * на десктопе. Причина не в украшательстве: сегментный контрол — это выбор из
@@ -73,9 +81,10 @@ export function MobileViewBar({ title, options, value, onValueChange, action, le
       <div className={styles.titleRow}>
         {leading}
         <h1 className={styles.title}>{title}</h1>
+        {action}
       </div>
 
-      <div className={styles.controls}>
+      {options.length > 1 && (
         <div className={styles.scroller}>
           {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- фокус держат сами вкладки (roving tabindex) */}
           <div className={styles.tabs} role="tablist" aria-label="Что показать на экране" onKeyDown={handleKeyDown}>
@@ -100,9 +109,7 @@ export function MobileViewBar({ title, options, value, onValueChange, action, le
             })}
           </div>
         </div>
-
-        {action}
-      </div>
+      )}
     </div>
   );
 }
