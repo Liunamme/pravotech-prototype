@@ -31,11 +31,16 @@ export type ChatViewProps = {
   threadId: Id;
   scope: ThreadScope;
   /**
-   * Если задано и при монтировании тред пуст — один раз за сессию браузера
-   * запускает этот ввод через `transport.send()` без видимой реплики
-   * пользователя (ТЗ 4b.9, автозапуск `morningDigest` на «Сегодня»).
-   * Гвард — `sessionStorage`, не модульная переменная: должен переживать
-   * переход на другую страницу и обратно в рамках вкладки, но не F5.
+   * Если задано и при монтировании тред пуст — запускает этот ввод через
+   * `transport.send()` без видимой реплики пользователя (ТЗ 4b.9,
+   * автозапуск `morningDigest` на «Сегодня»).
+   *
+   * Единственное условие — пустой тред. Раньше сверху лежал ещё и флаг в
+   * `sessionStorage`, и он ломал перезагрузку: стор гидратируется заново
+   * (`main.tsx`), сообщений после F5 нет, а флаг во вкладке остался — юрист
+   * получал пустой экран «Сегодня» до конца сессии браузера. Отдельный флаг
+   * и не нужен: возврат на страницу в той же вкладке видит сообщения
+   * прошлого прогона в сторе и сам ничего не запускает.
    */
   autoRunOnEmpty?: string;
   /**
@@ -92,9 +97,6 @@ export function ChatView({ threadId, scope, autoRunOnEmpty, autoSendOnEmpty }: C
     autoRunFiredRef.current = true;
     if (messages.length > 0) return; // история уже есть — автодайджест не по адресу
 
-    const key = `pravotech:auto-run:${threadId}`;
-    if (window.sessionStorage.getItem(key)) return;
-    window.sessionStorage.setItem(key, '1');
     if (autoSendOnEmpty) chat.sendUserMessage(autoSendOnEmpty);
     else chat.runTrigger(input);
     // `chat` — новый объект на каждый рендер (useAgentStream), сознательно
