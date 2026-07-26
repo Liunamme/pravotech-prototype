@@ -126,19 +126,14 @@ export function WorkspaceSidebar({ manifest, activeThreadId, activeTabId }: Work
       {manifest.contextTabs.length > 0 && tabValue && (
         <Tabs value={tabValue} onValueChange={(value) => setTabValue(value)} className={styles.tabsRoot}>
           <TabsList className={styles.tabsList}>
-            {manifest.contextTabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className={styles.tabTrigger}
-                  icon={<Icon size={14} strokeWidth={2} />}
-                >
-                  {tab.label}
-                </TabsTrigger>
-              );
-            })}
+            {/* Без иконок: пара переключателей на всю ширину сайдбара, подпись
+                по центру (design review). Иконка `tab.icon` в манифесте
+                остаётся — её используют другие места. */}
+            {manifest.contextTabs.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id} className={styles.tabTrigger}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
           {manifest.contextTabs.map((tab) => {
             const TabComponent = tab.Component;
