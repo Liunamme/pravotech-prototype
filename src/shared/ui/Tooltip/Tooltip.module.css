@@ -1,12 +1,25 @@
+/**
+ * Единственный вид подсказки в приложении — матовое стекло оверлея
+ * (`--pt-overlay` + `--pt-overlay-blur`), как у оверлеев и лотка задач.
+ *
+ * Раньше здесь была «инвертированная» подсказка: фон `--color-text`, текст
+ * `--color-text-inverted`. В тёмной теме `--color-text` сам почти белый — фон
+ * получался белым, а текст на нём светлым, и подсказка не читалась вовсе.
+ * Своей копии этих стилей больше ни у кого нет: рейка тоже ходит через этот
+ * компонент, чтобы вид не разъезжался (см. `Rail.tsx`).
+ */
 .content {
   max-width: 260px;
   padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  background: var(--color-text);
-  color: var(--color-text-inverted);
+  border-radius: var(--radius-md);
+  background: var(--pt-overlay);
+  backdrop-filter: var(--pt-overlay-blur);
+  -webkit-backdrop-filter: var(--pt-overlay-blur);
+  border: 1px solid var(--pt-overlay-line);
+  color: var(--pt-text);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--pt-shadow);
   z-index: var(--z-tooltip);
   animation-duration: var(--duration-fast);
   animation-timing-function: var(--ease-out);
@@ -17,16 +30,18 @@
 }
 
 .arrow {
-  fill: var(--color-text);
+  fill: var(--pt-overlay);
 }
 
+/* Появление без сдвига по оси: подсказка приходит с любой стороны (side), и
+   направленная анимация для половины из них выглядела бы «от себя». */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-2px);
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
   }
 }
