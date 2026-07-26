@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
-import { MessageCircleQuestion, Sparkles } from 'lucide-react';
+import { MessageCircleQuestion } from 'lucide-react';
 import type { AgentSkill } from '@/workspaces/types';
 import type { Id } from '@/types/domain';
 import { getWorkspace } from '@/workspaces/registry';
@@ -15,6 +15,7 @@ import { SegmentedControl } from '@/shared/ui';
 import { MobileThreadsDrawer, MobileThreadsTrigger } from './MobileThreadsDrawer';
 import { ChatView } from '@/core/chat/ChatView';
 import { Composer } from '@/core/chat/Composer';
+import { SkillSuggestions } from '@/core/chat/SkillSuggestions';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
 import { Button, EmptyState } from '@/shared/ui';
 import { newId } from '@/shared/lib/id';
@@ -333,25 +334,20 @@ function WorkspaceInvite({
           title="О чём поговорим?"
           description="Спросите что угодно о делах и договорах — или начните с подсказки."
         />
-        {skills.length > 0 && (
-          <div className={styles.skillChips} role="list" aria-label="Подсказки навыков">
-            {skills.map((skill) => {
-              const Icon = skill.icon ?? Sparkles;
-              return (
-                <button
-                  key={skill.id}
-                  type="button"
-                  role="listitem"
-                  className={styles.skillChip}
-                  onClick={() => onPickSkill(skill)}
-                >
-                  <Icon size={13} strokeWidth={1.75} aria-hidden="true" />
-                  {skill.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        {/* Ровно тот же компонент подсказок, что и в пустом треде
+            (`MessageList`): приглашение и пустой тред — одно и то же место,
+            и собственная копия чипов здесь неминуемо разъезжалась с
+            оригиналом (так и вышло: разные отступы и разное поведение при
+            переносе строк). */}
+        <div className={styles.inviteSkills}>
+          <SkillSuggestions
+            skills={skills}
+            onPick={(prompt) => {
+              const skill = skills.find((item) => item.prompt === prompt);
+              if (skill) onPickSkill(skill);
+            }}
+          />
+        </div>
         </div>
         <div className={styles.inviteFade} aria-hidden="true" />
       </div>
