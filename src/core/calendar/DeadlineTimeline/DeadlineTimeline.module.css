@@ -1,4 +1,24 @@
+/* Затухание включается динамически из JS (`useScrollFade`): пока за краем
+   ничего не спрятано, `--fade-*` равны нулю и маска ничего не делает.
+   Внутри ленты нет `backdrop-filter`, поэтому маска здесь допустима —
+   в очереди карточек так делать было нельзя (грабли №2 в docs/HANDOFF.md). */
 .root {
+  --fade-top: 0px;
+  --fade-bottom: 0px;
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    black var(--fade-top),
+    black calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    black var(--fade-top),
+    black calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
   container-type: inline-size;
   height: 100%;
   min-height: 0;

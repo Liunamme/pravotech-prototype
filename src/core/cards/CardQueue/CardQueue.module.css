@@ -1,4 +1,5 @@
 .root {
+  position: relative;
   height: 100%;
   min-height: 0;
   display: flex;
@@ -9,12 +10,40 @@
   height: 100%;
 }
 
-/* ВАЖНО: никаких `mask-image` на этом элементе и на `.list`. Маска делает
-   предка «backdrop root» — и `backdrop-filter` у вуалей внутри перестаёт
-   что-либо размывать (поведение Chromium). Края ленты отделаны вуалями
-   `.topVeil`/`.bottomVeil`, а не маской. */
+/**
+ * Затухание краёв — маской, ровно как в ленте сообщений и списках договоров:
+ * содержимое уходит «в никуда», а не закрашивается полосой. Ни заливка
+ * цветом, ни размытие тут не годились — обе читались посторонним пятном
+ * поперёк списка.
+ *
+ * Включается динамически: пока за краем ничего не спрятано, `--fade-*` равны
+ * нулю и маска ничего не делает (тот же приём, что в `useScrollFade`).
+ *
+ * Заголовки групп при этом гаснут вместе с карточками — они внутри маски.
+ * Поэтому прилипший заголовок рисуется отдельной копией СНАРУЖИ (`.stuckHeader`),
+ * а оригинал просто уезжает вверх вместе с содержимым.
+ *
+ * Плата за маску: элемент становится backdrop root, и `backdrop-filter`
+ * карточек внутри перестаёт размывать (грабли №2 в docs/HANDOFF.md). Здесь
+ * это допустимо — за карточками ровная подложка панели, размывать нечего.
+ * В инспекторе документа, где под стеклом едет текст, так делать нельзя.
+ */
 .scroll {
   height: 100%;
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    black var(--fade-top, 0px),
+    black calc(100% - var(--fade-bottom, 0px)),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    black var(--fade-top, 0px),
+    black calc(100% - var(--fade-bottom, 0px)),
+    transparent 100%
+  );
 }
 
 .list {
@@ -22,45 +51,6 @@
   flex-direction: column;
   gap: 14px;
   padding: 4px 12px 36px;
-}
-
-/* Размытая полоса у верхнего края ленты — «стекло», в котором тонет уезжающий
-   вверх контент и на котором лежат sticky-заголовки групп.
-   `position: sticky` (а не absolute у контейнера): полоса обязана быть ВНУТРИ
-   прокручиваемого блока, иначе `backdrop-filter` брал бы фоном не карточки, а
-   подложку колонки. Отрицательный `margin-bottom` убирает её из потока — она
-   не сдвигает список. Размытие растушёвано маской: плотное у самого края и
-   полностью растворяется книзу, без видимой границы. */
-.topVeil,
-.bottomVeil {
-  position: sticky;
-  z-index: 1;
-  height: 52px;
-  pointer-events: none;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  /* Растворяется динамически: пока за краем ничего не спрятано, размывать
-     нечего — иначе вуаль без причины мылила бы крайнюю карточку. */
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-out);
-}
-
-.topVeil {
-  top: 0;
-  margin-bottom: -52px;
-  mask-image: linear-gradient(180deg, black 0, black 42%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, black 0, black 42%, transparent 100%);
-}
-
-.bottomVeil {
-  bottom: 0;
-  margin-top: -52px;
-  mask-image: linear-gradient(0deg, black 0, black 42%, transparent 100%);
-  -webkit-mask-image: linear-gradient(0deg, black 0, black 42%, transparent 100%);
-}
-
-.veilVisible {
-  opacity: 1;
 }
 
 .group {
@@ -71,20 +61,16 @@
 
 /* Заголовок группы приоритета — капсом, цвет = приоритет (design_handoff
    `GROUP_LABEL`/`g.color`), тонкая линия-продолжение до счётчика. */
+/* Заголовок в потоке: не sticky. Прилипшую копию рисует `.stuckHeader`
+   снаружи маски — иначе он гас бы вместе с карточками. */
 .groupHeader {
-  position: sticky;
-  top: 0;
-  /* Выше размытой полосы `.topVeil`, чтобы сам текст заголовка оставался
-     резким, пока карточки под ним размываются. */
-  z-index: var(--z-sticky);
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 4px 12px;
   margin: 0 -4px;
-  /* Ни фона, ни собственного blur: отделку края держит `.topVeil` — плашка,
-     едущая вместе с заголовком, читалась как случайный прямоугольник
-     (design review). */
+  /* Ни фона, ни собственного размытия: край отделывает маска прокрутки —
+     плашка под заголовком читалась как случайный прямоугольник (design review). */
   font-size: 10px;
   font-weight: var(--weight-bold);
   letter-spacing: 0.9px;
@@ -137,4 +123,35 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/**
+ * Прилипший заголовок группы — копия поверх ленты, вне маски затухания.
+ * Живёт в `.root` (у которого `position: relative`), а не в прокрутке:
+ * содержимое под ним растворяется маской, а сам он остаётся резким.
+ * `pointer-events: none` — это индикатор, а не элемент управления.
+ */
+.stuckHeader {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 4px 12px;
+  pointer-events: none;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+}
+
+.stuckHeader::after {
+  content: '';
+  order: 1;
+  flex: 1;
+  height: 1px;
+  background: var(--pt-line2);
 }

@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type UIEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type UIEvent,
+} from 'react';
 import { Inbox } from 'lucide-react';
 import type { ActionCard, Id, Priority } from '@/types/domain';
 import { PRIORITIES, TODAY_SCOPE } from '@/types/domain';
@@ -55,14 +64,30 @@ export function CardQueue({ scope }: CardQueueProps) {
    * позиции и у дна отделки нет, чтобы не мылить крайние карточки зря).
    */
   const [veils, setVeils] = useState({ top: false, bottom: false });
+  /**
+   * Заголовок какой группы сейчас «прилип» к верху. Считается по прокрутке, а
+   * не через `position: sticky`: сами заголовки живут ВНУТРИ маски затухания и
+   * гаснут вместе с карточками, поэтому наверху рисуется отдельная копия —
+   * снаружи маски и потому резкая (см. `.stuckHeader` в CSS).
+   */
+  const [stuckGroup, setStuckGroup] = useState<Priority | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<Record<Id, HTMLDivElement | null>>({});
+  const headerRefs = useRef<Record<string, HTMLElement | null>>({});
 
   const measureVeils = useCallback((el: HTMLElement | null | undefined) => {
     if (!el) return;
     const top = el.scrollTop > 2;
     const bottom = el.scrollTop + el.clientHeight < el.scrollHeight - 2;
     setVeils((prev) => (prev.top === top && prev.bottom === bottom ? prev : { top, bottom }));
+
+    // Прилипшим считается последний заголовок, который уже ушёл за верхний край.
+    const edge = el.getBoundingClientRect().top;
+    let current: Priority | null = null;
+    for (const [priority, node] of Object.entries(headerRefs.current)) {
+      if (node && node.getBoundingClientRect().top <= edge + 1) current = priority as Priority;
+    }
+    setStuckGroup((prev) => (prev === current ? prev : current));
   }, []);
 
   function handleScroll(event: UIEvent<HTMLDivElement>) {
@@ -217,22 +242,44 @@ export function CardQueue({ scope }: CardQueueProps) {
 
   return (
     <div className={styles.root} ref={rootRef}>
+      {/* Копия заголовка прилипшей группы — СНАРУЖИ прокрутки, а значит вне
+          маски затухания: только так он остаётся резким, пока карточки под
+          ним растворяются. Оригинал продолжает ехать в потоке и задаёт, какая
+          группа считается текущей. */}
+      {stuckGroup && (
+        <div className={styles.stuckHeader} aria-hidden="true">
+          <span className={cn(styles.groupLabel, styles[`priority_${stuckGroup}`])}>{GROUP_LABEL[stuckGroup]}</span>
+          <span className={styles.groupCount}>
+            {groups.find((group) => group.priority === stuckGroup)?.items.length ?? 0}
+          </span>
+        </div>
+      )}
+
       <ScrollArea
         className={styles.scroll}
         data-queue-scroll=""
+        style={
+          {
+            // 60px, а не «на глаз»: прилипший заголовок стоит в первых ~30px, и
+            // содержимое обязано быть почти прозрачным именно там, иначе текст
+            // карточки читается сквозь текст заголовка.
+            '--fade-top': veils.top ? '60px' : '0px',
+            '--fade-bottom': veils.bottom ? '24px' : '0px',
+          } as CSSProperties
+        }
         onKeyDown={handleListKeyDown}
         onScroll={handleScroll}
         shadows={false}
       >
-        {/* Размытая растушёванная полоса у верхнего края — место, куда прилипают
-            заголовки групп. Сами заголовки фона не имеют: контент размывается
-            под этой полосой, а не под каждым заголовком (design review). */}
-        <div className={cn(styles.topVeil, veils.top && styles.veilVisible)} aria-hidden="true" />
-
         <div className={styles.list}>
           {groups.map((group) => (
             <section key={group.priority} className={styles.group} aria-label={GROUP_LABEL[group.priority]}>
-              <header className={styles.groupHeader}>
+              <header
+                className={styles.groupHeader}
+                ref={(node) => {
+                  headerRefs.current[group.priority] = node;
+                }}
+              >
                 <span className={cn(styles.groupLabel, styles[`priority_${group.priority}`])}>
                   {GROUP_LABEL[group.priority]}
                 </span>
@@ -269,7 +316,6 @@ export function CardQueue({ scope }: CardQueueProps) {
 
         {/* Зеркальная вуаль у нижнего края — лента уходит в размытие, а не
             обрывается по границе колонки. */}
-        <div className={cn(styles.bottomVeil, veils.bottom && styles.veilVisible)} aria-hidden="true" />
       </ScrollArea>
     </div>
   );
