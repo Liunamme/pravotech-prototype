@@ -1,44 +1,75 @@
 /**
- * Мини-мост между `<input type="date">` (нужен только для примитивного
- * HTML-контрола) и `IsoDateTime` со временем/таймзоной (домен). Не путать с
- * `shared/lib/date.ts` — там форматирование для чтения (SPEC 4: прямые
- * вызовы `date-fns` вне того файла запрещены, но это ограничение про
- * `date-fns`, а не про нативный `Date`, которым здесь всё и обходится).
+ * Мост между `<input type="date">` и `IsoDateTime` домена
+ * (`'2026-07-24T09:15:00+03:00'`, docs/DOMAIN.md §1).
  *
- * Сохраняет исходное время суток при правке даты в `EditForm`, чтобы
- * «изменить срок» не тихо обнуляло часы карточки на полночь. Собственный
- * (не через `toISOString()`) сборщик строки — домен ожидает смещение вида
- * `+03:00` (docs/DOMAIN.md §1), а не суффикс `Z`.
+ * ⚠️ Здесь намеренно НЕТ `new Date()` для разбора срока. Срок в карточке —
+ * юридический факт, записанный в своём смещении (`+03:00`), а не момент
+ * времени, который можно пересчитывать в часовой пояс читателя. Прежняя
+ * реализация парсила строку через `Date`, правила локальные `setFullYear` и
+ * собирала смещение из `getTimezoneOffset()` браузера: у юриста в
+ * Калининграде или в командировке правка даты меняла сам момент и записывала
+ * срок уже в чужом смещении, а на границе перехода на летнее время — ещё и со
+ * сдвигом на час.
+ *
+ * Поэтому дата правится текстово: меняется только компонент `YYYY-MM-DD`,
+ * время суток и исходное смещение остаются ровно теми, что пришли из данных.
+ * Результат не зависит от часового пояса машины — см. `dateInput.test.ts`,
+ * где одни и те же входы гоняются под Europe/Moscow, UTC и Pacific/Honolulu.
  */
-function pad2(n: number): string {
-  return n.toString().padStart(2, '0');
+
+/** `YYYY-MM-DD`, дальше — время и (необязательно) смещение либо `Z`. */
+const ISO_DATE_TIME = /^(\d{4}-\d{2}-\d{2})(T.*)?$/;
+
+/** Только календарная дата, без времени: значение `<input type="date">`. */
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/**
+ * Существует ли такая дата в календаре. `2026-02-30` и `2026-13-01` разбор
+ * регуляркой проходят, но означают несуществующий срок. Сверка идёт через
+ * `Date.UTC` — в UTC нет переходов на летнее время, поэтому нормализация
+ * компонентов однозначна и не зависит от машины.
+ */
+export function isValidCalendarDate(value: string): boolean {
+  const match = DATE_ONLY.exec(value);
+  if (!match) return false;
+
+  const y = Number(match[1]);
+  const m = Number(match[2]);
+  const d = Number(match[3]);
+  if (m < 1 || m > 12 || d < 1 || d > 31) return false;
+
+  const utc = new Date(Date.UTC(y, m - 1, d));
+  return utc.getUTCFullYear() === y && utc.getUTCMonth() === m - 1 && utc.getUTCDate() === d;
 }
 
-function timezoneOffset(date: Date): string {
-  const offsetMin = -date.getTimezoneOffset();
-  const sign = offsetMin >= 0 ? '+' : '-';
-  const abs = Math.abs(offsetMin);
-  return `${sign}${pad2(Math.floor(abs / 60))}:${pad2(abs % 60)}`;
+/** Разбирает `IsoDateTime` на календарную дату и неизменяемый хвост (время + смещение). */
+function splitIso(iso: string): { date: string; rest: string } | null {
+  const match = ISO_DATE_TIME.exec(iso);
+  if (!match) return null;
+
+  const date = match[1]!;
+  if (!isValidCalendarDate(date)) return null;
+  return { date, rest: match[2] ?? '' };
 }
 
-function toIso(date: Date): string {
-  const datePart = `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
-  const timePart = `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`;
-  return `${datePart}T${timePart}${timezoneOffset(date)}`;
-}
-
+/** Значение для `<input type="date">` — календарная дата в смещении самого срока. */
 export function toDateInputValue(iso: string): string {
-  const date = new Date(iso);
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+  return splitIso(iso)?.date ?? '';
 }
 
-/** `dateInputValue` («YYYY-MM-DD») подставляется в `originalIso`, время суток сохраняется. */
+/**
+ * Подставляет новую календарную дату, сохраняя время суток и исходное
+ * смещение. Некорректный ввод (пустой, несуществующая дата) не меняет ничего —
+ * ошибку у поля показывает уже валидация карточки (`validateCardDecision`).
+ */
 export function withNewDate(originalIso: string, dateInputValue: string): string {
-  const parts = dateInputValue.split('-').map(Number);
-  const [year, month, day] = parts;
-  if (!year || !month || !day) return originalIso;
+  const parsed = splitIso(originalIso);
+  if (!parsed || !isValidCalendarDate(dateInputValue)) return originalIso;
 
-  const next = new Date(originalIso);
-  next.setFullYear(year, month - 1, day);
-  return toIso(next);
+  return `${dateInputValue}${parsed.rest}`;
+}
+
+/** Пригодна ли строка как значение срока: разбирается и указывает на существующую дату. */
+export function isValidIsoDateTime(iso: string): boolean {
+  return splitIso(iso) !== null;
 }
