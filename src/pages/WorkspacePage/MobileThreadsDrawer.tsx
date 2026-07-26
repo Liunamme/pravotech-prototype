@@ -119,7 +119,7 @@ export function MobileThreadsDrawer({
               iconLeft={<Plus size={14} strokeWidth={2} aria-hidden="true" />}
               onClick={handleNewThread}
             >
-              Новый разговор
+              Новый диалог
             </Button>
           </div>
         </RadixDialog.Content>

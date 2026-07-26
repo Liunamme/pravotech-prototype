@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { MessageCircleQuestion } from 'lucide-react';
 import type { AgentSkill } from '@/workspaces/types';
@@ -85,6 +85,21 @@ export function WorkspacePage() {
    * теперь возвращает и то, что там было открыто.
    */
   const [mobileViewByWorkspace, setMobileViewByWorkspace] = useState<Record<Id, string>>({});
+
+  /**
+   * Возврат в пространство открывает ту переписку, на которой человек
+   * остановился, а не приглашение «О чём поговорим?». Приглашение — это
+   * состояние «здесь ещё ничего не начато», а не то, что должно встречать
+   * при каждом переходе по нижним вкладкам.
+   */
+  const threads = useStore((state) => state.threads);
+  const lastThreadByWorkspace = useStore((state) => state.lastThreadByWorkspace);
+  const rememberWorkspaceThread = useStore((state) => state.rememberWorkspaceThread);
+  const openThreadId = thread && workspaceId && thread.workspaceId === workspaceId ? thread.id : undefined;
+
+  useEffect(() => {
+    if (workspaceId && openThreadId) rememberWorkspaceThread(workspaceId, openThreadId);
+  }, [workspaceId, openThreadId, rememberWorkspaceThread]);
   /** Сегмент выдвижной панели: на телефоне переключатель живёт в её шапке. */
   const [queueSegment, setQueueSegment] = useState<'queue' | 'deadlines'>('queue');
   const queueCount = useStore((state) => (workspaceId ? selectWorkspaceQueue(state, workspaceId).length : 0));
@@ -120,6 +135,18 @@ export function WorkspacePage() {
    */
   const tabMissing = Boolean(tabId) && !manifest.contextTabs.some((tab) => tab.id === tabId);
   if (tabMissing) return <Navigate to={`/w/${manifest.id}`} replace />;
+
+  /*
+   * Восстанавливаем последний диалог только на телефоне: на десктопе список
+   * диалогов виден всегда, и приглашение там — осмысленная стартовая точка,
+   * а не тупик. Диалог сверяется со стором: удалённый или чужой id обязан
+   * привести к приглашению, а не к пустому экрану.
+   */
+  const remembered = lastThreadByWorkspace[manifest.id];
+  const rememberedThread = remembered ? threads[remembered] : undefined;
+  if (isMobile && !threadId && rememberedThread?.workspaceId === manifest.id) {
+    return <Navigate to={`/w/${manifest.id}/t/${remembered}`} replace />;
+  }
 
   function handlePickSkill(skill: AgentSkill) {
     const id = newId('thread');
