@@ -1,0 +1,55 @@
+.root {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.title {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  margin: 0;
+  font-size: 20px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.3px;
+  color: var(--pt-text);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/**
+ * Переключатель прокручивается, кнопка очереди — нет. В пространстве вкладок
+ * четыре, и на 375px они в строку не помещаются; обрезать подписи нельзя —
+ * «Обяз…» не опознаётся. Полоса прокрутки скрыта: она здесь только мешала бы,
+ * а о продолжении говорит сам обрезанный край.
+ */
+.segments {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Кольцо фокуса у крайнего сегмента иначе срезается краем прокрутки. */
+  padding: 2px;
+  margin: -2px;
+}
+
+.segments::-webkit-scrollbar {
+  display: none;
+}
+
+.segments > * {
+  width: max-content;
+  min-width: 100%;
+}
