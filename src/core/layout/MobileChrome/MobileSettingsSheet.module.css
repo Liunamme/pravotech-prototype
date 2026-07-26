@@ -1,28 +1,51 @@
 /**
- * Лист настроек. Прижат к низу рабочей области, над нижними вкладками —
- * навигация не должна пропадать под ним.
+ * Лист настроек. Прижат к низу экрана и накрывает нижнюю навигацию: пока
+ * лист открыт, переходить некуда — он и есть текущая задача.
  */
+
+/* Затемнение с размытием под листом. Отдельный слой, а не тень листа: он
+   должен перехватывать клики (тап мимо закрывает) и приглушать то, что под
+   ним, чтобы внимание осталось на листе. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-dialog);
+  background: var(--color-scrim);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: fadeIn 220ms var(--ease-out);
+}
+
 .content {
   composes: focusRing from '../../../shared/styles/shared.module.css';
 
   position: absolute;
   left: 0;
   right: 0;
-  /* Над нижней навигацией, а не поверх неё: кнопка «Настройки» остаётся
-     видимой и подсвеченной, и ей же лист закрывается. Так же ведут себя
-     панели очереди и диалогов. */
-  bottom: calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom, 0px));
-  z-index: var(--z-dialog);
+  bottom: 0;
+  /* На единицу выше затемнения — лист лежит НА нём, а не под. */
+  z-index: calc(var(--z-dialog) + 1);
 
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-3) var(--space-4) var(--space-5);
+  /* Нижний отступ учитывает домашний индикатор: лист доходит до самого края
+     экрана, и без этого последняя строка ложилась бы прямо на полоску. */
+  padding: 0 var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
   border-radius: var(--radius-panel) var(--radius-panel) 0 0;
   box-shadow: 0 -14px 44px rgba(0, 0, 0, 0.22);
 
   animation: slideUp 220ms var(--ease-out);
+  /* Возврат на место после недотянутого жеста — плавный; во время самого
+     жеста лист обязан идти строго за пальцем, поэтому переход отключается. */
+  transition: transform 180ms var(--ease-out);
   will-change: transform;
+  touch-action: none;
+}
+
+.content[data-dragging] {
+  animation: none;
+  transition: none;
 }
 
 .content[data-state='closed'] {
@@ -41,13 +64,28 @@
   border-top: 1px solid var(--pt-overlay-line);
 }
 
-.grabber {
+/* Зона захвата шире полоски: попасть пальцем в 4px невозможно, а промах по
+   жесту читается как «лист не тянется». */
+.handleArea {
   position: relative;
-  align-self: center;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  height: 28px;
+  margin-bottom: calc(-1 * var(--space-2));
+  cursor: grab;
+  touch-action: none;
+}
+
+.handleArea:active {
+  cursor: grabbing;
+}
+
+.grabber {
   width: 36px;
   height: 4px;
   border-radius: var(--radius-full);
-  background: var(--pt-line);
+  background: var(--pt-t3);
 }
 
 .close.close {
@@ -173,6 +211,15 @@
   composes: visuallyHidden from '../../../shared/styles/shared.module.css';
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes slideUp {
   from {
     transform: translateY(100%);
@@ -193,7 +240,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .content,
-  .content[data-state='closed'] {
+  .content[data-state='closed'],
+  .scrim {
     animation: none;
+  }
+
+  .content {
+    transition: none;
   }
 }
