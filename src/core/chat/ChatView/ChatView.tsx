@@ -38,6 +38,14 @@ export type ChatViewProps = {
    * переход на другую страницу и обратно в рамках вкладки, но не F5.
    */
   autoRunOnEmpty?: string;
+  /**
+   * То же, но реплика ВИДИМАЯ: текст уходит как обычное сообщение юриста.
+   * Нужен полю ввода на приглашении «О чём поговорим?» — там пользователь
+   * пишет сам, и его слова обязаны остаться в переписке (а заодно дать треду
+   * тему, см. `threadTitleFromMessage`). `autoRunOnEmpty` для этого не годится:
+   * он гоняет ввод молча, как автозапуск дайджеста.
+   */
+  autoSendOnEmpty?: string;
 };
 
 const STATUS_LABEL: Record<ThreadStatus, string> = {
@@ -65,7 +73,7 @@ const STATUS_VARIANT: Record<ThreadStatus, BadgeVariant> = {
  * Контейнер живого чата (ТЗ 4b.1): шапка + прокручиваемый список + композер.
  * Шапка и композер закреплены, скроллится только `MessageList`.
  */
-export function ChatView({ threadId, scope, autoRunOnEmpty }: ChatViewProps) {
+export function ChatView({ threadId, scope, autoRunOnEmpty, autoSendOnEmpty }: ChatViewProps) {
   const thread = useStore((state) => state.threads[threadId]);
   const messages = useStore((state) => selectThreadMessages(state, threadId));
   const chat = useAgentStream(threadId, scope);
@@ -79,14 +87,16 @@ export function ChatView({ threadId, scope, autoRunOnEmpty }: ChatViewProps) {
   const autoRunFiredRef = useRef(false);
 
   useEffect(() => {
-    if (!autoRunOnEmpty || autoRunFiredRef.current) return;
+    const input = autoRunOnEmpty ?? autoSendOnEmpty;
+    if (!input || autoRunFiredRef.current) return;
     autoRunFiredRef.current = true;
     if (messages.length > 0) return; // история уже есть — автодайджест не по адресу
 
     const key = `pravotech:auto-run:${threadId}`;
     if (window.sessionStorage.getItem(key)) return;
     window.sessionStorage.setItem(key, '1');
-    chat.runTrigger(autoRunOnEmpty);
+    if (autoSendOnEmpty) chat.sendUserMessage(autoSendOnEmpty);
+    else chat.runTrigger(input);
     // `chat` — новый объект на каждый рендер (useAgentStream), сознательно
     // не в зависимостях: эффект обязан выполниться ровно раз на монтирование
     // треда, а не при каждой смене ссылки на хук.

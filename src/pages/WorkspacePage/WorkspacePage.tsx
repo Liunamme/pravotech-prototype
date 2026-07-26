@@ -6,15 +6,23 @@ import type { Id } from '@/types/domain';
 import { getWorkspace } from '@/workspaces/registry';
 import { useStore } from '@/store';
 import { cn } from '@/shared/lib/cn';
+import { NEW_THREAD_TITLE } from '@/shared/lib/threadTitle';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { ChatView } from '@/core/chat/ChatView';
+import { Composer } from '@/core/chat/Composer';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
 import { EmptyState } from '@/shared/ui';
 import { WorkspaceSidebar } from './WorkspaceSidebar';
 import { WorkspaceRightPanel } from './WorkspaceRightPanel';
 import styles from './WorkspacePage.module.css';
 
-type PendingAutoRun = { threadId: Id; prompt: string };
+/**
+ * Ввод, который ждёт нового треда. `mode` различает, чей это текст:
+ *  • `trigger` — чип навыка: прогон идёт молча, реплики юриста в переписке нет;
+ *  • `send` — юрист написал сам в поле на приглашении: текст обязан появиться
+ *    в переписке как его сообщение (и дать треду тему).
+ */
+type PendingAutoRun = { threadId: Id; prompt: string; mode: 'trigger' | 'send' };
 
 /**
  * Уровень 2 — рабочее пространство (tech-task.md, вторая ASCII-раскладка):
@@ -75,7 +83,29 @@ export function WorkspacePage() {
       updatedAt: now,
       unread: false,
     });
-    setPendingAutoRun({ threadId: id, prompt: skill.prompt });
+    setPendingAutoRun({ threadId: id, prompt: skill.prompt, mode: 'trigger' });
+    navigate(`/w/${manifest!.id}/t/${id}`);
+  }
+
+  /**
+   * Отправка из поля ввода на приглашении: заводим тред ровно как кнопка «+»
+   * в сайдбаре — с безымянным заголовком, который `useAgentStream` заменит
+   * темой из этой же реплики, — и уходим в него. Тред сразу появляется в
+   * списке диалогов, а текст улетает агенту как обычное сообщение.
+   */
+  function handleInviteSend(text: string) {
+    const id = `thread-${manifest!.id}-${Date.now()}`;
+    const now = new Date().toISOString();
+    createThread({
+      id,
+      workspaceId: manifest!.id,
+      title: NEW_THREAD_TITLE,
+      status: 'active',
+      createdAt: now,
+      updatedAt: now,
+      unread: false,
+    });
+    setPendingAutoRun({ threadId: id, prompt: text, mode: 'send' });
     navigate(`/w/${manifest!.id}/t/${id}`);
   }
 
@@ -89,10 +119,19 @@ export function WorkspacePage() {
             <ChatView
               threadId={validThread.id}
               scope={manifest.id}
-              autoRunOnEmpty={pendingAutoRun?.threadId === validThread.id ? pendingAutoRun.prompt : undefined}
+              autoRunOnEmpty={
+                pendingAutoRun?.threadId === validThread.id && pendingAutoRun.mode === 'trigger'
+                  ? pendingAutoRun.prompt
+                  : undefined
+              }
+              autoSendOnEmpty={
+                pendingAutoRun?.threadId === validThread.id && pendingAutoRun.mode === 'send'
+                  ? pendingAutoRun.prompt
+                  : undefined
+              }
             />
           ) : (
-            <WorkspaceInvite skills={manifest.skills} onPickSkill={handlePickSkill} />
+            <WorkspaceInvite skills={manifest.skills} onPickSkill={handlePickSkill} onSend={handleInviteSend} />
           )}
         </div>
 
@@ -116,36 +155,44 @@ export function WorkspacePage() {
 function WorkspaceInvite({
   skills,
   onPickSkill,
+  onSend,
 }: {
   skills: AgentSkill[];
   onPickSkill: (skill: AgentSkill) => void;
+  onSend: (text: string) => void;
 }) {
   return (
     <div className={styles.invite}>
-      <EmptyState
-        icon={MessageCircleQuestion}
-        title="О чём поговорим?"
-        description="Спросите что угодно о делах и договорах — или начните с подсказки."
-      />
-      {skills.length > 0 && (
-        <div className={styles.skillChips} role="list" aria-label="Подсказки навыков">
-          {skills.map((skill) => {
-            const Icon = skill.icon ?? Sparkles;
-            return (
-              <button
-                key={skill.id}
-                type="button"
-                role="listitem"
-                className={styles.skillChip}
-                onClick={() => onPickSkill(skill)}
-              >
-                <Icon size={13} strokeWidth={1.75} aria-hidden="true" />
-                {skill.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      <div className={styles.inviteBody}>
+        <EmptyState
+          icon={MessageCircleQuestion}
+          title="О чём поговорим?"
+          description="Спросите что угодно о делах и договорах — или начните с подсказки."
+        />
+        {skills.length > 0 && (
+          <div className={styles.skillChips} role="list" aria-label="Подсказки навыков">
+            {skills.map((skill) => {
+              const Icon = skill.icon ?? Sparkles;
+              return (
+                <button
+                  key={skill.id}
+                  type="button"
+                  role="listitem"
+                  className={styles.skillChip}
+                  onClick={() => onPickSkill(skill)}
+                >
+                  <Icon size={13} strokeWidth={1.75} aria-hidden="true" />
+                  {skill.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Тот же композер, что и в треде: приглашение — это будущий диалог,
+          писать в него нужно так же, как в любой другой. */}
+      <Composer isStreaming={false} onSend={onSend} onStop={() => {}} />
     </div>
   );
 }
