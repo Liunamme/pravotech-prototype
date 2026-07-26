@@ -1,0 +1,94 @@
+.root {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.title {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  flex: 1;
+  margin: 0;
+  font-size: 20px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.3px;
+  color: var(--pt-text);
+}
+
+/**
+ * Лента вкладок прокручивается, кнопка очереди — нет.
+ *
+ * Край не режется, а растворяется маской: обрубленная посередине подпись
+ * читается как поломка вёрстки, а мягкое затухание — как «дальше есть ещё».
+ * Маска только справа, потому что лента всегда начинается с левого края.
+ *
+ * `mask-image` делает элемент backdrop root, поэтому внутри ленты не должно
+ * появляться `backdrop-filter` — у таблеток его и нет (см. грабли №2 в
+ * docs/HANDOFF.md).
+ */
+.scroller {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+}
+
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: max-content;
+  /* Кольцо фокуса крайней вкладки иначе срезается краем прокрутки. */
+  padding: 2px 24px 2px 2px;
+}
+
+.tab {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: var(--text-sm);
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--pt-t3);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.tab:hover {
+  color: var(--pt-t2);
+  background: var(--pt-glass2);
+}
+
+/* Активная вкладка — акцентная подложка. Текст на ней НЕ акцентный
+   (см. `Badge.variant_accent`): фиолетовый по фиолетовому сливается. */
+.tabActive,
+.tabActive:hover {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent-border);
+  color: var(--pt-text);
+  font-weight: var(--weight-medium);
+}

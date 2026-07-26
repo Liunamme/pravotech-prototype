@@ -225,3 +225,20 @@
   font-size: var(--text-xs);
   color: var(--pt-p0);
 }
+
+/**
+ * На телефоне лоток открывается сверху, под верхней полосой: слева от него
+ * больше нет рейки, а снизу место занято вкладками и тостами. Кнопка,
+ * которая его открывает, тоже вверху — панель появляется там, куда смотрит
+ * палец (макет `pravotex-adaptive.dc.html`, `tasksPos` для mobile).
+ */
+@media (max-width: 767px) {
+  .panel {
+    left: var(--space-3);
+    right: var(--space-3);
+    top: calc(52px + env(safe-area-inset-top, 0px) + var(--space-2));
+    bottom: auto;
+    width: auto;
+    max-width: none;
+  }
+}

@@ -65,6 +65,9 @@
    прижато к низу — чтобы переход «написал → открылся диалог» не дёргал
    раскладку. */
 .invite {
+  /* Тот же контейнер, что у чата: пороги внутренней раскладки считаются от
+     ширины ПАНЕЛИ, не окна (SPEC 4 п.5). */
+  container-type: inline-size;
   /* Опора для кнопки «Очередь» на планшете — см. `.inviteHeaderAction`. */
   position: relative;
   height: 100%;
@@ -73,48 +76,82 @@
   flex-direction: column;
 }
 
+/**
+ * Приглашение «О чём поговорим?» прокручивается, когда не влезает.
+ *
+ * На iPhone SE (375×667) чипов подсказок пять, и вместе с пустым состоянием
+ * они выходили за экран: последние два уезжали под композер и были
+ * недостижимы. `justify-content: center` при этом не годится вместе с
+ * прокруткой — он обрезает содержимое с ОБОИХ краёв, и до верха тоже не
+ * доскроллить. Поэтому центрирование через `margin: auto` у содержимого:
+ * пока место есть, оно центрируется, а как только перестаёт хватать —
+ * прижимается к краям и честно прокручивается.
+ */
 .inviteBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Отступы и шаг — ровно как у ленты сообщений (`MessageList.module.css`):
+     приглашение и пустой тред обязаны совпадать пиксель в пиксель, иначе
+     переход между ними читается как переход на другой экран. */
+  gap: 14px;
+  padding: 20px;
+}
+
+@container (max-width: 480px) {
+  .inviteBody {
+    padding: var(--space-3);
+  }
+}
+
+.inviteSkills {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 520px;
+}
+
+/**
+ * Прокручиваемая область приглашения и вуаль у её нижнего края.
+ *
+ * Затухание сделано ВУАЛЬЮ, а не `mask-image` на самой области, как в ленте
+ * сообщений. Причина — грабли №2 из docs/HANDOFF.md: маска делает предка
+ * backdrop root, и `backdrop-filter` у чипов подсказок (`.skillChip`,
+ * blur 14px) перестал бы работать вовсе. Вуаль — сосед, а не предок, её
+ * собственная маска на чипы не влияет. Тот же приём, что у краёв очереди
+ * (`CardQueue`).
+ */
+.inviteScrollArea {
+  position: relative;
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
-  padding: var(--space-6);
 }
 
-.skillChips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  max-width: 520px;
+.inviteFade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28px;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(to top, black 30%, transparent 100%);
+  mask-image: linear-gradient(to top, black 30%, transparent 100%);
 }
 
-.skillChip {
-  composes: focusRing from '../../shared/styles/shared.module.css';
-
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 9px 15px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--pt-line);
-  background: var(--pt-glass2);
-  color: var(--pt-text);
-  font-size: 12.5px;
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  transition:
-    border-color var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
+.inviteBody > *:first-child {
+  margin-top: auto;
 }
 
-.skillChip:hover {
-  border-color: var(--pt-accent);
-  color: var(--pt-accent);
+.inviteBody > *:last-child {
+  margin-bottom: auto;
 }
 
 /* Кнопка «Очередь» на приглашении «О чём поговорим?»: своей шапки у него
@@ -126,3 +163,62 @@
   right: var(--space-5);
   z-index: 1;
 }
+
+/* ── мобильная раскладка ──────────────────────────────────────────── */
+
+/* Одна колонка без стеклянной плашки — см. тот же довод в
+   `TodayPage.module.css`. Опора для панелей и инспектора: страница
+   прокидывает этот узел как `container` их порталов. */
+.mobileRoot {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mobileBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileBody > * {
+  flex: 1;
+  min-height: 0;
+}
+
+/**
+ * Вкладка контекста: боковые поля как у остального экрана, края растворяются
+ * так же, как в ленте сообщений (`MessageList.module.css`) — тот же градиент
+ * с точностью до пикселя. Раньше список просто обрезался по краю экрана, и
+ * было не понять, кончился он или продолжается.
+ *
+ * Здесь можно маской, а не вуалью: внутри вкладок нет `backdrop-filter`
+ * (проверено по всем четырём), поэтому грабли №2 из docs/HANDOFF.md —
+ * «маска на предке отключает размытие внутри» — не срабатывают. У
+ * приглашения `backdrop-filter` есть у чипов, и там пришлось делать вуалью.
+ */
+.mobileTab {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--space-4) var(--space-3);
+  mask-image: linear-gradient(180deg, transparent 0, black 14px, black calc(100% - 28px), transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    black 14px,
+    black calc(100% - 28px),
+    transparent 100%
+  );
+}
+
+/* Прокрутку включает САМА обёртка. Вкладка контекста (`ContractsTab` и др.)
+   — обычная колонка без своего `overflow`: на десктопе её прокручивает
+   сайдбар. На телефоне такого предка нет, и без этих двух строк список
+   просто обрезался по нижнему краю экрана — прокрутки не было вовсе. */

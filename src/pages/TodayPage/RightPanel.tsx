@@ -15,7 +15,16 @@ import styles from './RightPanel.module.css';
  * §7): панель перемонтируется по `key={activeSegment}`, что и запускает
  * анимацию появления заново при каждом переключении.
  */
-export function RightPanel() {
+export type RightPanelProps = {
+  /**
+   * Показывать собственный переключатель «Очередь · Сроки». На телефоне его
+   * рисует шапка выдвижной панели — там он занимает пустое место рядом с
+   * крестиком вместо отдельной строки.
+   */
+  showSegments?: boolean;
+};
+
+export function RightPanel({ showSegments = true }: RightPanelProps) {
   const activeSegment = useStore((state) => state.activeSegment);
   const setSegment = useStore((state) => state.setSegment);
   const counts = useStore(selectQueueCounts);
@@ -28,15 +37,17 @@ export function RightPanel() {
       <div className={styles.topBlock}>
         <UpcomingBanner />
 
-        <SegmentedControl
-          aria-label="Режим правой колонки"
-          value={activeSegment}
-          onValueChange={(value) => setSegment(value as 'queue' | 'deadlines')}
-          options={[
-            { value: 'queue', label: 'Очередь', count: queueCount },
-            { value: 'deadlines', label: 'Сроки' },
-          ]}
-        />
+        {showSegments && (
+          <SegmentedControl
+            aria-label="Режим правой колонки"
+            value={activeSegment}
+            onValueChange={(value) => setSegment(value as 'queue' | 'deadlines')}
+            options={[
+              { value: 'queue', label: 'Очередь', count: queueCount },
+              { value: 'deadlines', label: 'Сроки' },
+            ]}
+          />
+        )}
       </div>
 
       <div key={activeSegment} className={styles.panelBody} ref={activeSegment === 'queue' ? queueRef : undefined}>

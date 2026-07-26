@@ -1,4 +1,3 @@
-import { ListChecks } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import styles from './QueueTrigger.module.css';
 
@@ -26,7 +25,6 @@ export function QueueTrigger({ open, onToggle, count, className }: QueueTriggerP
       aria-expanded={open}
       aria-label={count > 0 ? `Очередь, карточек: ${count}` : 'Очередь'}
     >
-      <ListChecks size={14} strokeWidth={1.75} aria-hidden="true" />
       <span className={styles.label}>Очередь</span>
       {count > 0 && (
         <span className={styles.count} aria-hidden="true">

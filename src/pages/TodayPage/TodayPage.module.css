@@ -58,3 +58,30 @@
 .behindInspector {
   pointer-events: none;
 }
+
+/* ── мобильная раскладка ──────────────────────────────────────────── */
+
+/* Одна колонка без стеклянной плашки: на 393px рамка с полями по 10px
+   съедала бы 20px ширины ради декора, а инспектор и очередь всё равно
+   выезжают на весь экран. Опора для их абсолютного позиционирования —
+   этот же узел (страница прокидывает его как `container` портала). */
+.mobileRoot {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mobileBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileBody > * {
+  flex: 1;
+  min-height: 0;
+}

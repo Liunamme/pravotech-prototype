@@ -81,3 +81,42 @@
   display: flex;
   flex-direction: column;
 }
+
+/* ── мобильный каркас ─────────────────────────────────────────────── */
+
+/* Один столбец: полоса с логотипом, содержимое, нижние вкладки.
+   `100dvh`, а не `100vh`: на телефоне адресная строка съезжает, и `vh`
+   оставлял бы под нижними вкладками пустую полосу высотой с неё. */
+.mobileRoot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--pt-bg);
+  isolation: isolate;
+}
+
+/* Рабочая зона — скруглённая стеклянная плашка, как в макете: содержимое
+   читается как отдельная поверхность, а не как текст, налитый в края экрана.
+   Боковых полей нет намеренно — на 393px они отнимали бы ширину у карточек
+   и переписки ради полоски фона по краям, которую всё равно не видно.
+   Скругление остаётся сверху и снизу: именно оно, а не отступ, отделяет
+   поверхность от фона. */
+.mobileContent {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  margin: 0 0 8px;
+  border-radius: var(--radius-panel);
+  background: var(--pt-glass);
+  border: 1px solid var(--pt-line);
+  border-left: none;
+  border-right: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

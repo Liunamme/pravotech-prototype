@@ -104,6 +104,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
         )}
       </div>
 
+      {/* На телефоне строка подсказки скрыта целиком (CSS) — см. там же почему. */}
       <p className={styles.hint}>
         {isStreaming ? 'Агент отвечает — можно остановить' : 'Enter — отправить · Shift+Enter — перенос строки'}
       </p>

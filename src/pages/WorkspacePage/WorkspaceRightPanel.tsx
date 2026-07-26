@@ -10,6 +10,15 @@ import styles from './WorkspaceRightPanel.module.css';
 
 export type WorkspaceRightPanelProps = {
   workspaceId: Id;
+  /**
+   * Внешнее управление сегментом. На телефоне переключатель живёт в шапке
+   * выдвижной панели, поэтому состояние поднято на страницу; на десктопе
+   * оно остаётся здесь.
+   */
+  segment?: 'queue' | 'deadlines';
+  onSegmentChange?: (segment: 'queue' | 'deadlines') => void;
+  /** Показывать собственный переключатель — см. `RightPanel`. */
+  showSegments?: boolean;
 };
 
 /**
@@ -18,8 +27,15 @@ export type WorkspaceRightPanelProps = {
  * а не стопкой друг под другом. Сегмент — локальное состояние (не глобальный
  * `activeSegment`), чтобы уровни 1 и 2 переключались независимо.
  */
-export function WorkspaceRightPanel({ workspaceId }: WorkspaceRightPanelProps) {
-  const [segment, setSegment] = useState<'queue' | 'deadlines'>('queue');
+export function WorkspaceRightPanel({
+  workspaceId,
+  segment: controlledSegment,
+  onSegmentChange,
+  showSegments = true,
+}: WorkspaceRightPanelProps) {
+  const [localSegment, setLocalSegment] = useState<'queue' | 'deadlines'>('queue');
+  const segment = controlledSegment ?? localSegment;
+  const setSegment = onSegmentChange ?? setLocalSegment;
   const queueCount = useStore((state) => selectWorkspaceQueue(state, workspaceId).length);
   const queueRef = useFocusCardIntoView<HTMLDivElement>();
 
@@ -43,17 +59,19 @@ export function WorkspaceRightPanel({ workspaceId }: WorkspaceRightPanelProps) {
 
   return (
     <div className={styles.root}>
-      <div className={styles.topBlock}>
-        <SegmentedControl
-          aria-label="Режим правой колонки"
-          value={segment}
-          onValueChange={(value) => setSegment(value as 'queue' | 'deadlines')}
-          options={[
-            { value: 'queue', label: 'Очередь', count: queueCount },
-            { value: 'deadlines', label: 'Сроки' },
-          ]}
-        />
-      </div>
+      {showSegments && (
+        <div className={styles.topBlock}>
+          <SegmentedControl
+            aria-label="Режим правой колонки"
+            value={segment}
+            onValueChange={(value) => setSegment(value as 'queue' | 'deadlines')}
+            options={[
+              { value: 'queue', label: 'Очередь', count: queueCount },
+              { value: 'deadlines', label: 'Сроки' },
+            ]}
+          />
+        </div>
+      )}
 
       <div key={segment} className={styles.panelBody} ref={segment === 'queue' ? queueRef : undefined}>
         {segment === 'queue' ? (

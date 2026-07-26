@@ -57,6 +57,12 @@ export type ChatViewProps = {
    * страница кладёт кнопку «Очередь», на десктопе слот пуст.
    */
   headerAction?: ReactNode;
+  /**
+   * Показывать собственную шапку с названием треда. На телефоне заголовок
+   * экрана даёт `MobileViewBar`, и вторая строка с тем же текстом просто
+   * отнимала бы у переписки 52px из 852-х.
+   */
+  showHeader?: boolean;
 };
 
 const STATUS_LABEL: Record<ThreadStatus, string> = {
@@ -84,7 +90,14 @@ const STATUS_VARIANT: Record<ThreadStatus, BadgeVariant> = {
  * Контейнер живого чата (ТЗ 4b.1): шапка + прокручиваемый список + композер.
  * Шапка и композер закреплены, скроллится только `MessageList`.
  */
-export function ChatView({ threadId, scope, autoRunOnEmpty, autoSendOnEmpty, headerAction }: ChatViewProps) {
+export function ChatView({
+  threadId,
+  scope,
+  autoRunOnEmpty,
+  autoSendOnEmpty,
+  headerAction,
+  showHeader = true,
+}: ChatViewProps) {
   const thread = useStore((state) => state.threads[threadId]);
   const messages = useStore((state) => selectThreadMessages(state, threadId));
   const chat = useAgentStream(threadId, scope);
@@ -147,18 +160,20 @@ export function ChatView({ threadId, scope, autoRunOnEmpty, autoSendOnEmpty, hea
 
   return (
     <div className={styles.root}>
-      <header className={styles.header}>
-        <div className={styles.headerRow}>
-          <h2 className={styles.title}>{thread?.title ?? 'Тред'}</h2>
-          {thread && (
-            <Badge variant={STATUS_VARIANT[thread.status]} size="sm">
-              {STATUS_LABEL[thread.status]}
-            </Badge>
-          )}
-        </div>
-        {thread?.subjectRef && <p className={styles.subject}>{thread.subjectRef.label}</p>}
-        {headerAction && <div className={styles.headerAction}>{headerAction}</div>}
-      </header>
+      {showHeader && (
+        <header className={styles.header}>
+          <div className={styles.headerRow}>
+            <h2 className={styles.title}>{thread?.title ?? 'Тред'}</h2>
+            {thread && (
+              <Badge variant={STATUS_VARIANT[thread.status]} size="sm">
+                {STATUS_LABEL[thread.status]}
+              </Badge>
+            )}
+          </div>
+          {thread?.subjectRef && <p className={styles.subject}>{thread.subjectRef.label}</p>}
+          {headerAction && <div className={styles.headerAction}>{headerAction}</div>}
+        </header>
+      )}
 
       <div className={styles.listArea}>
         <MessageList

@@ -1,0 +1,70 @@
+/**
+ * Нижняя навигация лежит прямо на фоне страницы — без своей поверхности и
+ * без разделителя сверху (как в макете). Полоса со стеклом и рамкой резала
+ * экран пополам и читалась как отдельный элемент интерфейса; на деле
+ * единственное, что здесь должно выделяться, — активная вкладка.
+ */
+.root {
+  position: relative;
+  z-index: 3;
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  /* Полоса домашнего индикатора на iPhone: без этого нижний ряд подписей
+     оказывается ровно под ней и не читается. */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.item {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  /* Опора для полоски активной вкладки — см. `::before` ниже. */
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  /* 52px + подпись: цель нажатия выше рекомендованных 44px даже без учёта
+     подписи, поэтому промахнуться пальцем сложно. */
+  height: var(--mobile-tabbar-height);
+  padding: 0 var(--space-1);
+  color: var(--pt-t3);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.item:hover {
+  color: var(--pt-t2);
+}
+
+/* Активная вкладка — акцентная подложка-таблетка, как в макете. Текст на ней
+   НЕ акцентный (см. `Badge.variant_accent`): фиолетовый по фиолетовому
+   сливается. Подложка сама по себе вторая, нецветовая примета активности —
+   форма, а не только оттенок (docs/UX.md §9). */
+.item[aria-current='page'],
+.itemActive {
+  color: var(--pt-text);
+}
+
+.item[aria-current='page']::after,
+.itemActive::after {
+  content: '';
+  position: absolute;
+  inset: 2px 6px;
+  z-index: -1;
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-subtle);
+  border: 1px solid var(--color-accent-border);
+}
+
+.label {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  max-width: 100%;
+  font-size: 10.5px;
+  line-height: 1.2;
+  letter-spacing: -0.1px;
+}
+

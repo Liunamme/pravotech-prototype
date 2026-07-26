@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { TODAY_SCOPE } from '@/types/domain';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { QueueDrawer, QueueTrigger } from '@/core/layout/QueueDrawer';
+import { MobileViewBar } from '@/core/layout/MobileChrome';
+import { SegmentedControl } from '@/shared/ui';
 import { ChatView } from '@/core/chat/ChatView';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
 import { useStore } from '@/store';
@@ -38,10 +40,15 @@ export function TodayPage() {
    * На планшете три колонки не помещаются: очередь уезжает в выдвижную панель
    * поверх рабочей области, а её место забирает чат (docs/UX.md §8).
    */
-  const isTablet = useDeviceClass() === 'tablet';
+  const device = useDeviceClass();
+  const isTablet = device === 'tablet';
+  const isMobile = device === 'mobile';
   const [queueOpen, setQueueOpen] = useState(false);
   const counts = useStore(selectQueueCounts);
+  const activeSegment = useStore((state) => state.activeSegment);
+  const setSegment = useStore((state) => state.setSegment);
   const queueCount = counts.P0 + counts.P1 + counts.P2 + counts.P3;
+
 
   // Тред «Сегодня» создаётся один раз при первом заходе на страницу в этой
   // сессии стора — если он уже есть (повторный заход, HMR), не трогаем его.
@@ -59,6 +66,51 @@ export function TodayPage() {
     });
   }, [threadExists, createThread]);
 
+  const queueTrigger = (
+    <QueueTrigger open={queueOpen} onToggle={() => setQueueOpen((open) => !open)} count={queueCount} />
+  );
+
+  if (isMobile) {
+    return (
+      <div className={styles.mobileRoot} ref={setMainEl}>
+        {/* Вкладок на «Сегодня» нет: сроки живут внутри очереди (сегмент
+            «Очередь · Сроки»), и единственная оставшаяся поверхность — диалог.
+            Одна вкладка — это не выбор, а строка, отнятая у переписки. */}
+        <MobileViewBar title="Сегодня" options={[]} value="chat" onValueChange={() => {}} action={queueTrigger} />
+
+        <div className={styles.mobileBody}>
+          {threadExists && (
+            <ChatView threadId={TODAY_THREAD_ID} scope={TODAY_SCOPE} autoRunOnEmpty="дайджест" showHeader={false} />
+          )}
+        </div>
+
+        <QueueDrawer
+          asDrawer
+          open={queueOpen}
+          onOpenChange={setQueueOpen}
+          container={mainEl}
+          header={
+            <SegmentedControl
+              aria-label="Режим панели"
+              size="sm"
+              value={activeSegment}
+              onValueChange={(value) => setSegment(value as 'queue' | 'deadlines')}
+              options={[
+                { value: 'queue', label: 'Очередь', count: queueCount },
+                { value: 'deadlines', label: 'Сроки' },
+              ]}
+            />
+          }
+        >
+          <RightPanel showSegments={false} />
+        </QueueDrawer>
+
+        <InspectorSlot container={mainEl} />
+        <BackgroundTaskTray />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.root}>
       <DayNav />
@@ -70,15 +122,7 @@ export function TodayPage() {
               threadId={TODAY_THREAD_ID}
               scope={TODAY_SCOPE}
               autoRunOnEmpty="дайджест"
-              headerAction={
-                isTablet ? (
-                  <QueueTrigger
-                    open={queueOpen}
-                    onToggle={() => setQueueOpen((open) => !open)}
-                    count={queueCount}
-                  />
-                ) : undefined
-              }
+              headerAction={isTablet ? queueTrigger : undefined}
             />
           )}
         </div>

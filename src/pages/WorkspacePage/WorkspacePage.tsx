@@ -1,6 +1,6 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
-import { MessageCircleQuestion, Sparkles } from 'lucide-react';
+import { MessageCircleQuestion } from 'lucide-react';
 import type { AgentSkill } from '@/workspaces/types';
 import type { Id } from '@/types/domain';
 import { getWorkspace } from '@/workspaces/registry';
@@ -10,8 +10,12 @@ import { cn } from '@/shared/lib/cn';
 import { NEW_THREAD_TITLE } from '@/shared/lib/threadTitle';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { QueueDrawer, QueueTrigger } from '@/core/layout/QueueDrawer';
+import { MobileViewBar } from '@/core/layout/MobileChrome';
+import { SegmentedControl } from '@/shared/ui';
+import { MobileThreadsDrawer, MobileThreadsTrigger } from './MobileThreadsDrawer';
 import { ChatView } from '@/core/chat/ChatView';
 import { Composer } from '@/core/chat/Composer';
+import { SkillSuggestions } from '@/core/chat/SkillSuggestions';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
 import { Button, EmptyState } from '@/shared/ui';
 import { newId } from '@/shared/lib/id';
@@ -63,8 +67,41 @@ export function WorkspacePage() {
    * На планшете три колонки не помещаются: очередь уезжает в выдвижную панель
    * поверх рабочей области, а её место забирает чат (docs/UX.md §8).
    */
-  const isTablet = useDeviceClass() === 'tablet';
+  const device = useDeviceClass();
+  const isTablet = device === 'tablet';
+  const isMobile = device === 'mobile';
   const [queueOpen, setQueueOpen] = useState(false);
+  const [threadsOpen, setThreadsOpen] = useState(false);
+  /**
+   * Что показывает единственная колонка на телефоне: переписка или одна из
+   * вкладок контекста пространства. Ни очередь, ни сроки сюда не входят —
+   * они живут в панели очереди, которая открывается поверх.
+   *
+   * Выбор помнится ОТДЕЛЬНО для каждого пространства. Одной строки на всё
+   * приложение не хватало: `WorkspacePage` при переходе между
+   * пространствами не размонтируется, и выбранная вкладка переезжала
+   * следом. В «Делах» нет вкладки «Договоры» — экран оказывался пустым, и
+   * ни одна вкладка не была подсвечена. Возврат в прежнее пространство
+   * теперь возвращает и то, что там было открыто.
+   */
+  const [mobileViewByWorkspace, setMobileViewByWorkspace] = useState<Record<Id, string>>({});
+
+  /**
+   * Возврат в пространство открывает ту переписку, на которой человек
+   * остановился, а не приглашение «О чём поговорим?». Приглашение — это
+   * состояние «здесь ещё ничего не начато», а не то, что должно встречать
+   * при каждом переходе по нижним вкладкам.
+   */
+  const threads = useStore((state) => state.threads);
+  const lastThreadByWorkspace = useStore((state) => state.lastThreadByWorkspace);
+  const rememberWorkspaceThread = useStore((state) => state.rememberWorkspaceThread);
+  const openThreadId = thread && workspaceId && thread.workspaceId === workspaceId ? thread.id : undefined;
+
+  useEffect(() => {
+    if (workspaceId && openThreadId) rememberWorkspaceThread(workspaceId, openThreadId);
+  }, [workspaceId, openThreadId, rememberWorkspaceThread]);
+  /** Сегмент выдвижной панели: на телефоне переключатель живёт в её шапке. */
+  const [queueSegment, setQueueSegment] = useState<'queue' | 'deadlines'>('queue');
   const queueCount = useStore((state) => (workspaceId ? selectWorkspaceQueue(state, workspaceId).length : 0));
 
   if (!workspaceId) return <Navigate to="/today" replace />;
@@ -98,6 +135,18 @@ export function WorkspacePage() {
    */
   const tabMissing = Boolean(tabId) && !manifest.contextTabs.some((tab) => tab.id === tabId);
   if (tabMissing) return <Navigate to={`/w/${manifest.id}`} replace />;
+
+  /*
+   * Восстанавливаем последний диалог только на телефоне: на десктопе список
+   * диалогов виден всегда, и приглашение там — осмысленная стартовая точка,
+   * а не тупик. Диалог сверяется со стором: удалённый или чужой id обязан
+   * привести к приглашению, а не к пустому экрану.
+   */
+  const remembered = lastThreadByWorkspace[manifest.id];
+  const rememberedThread = remembered ? threads[remembered] : undefined;
+  if (isMobile && !threadId && rememberedThread?.workspaceId === manifest.id) {
+    return <Navigate to={`/w/${manifest.id}/t/${remembered}`} replace />;
+  }
 
   function handlePickSkill(skill: AgentSkill) {
     const id = newId('thread');
@@ -140,6 +189,105 @@ export function WorkspacePage() {
   const queueTrigger = (
     <QueueTrigger open={queueOpen} onToggle={() => setQueueOpen((open) => !open)} count={queueCount} />
   );
+
+  if (isMobile) {
+    /*
+     * Значение сверяется с манифестом на каждом рендере, а не только при
+     * записи: вкладки задаёт пространство, и чужой (или устаревший) id
+     * обязан вырождаться в «Диалог», а не в пустой экран.
+     */
+    const stored = mobileViewByWorkspace[manifest.id];
+    const mobileView =
+      stored && (stored === 'chat' || manifest.contextTabs.some((tab) => tab.id === stored)) ? stored : 'chat';
+    const setMobileView = (value: string) =>
+      setMobileViewByWorkspace((current) => ({ ...current, [manifest.id]: value }));
+
+    const activeTab = manifest.contextTabs.find((tab) => tab.id === mobileView);
+    const TabComponent = activeTab?.Component;
+
+    return (
+      <div className={styles.mobileRoot} ref={setMainEl}>
+        <MobileViewBar
+          title={manifest.shortTitle}
+          leading={<MobileThreadsTrigger open={threadsOpen} onToggle={() => setThreadsOpen((open) => !open)} />}
+          options={[
+            { value: 'chat', label: 'Диалог' },
+            ...manifest.contextTabs.map((tab) => ({ value: tab.id, label: tab.label })),
+          ]}
+          value={mobileView}
+          onValueChange={setMobileView}
+          action={queueTrigger}
+        />
+
+        <div className={styles.mobileBody}>
+          {mobileView === 'chat' ? (
+            validThread ? (
+              <ChatView
+                threadId={validThread.id}
+                scope={manifest.id}
+                showHeader={false}
+                autoRunOnEmpty={
+                  pendingAutoRun?.threadId === validThread.id && pendingAutoRun.mode === 'trigger'
+                    ? pendingAutoRun.prompt
+                    : undefined
+                }
+                autoSendOnEmpty={
+                  pendingAutoRun?.threadId === validThread.id && pendingAutoRun.mode === 'send'
+                    ? pendingAutoRun.prompt
+                    : undefined
+                }
+              />
+            ) : (
+              <WorkspaceInvite skills={manifest.skills} onPickSkill={handlePickSkill} onSend={handleInviteSend} />
+            )
+          ) : (
+            TabComponent && (
+              <div className={styles.mobileTab}>
+                <TabComponent workspaceId={manifest.id} />
+              </div>
+            )
+          )}
+        </div>
+
+        <MobileThreadsDrawer
+          workspaceId={manifest.id}
+          activeThreadId={validThread?.id}
+          open={threadsOpen}
+          onOpenChange={setThreadsOpen}
+          container={mainEl}
+        />
+
+        <QueueDrawer
+          asDrawer
+          open={queueOpen}
+          onOpenChange={setQueueOpen}
+          container={mainEl}
+          header={
+            <SegmentedControl
+              aria-label="Режим панели"
+              size="sm"
+              value={queueSegment}
+              onValueChange={(value) => setQueueSegment(value as 'queue' | 'deadlines')}
+              options={[
+                { value: 'queue', label: 'Очередь', count: queueCount },
+                { value: 'deadlines', label: 'Сроки' },
+              ]}
+            />
+          }
+        >
+          <WorkspaceRightPanel
+            workspaceId={manifest.id}
+            segment={queueSegment}
+            onSegmentChange={setQueueSegment}
+            showSegments={false}
+          />
+        </QueueDrawer>
+
+        <InspectorSlot container={mainEl} />
+        <BackgroundTaskTray />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.root}>
@@ -224,31 +372,29 @@ function WorkspaceInvite({
   return (
     <div className={styles.invite}>
       {headerAction && <div className={styles.inviteHeaderAction}>{headerAction}</div>}
-      <div className={styles.inviteBody}>
+      <div className={styles.inviteScrollArea}>
+        <div className={styles.inviteBody}>
         <EmptyState
           icon={MessageCircleQuestion}
           title="О чём поговорим?"
           description="Спросите что угодно о делах и договорах — или начните с подсказки."
         />
-        {skills.length > 0 && (
-          <div className={styles.skillChips} role="list" aria-label="Подсказки навыков">
-            {skills.map((skill) => {
-              const Icon = skill.icon ?? Sparkles;
-              return (
-                <button
-                  key={skill.id}
-                  type="button"
-                  role="listitem"
-                  className={styles.skillChip}
-                  onClick={() => onPickSkill(skill)}
-                >
-                  <Icon size={13} strokeWidth={1.75} aria-hidden="true" />
-                  {skill.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        {/* Ровно тот же компонент подсказок, что и в пустом треде
+            (`MessageList`): приглашение и пустой тред — одно и то же место,
+            и собственная копия чипов здесь неминуемо разъезжалась с
+            оригиналом (так и вышло: разные отступы и разное поведение при
+            переносе строк). */}
+        <div className={styles.inviteSkills}>
+          <SkillSuggestions
+            skills={skills}
+            onPick={(prompt) => {
+              const skill = skills.find((item) => item.prompt === prompt);
+              if (skill) onPickSkill(skill);
+            }}
+          />
+        </div>
+        </div>
+        <div className={styles.inviteFade} aria-hidden="true" />
       </div>
 
       {/* Тот же композер, что и в треде: приглашение — это будущий диалог,

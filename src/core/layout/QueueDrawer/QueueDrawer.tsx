@@ -18,6 +18,13 @@ export type QueueDrawerProps = {
   container: HTMLElement | null;
   /** Класс обычной колонки в десктопной раскладке. */
   columnClassName?: string;
+  /**
+   * Содержимое строки с крестиком — переключатель «Очередь · Сроки».
+   * Раньше эта строка несла только крестик, а переключатель шёл под ней
+   * отдельной строкой: две полосы там, где хватает одной, и полэкрана
+   * пустоты слева от крестика.
+   */
+  header?: ReactNode;
   children: ReactNode;
 };
 
@@ -50,6 +57,7 @@ export function QueueDrawer({
   onOpenChange,
   container,
   columnClassName,
+  header,
   children,
 }: QueueDrawerProps) {
   if (!asDrawer) {
@@ -71,6 +79,7 @@ export function QueueDrawer({
 
           {/* Содержимое лежит НАД стеклом: оба слоя позиционированы, порядок в DOM решает. */}
           <div className={styles.closeRow}>
+            {header && <div className={styles.headerSlot}>{header}</div>}
             <RadixDialog.Close asChild>
               <IconButton className={styles.close} variant="ghost" size="sm" aria-label="Закрыть очередь">
                 <X size={15} strokeWidth={2} />
