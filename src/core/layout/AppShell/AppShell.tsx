@@ -12,10 +12,12 @@ import styles from './AppShell.module.css';
  * decorative, pointer-events отключены. Рейка и сайдбар страницы лежат прямо
  * на этом фоне, а рабочая область — отдельная стеклянная плашка (см. страницы).
  *
- * Пока планшетной и мобильной раскладок нет, на узких экранах вместо сетки
- * показывается честная заглушка (`UnsupportedViewport`): десктопные колонки
- * там не сжимаются, а разъезжаются за край экрана. По мере готовности
- * раскладок ветки отсюда убираются — сначала `tablet`, потом `mobile`.
+ * Планшетная раскладка (768–1279px) готова: рейка и сайдбар остаются, а
+ * очередь уезжает в выдвижную панель (`QueueDrawer`). Заглушка осталась
+ * только для мобильной ширины — там нужна другая навигация, и десктопная
+ * сетка не сжимается, а разъезжается за край экрана. Когда мобильная
+ * раскладка будет готова, отсюда уходит и эта ветка, а
+ * `UnsupportedViewport` удаляется целиком.
  */
 export function AppShell() {
   const device = useDeviceClass();
@@ -26,8 +28,8 @@ export function AppShell() {
    */
   const [dismissed, setDismissed] = useState(false);
 
-  if (device !== 'desktop' && !dismissed) {
-    return <UnsupportedViewport device={device} onDismiss={() => setDismissed(true)} />;
+  if (device === 'mobile' && !dismissed) {
+    return <UnsupportedViewport onDismiss={() => setDismissed(true)} />;
   }
 
   return (

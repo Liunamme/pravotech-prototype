@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowDown } from 'lucide-react';
 import { TODAY_SCOPE, type Id, type ThreadScope, type ThreadStatus } from '@/types/domain';
 import type { AgentSkill } from '@/workspaces/types';
@@ -51,6 +51,12 @@ export type ChatViewProps = {
    * он гоняет ввод молча, как автозапуск дайджеста.
    */
   autoSendOnEmpty?: string;
+  /**
+   * Управляющий элемент в правой части шапки. Слот намеренно безымянный:
+   * чат не должен знать ни про очередь, ни про раскладку — на планшете сюда
+   * страница кладёт кнопку «Очередь», на десктопе слот пуст.
+   */
+  headerAction?: ReactNode;
 };
 
 const STATUS_LABEL: Record<ThreadStatus, string> = {
@@ -78,7 +84,7 @@ const STATUS_VARIANT: Record<ThreadStatus, BadgeVariant> = {
  * Контейнер живого чата (ТЗ 4b.1): шапка + прокручиваемый список + композер.
  * Шапка и композер закреплены, скроллится только `MessageList`.
  */
-export function ChatView({ threadId, scope, autoRunOnEmpty, autoSendOnEmpty }: ChatViewProps) {
+export function ChatView({ threadId, scope, autoRunOnEmpty, autoSendOnEmpty, headerAction }: ChatViewProps) {
   const thread = useStore((state) => state.threads[threadId]);
   const messages = useStore((state) => selectThreadMessages(state, threadId));
   const chat = useAgentStream(threadId, scope);
@@ -151,6 +157,7 @@ export function ChatView({ threadId, scope, autoRunOnEmpty, autoSendOnEmpty }: C
           )}
         </div>
         {thread?.subjectRef && <p className={styles.subject}>{thread.subjectRef.label}</p>}
+        {headerAction && <div className={styles.headerAction}>{headerAction}</div>}
       </header>
 
       <div className={styles.listArea}>

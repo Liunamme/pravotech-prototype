@@ -1,18 +1,21 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { MessageCircleQuestion, Sparkles } from 'lucide-react';
 import type { AgentSkill } from '@/workspaces/types';
 import type { Id } from '@/types/domain';
 import { getWorkspace } from '@/workspaces/registry';
 import { useStore } from '@/store';
+import { selectWorkspaceQueue } from '@/store/selectors';
 import { cn } from '@/shared/lib/cn';
 import { NEW_THREAD_TITLE } from '@/shared/lib/threadTitle';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
+import { QueueDrawer, QueueTrigger } from '@/core/layout/QueueDrawer';
 import { ChatView } from '@/core/chat/ChatView';
 import { Composer } from '@/core/chat/Composer';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
 import { Button, EmptyState } from '@/shared/ui';
 import { newId } from '@/shared/lib/id';
+import { useDeviceClass } from '@/shared/lib/useDeviceClass';
 import { WorkspaceSidebar } from './WorkspaceSidebar';
 import { WorkspaceRightPanel } from './WorkspaceRightPanel';
 import styles from './WorkspacePage.module.css';
@@ -55,6 +58,14 @@ export function WorkspacePage() {
   /** Узел стеклянной плашки `main` — портал документного инспектора рендерится
       внутрь него (design_handoff: оверлей лежит НАД содержимым `main`, не окна). */
   const [mainEl, setMainEl] = useState<HTMLDivElement | null>(null);
+
+  /**
+   * На планшете три колонки не помещаются: очередь уезжает в выдвижную панель
+   * поверх рабочей области, а её место забирает чат (docs/UX.md §8).
+   */
+  const isTablet = useDeviceClass() === 'tablet';
+  const [queueOpen, setQueueOpen] = useState(false);
+  const queueCount = useStore((state) => (workspaceId ? selectWorkspaceQueue(state, workspaceId).length : 0));
 
   if (!workspaceId) return <Navigate to="/today" replace />;
 
@@ -126,6 +137,10 @@ export function WorkspacePage() {
     navigate(`/w/${manifest!.id}/t/${id}`);
   }
 
+  const queueTrigger = (
+    <QueueTrigger open={queueOpen} onToggle={() => setQueueOpen((open) => !open)} count={queueCount} />
+  );
+
   return (
     <div className={styles.root}>
       <WorkspaceSidebar manifest={manifest} activeThreadId={validThread?.id} activeTabId={tabId} />
@@ -159,15 +174,27 @@ export function WorkspacePage() {
                   ? pendingAutoRun.prompt
                   : undefined
               }
+              headerAction={isTablet ? queueTrigger : undefined}
             />
           ) : (
-            <WorkspaceInvite skills={manifest.skills} onPickSkill={handlePickSkill} onSend={handleInviteSend} />
+            <WorkspaceInvite
+              skills={manifest.skills}
+              onPickSkill={handlePickSkill}
+              onSend={handleInviteSend}
+              headerAction={isTablet ? queueTrigger : undefined}
+            />
           )}
         </div>
 
-        <div className={cn(styles.right, inspectorOpen && styles.behindInspector)}>
+        <QueueDrawer
+          asDrawer={isTablet}
+          open={queueOpen}
+          onOpenChange={setQueueOpen}
+          container={mainEl}
+          columnClassName={cn(styles.right, inspectorOpen && styles.behindInspector)}
+        >
           <WorkspaceRightPanel workspaceId={manifest.id} />
-        </div>
+        </QueueDrawer>
 
         <InspectorSlot container={mainEl} />
       </div>
@@ -186,13 +213,17 @@ function WorkspaceInvite({
   skills,
   onPickSkill,
   onSend,
+  headerAction,
 }: {
   skills: AgentSkill[];
   onPickSkill: (skill: AgentSkill) => void;
   onSend: (text: string) => void;
+  /** Кнопка «Очередь» на планшете: своей шапки у приглашения нет, поэтому — в угол. */
+  headerAction?: ReactNode;
 }) {
   return (
     <div className={styles.invite}>
+      {headerAction && <div className={styles.inviteHeaderAction}>{headerAction}</div>}
       <div className={styles.inviteBody}>
         <EmptyState
           icon={MessageCircleQuestion}
