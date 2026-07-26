@@ -24,6 +24,13 @@ function RailTooltip({ label, children }: { label: string; children: ReactNode }
   );
 }
 
+/**
+ * Активная страница у ссылок рейки помечается через `[aria-current='page']`
+ * (его `NavLink` ставит сам), а НЕ функцией `className={({isActive}) => …}`:
+ * `Tooltip.Trigger asChild` склеивает className строкой, и функция попадала в
+ * атрибут своим исходным текстом — стили `.item` к ссылкам не применялись
+ * вовсе (не было ни коробки 38×38, ни ховера, ни активной плашки).
+ */
 export function Rail() {
   const { theme, toggle } = useTheme();
   const activeTasks = useStore(selectActiveTasks);
@@ -36,11 +43,7 @@ export function Rail() {
       <nav className={styles.root} aria-label="Основная навигация">
         <div className={styles.top}>
           <RailTooltip label="Сегодня">
-            <NavLink
-              to="/today"
-              className={({ isActive }) => cn(styles.item, isActive && styles.active)}
-              aria-label="Сегодня"
-            >
+            <NavLink to="/today" className={styles.item} aria-label="Сегодня">
               <TodayIcon size={18} />
             </NavLink>
           </RailTooltip>
@@ -51,11 +54,7 @@ export function Rail() {
             const Icon = workspace.icon;
             return (
               <RailTooltip key={workspace.id} label={workspace.title}>
-                <NavLink
-                  to={`/w/${workspace.id}`}
-                  className={({ isActive }) => cn(styles.item, isActive && styles.active)}
-                  aria-label={workspace.title}
-                >
+                <NavLink to={`/w/${workspace.id}`} className={styles.item} aria-label={workspace.title}>
                   <Icon size={16} strokeWidth={1.8} />
                 </NavLink>
               </RailTooltip>
@@ -91,11 +90,7 @@ export function Rail() {
           </RailTooltip>
 
           <RailTooltip label="Настройки">
-            <NavLink
-              to="/settings"
-              className={({ isActive }) => cn(styles.item, isActive && styles.active)}
-              aria-label="Настройки"
-            >
+            <NavLink to="/settings" className={styles.item} aria-label="Настройки">
               <Settings size={16} strokeWidth={1.8} />
             </NavLink>
           </RailTooltip>

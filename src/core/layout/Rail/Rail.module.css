@@ -21,10 +21,13 @@
   gap: 20px;
 }
 
-/* Разделитель отделяет «Сегодня» (уровень 1) от рабочих пространств. */
+/* Разделитель отделяет «Сегодня» (уровень 1) от рабочих пространств. Сидит
+   ВНУТРИ обычного шага 20px (отрицательные поля гасят собственный gap с обеих
+   сторон), иначе на нём шаг между иконками удваивался до 41px. */
 .divider {
   width: 22px;
   height: 1px;
+  margin: -10.5px 0;
   background: var(--pt-line);
 }
 
@@ -54,16 +57,23 @@
   color: var(--pt-text);
 }
 
-/* Активная страница — заметная фиолетовая плашка с чёткой рамкой (design review). */
-.active {
+/* Активная страница — заметная фиолетовая плашка с чёткой рамкой (design review).
+   `[aria-current='page']` ставит сам `NavLink`; `.active` остаётся для кнопок
+   без навигации (открытый лоток задач). */
+.active,
+.item[aria-current='page'] {
   background: var(--pt-accent-soft-hi);
   box-shadow: inset 0 0 0 1px var(--pt-accent);
-  color: var(--pt-accent);
+  /* Не акцентным цветом: фиолетовая иконка на фиолетовой плашке в тёмной теме
+     сливалась. `--pt-text` даёт яркую белую иконку в тёмной теме и тёмную —
+     в светлой, где плашка сама светлая. */
+  color: var(--pt-text);
 }
 
-.active:hover {
+.active:hover,
+.item[aria-current='page']:hover {
   background: var(--pt-accent-soft-hi);
-  color: var(--pt-accent);
+  color: var(--pt-text);
 }
 
 .badge {
