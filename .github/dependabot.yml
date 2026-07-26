@@ -1,0 +1,21 @@
+# Автоматические PR на обновление зависимостей.
+#
+# Заведено после того, как аудит нашёл high-CVE в react-router: без слежения
+# такие вещи всплывают случайно и поздно. Раз в неделю, чтобы не заваливать
+# репозиторий шумом; каждый PR всё равно проходит `ci.yml`.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Мелкие обновления — одним PR, иначе их будет по одному на пакет.
+      minor-and-patch:
+        update-types: ['minor', 'patch']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

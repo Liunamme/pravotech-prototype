@@ -1,0 +1,64 @@
+# Проверки качества. Гоняются на каждый pull request и на каждый push в main.
+#
+# Деплой (`deploy.yml`) ждёт зелёного результата этого прогона — публикуется
+# только то, что прошло линт, типы, тесты, сухой прогон агента и аудит
+# зависимостей.
+#
+# Чтобы прямой push в main нельзя было провести мимо проверок, включите в
+# настройках репозитория: Settings → Branches → Add rule для `main` →
+# «Require status checks to pass» (отметить `Проверки`) и «Require a pull
+# request before merging». Настройки репозитория из кода не включаются.
+name: CI
+
+on:
+  pull_request:
+  # Вызывается из `deploy.yml` перед публикацией — один и тот же набор
+  # проверок и на pull request, и перед деплоем, без копипасты.
+  workflow_call:
+  workflow_dispatch:
+
+# Новый push в ту же ветку отменяет предыдущий незавершённый прогон.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Проверки
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Версия одна и та же здесь, в деплое и в `engines` package.json.
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Предупреждения в CI — ошибка: иначе они накапливаются, и линт
+      # перестаёт что-либо значить. Точечные обоснованные исключения живут в
+      # `.oxlintrc.json` (overrides) и объяснены в README.
+      - name: Линт
+        run: npx oxlint --max-warnings 0
+
+      - name: Типы
+        run: npx tsc -b
+
+      - name: Тесты
+        run: npm test
+
+      # Сухой прогон мок-агента: сценарии, ссылки на источники, отмена.
+      - name: Прогон агента
+        run: npm run dry-run
+
+      - name: Сборка
+        run: npm run build
+
+      # Только production-зависимости: то, что реально уедет в браузер.
+      - name: Аудит зависимостей
+        run: npm audit --omit=dev --audit-level=high
