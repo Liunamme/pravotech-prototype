@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "check:dist": "tsx scripts/check-dist-css.ts",
     "lint": "oxlint",
     "test": "vitest run",
     "test:watch": "vitest",

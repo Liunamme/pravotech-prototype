@@ -37,8 +37,8 @@
   z-index: 1;
   height: 52px;
   pointer-events: none;
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   /* Растворяется динамически: пока за краем ничего не спрятано, размывать
      нечего — иначе вуаль без причины мылила бы крайнюю карточку. */
   opacity: 0;

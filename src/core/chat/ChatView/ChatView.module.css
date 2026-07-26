@@ -67,8 +67,8 @@
   padding: 0 var(--space-3);
   border-radius: var(--radius-full);
   background: var(--pt-overlay);
-  backdrop-filter: var(--pt-overlay-blur);
   -webkit-backdrop-filter: var(--pt-overlay-blur);
+  backdrop-filter: var(--pt-overlay-blur);
   border: 1px solid var(--pt-overlay-line);
   color: var(--pt-text);
   box-shadow: var(--pt-shadow);

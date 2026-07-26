@@ -11,8 +11,8 @@
   border-radius: var(--radius-2xl);
   background: var(--pt-glass2);
   border: 1px solid var(--pt-line);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   transition:
     border-color var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out);

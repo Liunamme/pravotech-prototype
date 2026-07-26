@@ -13,8 +13,8 @@
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-md);
   background: var(--pt-overlay);
-  backdrop-filter: var(--pt-overlay-blur);
   -webkit-backdrop-filter: var(--pt-overlay-blur);
+  backdrop-filter: var(--pt-overlay-blur);
   border: 1px solid var(--pt-overlay-line);
   color: var(--pt-text);
   font-size: var(--text-sm);

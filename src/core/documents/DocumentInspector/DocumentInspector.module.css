@@ -47,8 +47,8 @@
   inset: 0;
   pointer-events: none;
   background: var(--pt-overlay);
-  backdrop-filter: var(--pt-overlay-blur);
   -webkit-backdrop-filter: var(--pt-overlay-blur);
+  backdrop-filter: var(--pt-overlay-blur);
   border-left: 1px solid var(--pt-overlay-line);
 }
 
