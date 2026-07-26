@@ -2,7 +2,60 @@ import type { StateCreator } from 'zustand';
 import type { ActionCard, CardDecision, CardState, Id } from '@/types/domain';
 import type { StoreState } from './index';
 
-const DECIDED_STATES = new Set<CardState>(['accepted', 'modified', 'rejected']);
+/**
+ * Из чего можно вернуть карточку в `pending` кнопкой «Отменить» в тосте.
+ *
+ * Отдельное правило, а не строка в `ALLOWED_TRANSITIONS`: обычный ход
+ * состояний идёт вперёд, а undo — намеренный откат юриста в окно тоста
+ * (6 секунд). Раньше в наборе были только `accepted`/`modified`/`rejected`,
+ * но подтверждение сразу запускает исполнение и карточка успевает стать
+ * `executing` ещё до того, как тост появится на экране, — поэтому «Отменить»
+ * молча отказывал и карточка не возвращалась в очередь. Отмена уже идущего
+ * прогона безопасна: `useCardDecision` гасит применение его событий
+ * (`cancelledRef`), а `done`/`failed` до стора не доходят.
+ */
+const UNDOABLE_STATES = new Set<CardState>(['accepted', 'modified', 'rejected', 'executing', 'done', 'failed']);
+
+/**
+ * Допустимые переходы состояния карточки — маленькая машина состояний
+ * вместо «кто угодно ставит что угодно».
+ *
+ * Зачем: `decide()`, `setCardState()` и `bulkAccept()` меняли состояние без
+ * оглядки на текущее. Двойной клик по «Подтвердить», нажатие в двух
+ * вкладках, «Подтвердить все P3» поверх уже решённой карточки, запоздавший
+ * ответ исполнения — всё это спокойно проходило второй раз. Для мока это
+ * лишний прогон анимации, для настоящего действия — вторая отправка
+ * уведомления контрагенту или второй платёж.
+ *
+ * Настоящую защиту даёт только сервер: ожидаемая версия карточки
+ * (optimistic locking), ключ идемпотентности и та же машина состояний на
+ * его стороне. Здесь — клиентская половина контракта, чтобы интерфейс не
+ * порождал заведомо недопустимых команд.
+ */
+const ALLOWED_TRANSITIONS: Record<CardState, readonly CardState[]> = {
+  // Решение юриста — только из «ещё не решено».
+  pending: ['accepted', 'modified', 'rejected'],
+  // Решение принято → пошло исполнение (либо отменено через undo → pending).
+  accepted: ['executing', 'pending'],
+  modified: ['executing', 'pending'],
+  // Отклонённая карточка ничего не исполняет; вернуть её может только undo.
+  rejected: ['pending'],
+  executing: ['done', 'failed'],
+  // Повтор после сбоя — единственный выход из `failed`.
+  failed: ['executing'],
+  done: [],
+};
+
+function canTransition(from: CardState, to: CardState): boolean {
+  return from === to || ALLOWED_TRANSITIONS[from].includes(to);
+}
+
+/** Отказ от недопустимого перехода, с объяснением в dev-консоли. */
+function refuseTransition(id: Id, from: CardState, to: CardState): void {
+  if (import.meta.env.DEV) {
+    console.warn(`[cardsSlice] карточка "${id}": переход "${from}" → "${to}" не разрешён и проигнорирован.`);
+  }
+}
 
 /**
  * Граница данных на входе в стор.
@@ -82,6 +135,14 @@ export const createCardsSlice: StateCreator<StoreState, [], [], CardsSlice> = (s
       if (!card) return state;
 
       const nextState = DECISION_TO_STATE[decision];
+      // Решение принимается ровно один раз: повторный клик, вторая вкладка и
+      // групповое «Подтвердить все» поверх уже решённой карточки сюда не
+      // проходят.
+      if (!canTransition(card.state, nextState)) {
+        refuseTransition(id, card.state, nextState);
+        return state;
+      }
+
       const updated: ActionCard = {
         ...card,
         state: nextState,
@@ -98,10 +159,10 @@ export const createCardsSlice: StateCreator<StoreState, [], [], CardsSlice> = (s
       const card = state.cards[id];
       if (!card) return state;
 
-      if (!DECIDED_STATES.has(card.state)) {
+      if (!UNDOABLE_STATES.has(card.state)) {
         if (import.meta.env.DEV) {
           console.warn(
-            `[cardsSlice] undoDecision("${id}"): карточка в состоянии "${card.state}" — отменить решение уже нельзя.`,
+            `[cardsSlice] undoDecision("${id}"): карточка в состоянии "${card.state}" — отменять нечего.`,
           );
         }
         return state;
@@ -112,6 +173,9 @@ export const createCardsSlice: StateCreator<StoreState, [], [], CardsSlice> = (s
         state: 'pending',
         decidedAt: undefined,
         modifiedPayload: undefined,
+        // Карточка вернулась в очередь как нерешённая — след сорвавшегося
+        // прогона на ней остаться не должен.
+        failure: undefined,
       };
 
       return { cards: { ...state.cards, [id]: updated } };
@@ -121,6 +185,13 @@ export const createCardsSlice: StateCreator<StoreState, [], [], CardsSlice> = (s
     set((state) => {
       const card = state.cards[id];
       if (!card) return state;
+      // Запоздавший результат уже отменённого исполнения не имеет права
+      // вернуть карточку в `executing`/`done` — переход из `pending` туда
+      // не разрешён, и такой вызов просто гасится.
+      if (!canTransition(card.state, cardState)) {
+        refuseTransition(id, card.state, cardState);
+        return state;
+      }
       return { cards: { ...state.cards, [id]: { ...card, state: cardState } } };
     }),
 
@@ -128,6 +199,12 @@ export const createCardsSlice: StateCreator<StoreState, [], [], CardsSlice> = (s
     set((state) => {
       const card = state.cards[id];
       if (!card) return state;
+      // Сбой отменённого прогона не должен воскрешать карточку в `failed`:
+      // юрист уже нажал «Отменить», карточка вернулась в `pending`.
+      if (failure && !canTransition(card.state, 'failed')) {
+        refuseTransition(id, card.state, 'failed');
+        return state;
+      }
       return {
         cards: {
           ...state.cards,

@@ -246,6 +246,21 @@ export function useCardDecision<P>({ card, cardType, onDecided, onSettled }: Use
 
   const runDecision = useCallback(
     (decision: CardDecision, payload?: P, opts?: { skipToast?: boolean }) => {
+      /*
+       * Одно решение на карточку. Между кликом и перерисовкой проходит
+       * кадр, и за него успевает прилететь второй клик (двойной щелчок,
+       * залипшая клавиша, «Подтвердить все P3» поверх этой же карточки) —
+       * раньше это давало второй `decide()`, второй тост и второй прогон
+       * `execute()`. Источник правды — стор, а не локальный флаг: карточку
+       * мог решить и другой компонент.
+       *
+       * Настоящая идемпотентность — на сервере: ключ идемпотентности и
+       * ожидаемая версия карточки. Здесь — только то, что может сделать
+       * клиент, чтобы не отправить вторую команду.
+       */
+      const current = useStore.getState().cards[card.id];
+      if (!current || current.state !== 'pending') return;
+
       decide(card.id, decision, payload);
       const decidedCard: ActionCard<P> = {
         ...card,
@@ -348,7 +363,9 @@ export function useCardDecision<P>({ card, cardType, onDecided, onSettled }: Use
     setDestructiveOpen(false);
   }, []);
 
+  /** Повтор — только из `failed`: из `executing` он запустил бы второй прогон поверх идущего. */
   const retry = useCallback(() => {
+    if (useStore.getState().cards[card.id]?.state !== 'failed') return;
     setCardFailure(card.id, undefined);
     startExecution(lastPayloadRef.current, lastDecidedCardRef.current);
   }, [card.id, setCardFailure, startExecution]);
