@@ -4,18 +4,45 @@
  * а не окном.
  */
 
+/* Вся панель — ОДНА область прокрутки (шапка + текст). Раньше прокручивался
+   только текст под шапкой, а сама шапка (до половины высоты панели) была
+   мёртвой зоной для колеса — приходилось перекладывать событие скриптом, и
+   прокрутка теряла инерцию. Теперь колесо работает нативно в любой точке. */
 .root {
   container-type: inline-size;
+  flex: 1;
   height: 100%;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
+  /* Докрутили до края — прокрутка не «протекает» в то, что под панелью. */
+  overscroll-behavior: contain;
+  /* Динамическое затухание у краёв (useScrollFade): --fade-top/-bottom = 28px
+     только когда за краем есть скрытый контент, иначе 0. */
+  --fade-top: 0px;
+  --fade-bottom: 0px;
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    black var(--fade-top),
+    black calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    black var(--fade-top),
+    black calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
 }
 
 /* ── шапка ─────────────────────────────────────────────────────────── */
 
+/* Шапка прокручивается вместе с текстом. Липкой её не делаем: полупрозрачное
+   стекло не скрыло бы текст, уезжающий под неё. Название документа снова
+   видно, как только прокрутка вернулась наверх; кнопка закрытия закреплена на
+   самой панели и остаётся на месте всегда. */
 .header {
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -74,34 +101,6 @@
 }
 
 /* ── тело ──────────────────────────────────────────────────────────── */
-
-.scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  /* Докрутили тело до края — прокрутка НЕ уходит дальше в то, что под панелью
-     (scroll chaining). */
-  overscroll-behavior: contain;
-  /* Динамическое затухание текста у краёв (useScrollFade, та же схема, что у
-     списка договоров): --fade-top/-bottom = 28px только когда за краем есть
-     скрытый текст, иначе 0. Без backdrop-filter — чистое затухание в фон. */
-  --fade-top: 0px;
-  --fade-bottom: 0px;
-  mask-image: linear-gradient(
-    180deg,
-    transparent 0,
-    black var(--fade-top),
-    black calc(100% - var(--fade-bottom)),
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    180deg,
-    transparent 0,
-    black var(--fade-top),
-    black calc(100% - var(--fade-bottom)),
-    transparent 100%
-  );
-}
 
 .prose {
   display: flex;

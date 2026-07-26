@@ -63,7 +63,9 @@ export function DocumentViewer({ document, activeAnchorId }: DocumentViewerProps
   const Icon = KIND_ICON[document.kind];
 
   return (
-    <div className={styles.root}>
+    // Прокручивается ВСЯ панель целиком, а не только текст под шапкой: иначе
+    // шапка (а она занимает до половины высоты) — мёртвая зона для колеса.
+    <div className={styles.root} data-inspector-body="" ref={fade.ref} onScroll={fade.onScroll}>
       <header className={styles.header}>
         <div className={styles.kindRow}>
           <span className={styles.kindIcon} aria-hidden="true">
@@ -101,16 +103,12 @@ export function DocumentViewer({ document, activeAnchorId }: DocumentViewerProps
         </Button>
       </header>
 
-      {/* `data-inspector-body` — по нему `DocumentInspector` находит прокручиваемое
-          тело, чтобы направлять в него колесо мыши (см. там же). */}
-      <div className={styles.scroll} data-inspector-body="" ref={fade.ref} onScroll={fade.onScroll}>
-        <div className={styles.prose}>
-          {document.blocks.map((block) => {
-            const isActive = block.id === activeAnchor?.blockId;
-            const anchorForBlock = isActive ? activeAnchor : undefined;
-            return <BlockView key={block.id} block={block} isActive={isActive} anchor={anchorForBlock} />;
-          })}
-        </div>
+      <div className={styles.prose}>
+        {document.blocks.map((block) => {
+          const isActive = block.id === activeAnchor?.blockId;
+          const anchorForBlock = isActive ? activeAnchor : undefined;
+          return <BlockView key={block.id} block={block} isActive={isActive} anchor={anchorForBlock} />;
+        })}
       </div>
     </div>
   );
