@@ -5,9 +5,11 @@
   min-height: 0;
 }
 
+/* Тот же отступ под логотип, что и у настроек, — иначе он ложится на ссылку
+   «Назад в настройки» (см. `--logo-safe-top`). */
 .header {
   flex-shrink: 0;
-  padding: var(--space-6) var(--space-8) var(--space-4);
+  padding: var(--logo-safe-top) var(--space-8) var(--space-4);
   border-bottom: 1px solid var(--color-border);
 }
 

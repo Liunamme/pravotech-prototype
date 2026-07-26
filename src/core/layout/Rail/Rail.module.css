@@ -8,8 +8,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Верхний отступ 64px оставляет место под логотип «право(тех)». */
-  padding: 64px 0 18px;
+  /* Верхний отступ оставляет место под логотип «право(тех)» — см. `--logo-safe-top`. */
+  padding: var(--logo-safe-top) 0 18px;
   gap: 20px;
 }
 
