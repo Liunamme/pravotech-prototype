@@ -3,6 +3,7 @@ import { TODAY_SCOPE } from '@/types/domain';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { QueueDrawer, QueueTrigger } from '@/core/layout/QueueDrawer';
 import { MobileViewBar } from '@/core/layout/MobileChrome';
+import { SegmentedControl } from '@/shared/ui';
 import { ChatView } from '@/core/chat/ChatView';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
 import { useStore } from '@/store';
@@ -44,6 +45,8 @@ export function TodayPage() {
   const isMobile = device === 'mobile';
   const [queueOpen, setQueueOpen] = useState(false);
   const counts = useStore(selectQueueCounts);
+  const activeSegment = useStore((state) => state.activeSegment);
+  const setSegment = useStore((state) => state.setSegment);
   const queueCount = counts.P0 + counts.P1 + counts.P2 + counts.P3;
 
 
@@ -81,8 +84,25 @@ export function TodayPage() {
           )}
         </div>
 
-        <QueueDrawer asDrawer open={queueOpen} onOpenChange={setQueueOpen} container={mainEl}>
-          <RightPanel />
+        <QueueDrawer
+          asDrawer
+          open={queueOpen}
+          onOpenChange={setQueueOpen}
+          container={mainEl}
+          header={
+            <SegmentedControl
+              aria-label="Режим панели"
+              size="sm"
+              value={activeSegment}
+              onValueChange={(value) => setSegment(value as 'queue' | 'deadlines')}
+              options={[
+                { value: 'queue', label: 'Очередь', count: queueCount },
+                { value: 'deadlines', label: 'Сроки' },
+              ]}
+            />
+          }
+        >
+          <RightPanel showSegments={false} />
         </QueueDrawer>
 
         <InspectorSlot container={mainEl} />

@@ -73,15 +73,35 @@
   flex-direction: column;
 }
 
+/**
+ * Приглашение «О чём поговорим?» прокручивается, когда не влезает.
+ *
+ * На iPhone SE (375×667) чипов подсказок пять, и вместе с пустым состоянием
+ * они выходили за экран: последние два уезжали под композер и были
+ * недостижимы. `justify-content: center` при этом не годится вместе с
+ * прокруткой — он обрезает содержимое с ОБОИХ краёв, и до верха тоже не
+ * доскроллить. Поэтому центрирование через `margin: auto` у содержимого:
+ * пока место есть, оно центрируется, а как только перестаёт хватать —
+ * прижимается к краям и честно прокручивается.
+ */
 .inviteBody {
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: var(--space-4);
   padding: var(--space-6);
+}
+
+.inviteBody > *:first-child {
+  margin-top: auto;
+}
+
+.inviteBody > *:last-child {
+  margin-bottom: auto;
 }
 
 .skillChips {

@@ -11,6 +11,7 @@ import { NEW_THREAD_TITLE } from '@/shared/lib/threadTitle';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { QueueDrawer, QueueTrigger } from '@/core/layout/QueueDrawer';
 import { MobileViewBar } from '@/core/layout/MobileChrome';
+import { SegmentedControl } from '@/shared/ui';
 import { MobileThreadsDrawer, MobileThreadsTrigger } from './MobileThreadsDrawer';
 import { ChatView } from '@/core/chat/ChatView';
 import { Composer } from '@/core/chat/Composer';
@@ -76,6 +77,8 @@ export function WorkspacePage() {
    * они живут в панели очереди, которая открывается поверх.
    */
   const [mobileView, setMobileView] = useState<string>('chat');
+  /** Сегмент выдвижной панели: на телефоне переключатель живёт в её шапке. */
+  const [queueSegment, setQueueSegment] = useState<'queue' | 'deadlines'>('queue');
   const queueCount = useStore((state) => (workspaceId ? selectWorkspaceQueue(state, workspaceId).length : 0));
 
   if (!workspaceId) return <Navigate to="/today" replace />;
@@ -208,8 +211,30 @@ export function WorkspacePage() {
           container={mainEl}
         />
 
-        <QueueDrawer asDrawer open={queueOpen} onOpenChange={setQueueOpen} container={mainEl}>
-          <WorkspaceRightPanel workspaceId={manifest.id} />
+        <QueueDrawer
+          asDrawer
+          open={queueOpen}
+          onOpenChange={setQueueOpen}
+          container={mainEl}
+          header={
+            <SegmentedControl
+              aria-label="Режим панели"
+              size="sm"
+              value={queueSegment}
+              onValueChange={(value) => setQueueSegment(value as 'queue' | 'deadlines')}
+              options={[
+                { value: 'queue', label: 'Очередь', count: queueCount },
+                { value: 'deadlines', label: 'Сроки' },
+              ]}
+            />
+          }
+        >
+          <WorkspaceRightPanel
+            workspaceId={manifest.id}
+            segment={queueSegment}
+            onSegmentChange={setQueueSegment}
+            showSegments={false}
+          />
         </QueueDrawer>
 
         <InspectorSlot container={mainEl} />
