@@ -11,7 +11,7 @@ import { InspectorSlot } from '@/core/layout/InspectorSlot';
 import { ChatView } from '@/core/chat/ChatView';
 import { Composer } from '@/core/chat/Composer';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
-import { EmptyState } from '@/shared/ui';
+import { Button, EmptyState } from '@/shared/ui';
 import { newId } from '@/shared/lib/id';
 import { WorkspaceSidebar } from './WorkspaceSidebar';
 import { WorkspaceRightPanel } from './WorkspaceRightPanel';
@@ -71,6 +71,22 @@ export function WorkspacePage() {
   }
 
   const validThread = thread && thread.workspaceId === manifest.id ? thread : undefined;
+  /**
+   * В ссылке есть тред, но его нет в этом пространстве: либо диалог удалён,
+   * либо адрес скопирован из чужого пространства
+   * (`/w/obligations/t/thread-lit-…`). Раньше такая ссылка молча показывала
+   * приглашение «О чём поговорим?» — юрист не понимал, что попал не туда, и
+   * заводил новый разговор вместо исходного.
+   */
+  const threadMissing = Boolean(threadId) && !validThread;
+  /**
+   * То же про вкладку контекста: неизвестный `tabId` подменялся первой
+   * вкладкой, а адрес продолжал утверждать, что открыта другая. Ссылку
+   * чиним на месте — показывать ради этого 404 не за что, содержимое
+   * страницы от вкладки не зависит.
+   */
+  const tabMissing = Boolean(tabId) && !manifest.contextTabs.some((tab) => tab.id === tabId);
+  if (tabMissing) return <Navigate to={`/w/${manifest.id}`} replace />;
 
   function handlePickSkill(skill: AgentSkill) {
     const id = newId('thread');
@@ -116,7 +132,20 @@ export function WorkspacePage() {
 
       <div className={styles.main} ref={setMainEl}>
         <div className={styles.center}>
-          {validThread ? (
+          {threadMissing ? (
+            <div className={styles.notFound}>
+              <EmptyState
+                icon={MessageCircleQuestion}
+                title="Диалог не найден"
+                description={`В пространстве «${manifest.title}» нет такого разговора. Возможно, ссылка ведёт в другое пространство или диалог удалён.`}
+                action={
+                  <Button variant="secondary" onClick={() => navigate(`/w/${manifest.id}`, { replace: true })}>
+                    К списку диалогов
+                  </Button>
+                }
+              />
+            </div>
+          ) : validThread ? (
             <ChatView
               threadId={validThread.id}
               scope={manifest.id}

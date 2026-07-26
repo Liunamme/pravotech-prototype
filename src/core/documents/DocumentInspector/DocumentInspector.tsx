@@ -3,7 +3,7 @@ import * as RadixDialog from '@radix-ui/react-dialog';
 import { useSearchParams } from 'react-router';
 import { X } from 'lucide-react';
 import { useStore } from '@/store';
-import { IconButton } from '@/shared/ui';
+import { IconButton, useToast } from '@/shared/ui';
 import { DocumentViewer } from '../DocumentViewer';
 import styles from './DocumentInspector.module.css';
 
@@ -97,6 +97,20 @@ export function DocumentInspector(props: DocumentInspectorProps = {}) {
   const closeInspector = useStore((state) => state.closeInspector);
   const [searchParams, setSearchParams] = useSearchParams();
   const contentRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+
+  /** Снимает `?doc=&anchor=` из адреса, не трогая остальные параметры. */
+  function dropDocParams() {
+    setSearchParams(
+      (prev) => {
+        const nextParams = new URLSearchParams(prev);
+        nextParams.delete('doc');
+        nextParams.delete('anchor');
+        return nextParams;
+      },
+      { replace: true },
+    );
+  }
 
   // Загрузка страницы с `?doc=&anchor=` в URL открывает инспектор ровно один
   // раз при монтировании — сид грузится синхронно до первого рендера
@@ -107,9 +121,30 @@ export function DocumentInspector(props: DocumentInspectorProps = {}) {
     if (initedRef.current) return;
     initedRef.current = true;
     const docId = searchParams.get('doc');
-    if (!docId || !documents[docId]) return;
+    if (!docId) return;
+
+    // Ссылка обещает документ, которого нет: устаревший адрес, опечатка,
+    // документ из другого пространства. Молча показать страницу без
+    // документа нельзя — юрист решит, что ссылка сработала. Говорим прямо и
+    // убираем ложное обещание из адреса, чтобы он не пересылался дальше.
+    if (!documents[docId]) {
+      toast({
+        title: 'Документ по ссылке не найден',
+        description: 'Адрес устарел или ведёт в другое пространство.',
+        variant: 'danger',
+      });
+      dropDocParams();
+      return;
+    }
+
     const anchorId = searchParams.get('anchor') ?? undefined;
-    openInspector(docId, anchorId);
+    // Неизвестный якорь — не повод не открывать документ: сам документ на
+    // месте, просто место в нём указано неверно. Открываем целиком.
+    const knownAnchor = anchorId && documents[docId].anchors.some((a) => a.id === anchorId) ? anchorId : undefined;
+    if (anchorId && !knownAnchor && import.meta.env.DEV) {
+      console.warn(`[DocumentInspector] якорь "${anchorId}" не найден в документе "${docId}" — открываю целиком.`);
+    }
+    openInspector(docId, knownAnchor);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
