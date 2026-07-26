@@ -76,8 +76,15 @@ export function WorkspacePage() {
    * Что показывает единственная колонка на телефоне: переписка или одна из
    * вкладок контекста пространства. Ни очередь, ни сроки сюда не входят —
    * они живут в панели очереди, которая открывается поверх.
+   *
+   * Выбор помнится ОТДЕЛЬНО для каждого пространства. Одной строки на всё
+   * приложение не хватало: `WorkspacePage` при переходе между
+   * пространствами не размонтируется, и выбранная вкладка переезжала
+   * следом. В «Делах» нет вкладки «Договоры» — экран оказывался пустым, и
+   * ни одна вкладка не была подсвечена. Возврат в прежнее пространство
+   * теперь возвращает и то, что там было открыто.
    */
-  const [mobileView, setMobileView] = useState<string>('chat');
+  const [mobileViewByWorkspace, setMobileViewByWorkspace] = useState<Record<Id, string>>({});
   /** Сегмент выдвижной панели: на телефоне переключатель живёт в её шапке. */
   const [queueSegment, setQueueSegment] = useState<'queue' | 'deadlines'>('queue');
   const queueCount = useStore((state) => (workspaceId ? selectWorkspaceQueue(state, workspaceId).length : 0));
@@ -157,6 +164,17 @@ export function WorkspacePage() {
   );
 
   if (isMobile) {
+    /*
+     * Значение сверяется с манифестом на каждом рендере, а не только при
+     * записи: вкладки задаёт пространство, и чужой (или устаревший) id
+     * обязан вырождаться в «Диалог», а не в пустой экран.
+     */
+    const stored = mobileViewByWorkspace[manifest.id];
+    const mobileView =
+      stored && (stored === 'chat' || manifest.contextTabs.some((tab) => tab.id === stored)) ? stored : 'chat';
+    const setMobileView = (value: string) =>
+      setMobileViewByWorkspace((current) => ({ ...current, [manifest.id]: value }));
+
     const activeTab = manifest.contextTabs.find((tab) => tab.id === mobileView);
     const TabComponent = activeTab?.Component;
 
