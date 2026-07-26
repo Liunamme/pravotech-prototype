@@ -9,6 +9,7 @@ import { workspaces } from '@/workspaces/registry';
 import { Button, EmptyState } from '@/shared/ui';
 import { formatDate, formatDayHeader } from '@/shared/lib/date';
 import { EventRow } from '../EventRow';
+import { useScrollFade } from '@/shared/lib/useScrollFade';
 import styles from './DeadlineTimeline.module.css';
 
 export type DeadlineTimelineProps = {
@@ -25,6 +26,12 @@ const HORIZON_DAYS = 14;
  * тонкий разделитель «···».
  */
 export function DeadlineTimeline({ scope }: DeadlineTimelineProps) {
+  /**
+   * Затухание краёв — то же, что в списке договоров и ленте сообщений:
+   * содержимое уходит «в никуда», а не обрывается по краю панели. Включается
+   * только когда за краем реально есть скрытые сроки.
+   */
+  const fade = useScrollFade();
   const groups = useStore((state) => selectUpcoming(state, HORIZON_DAYS));
   const documents = useStore((state) => state.documents);
   const cards = useStore((state) => state.cards);
@@ -106,7 +113,7 @@ export function DeadlineTimeline({ scope }: DeadlineTimelineProps) {
   }
 
   return (
-    <div className={styles.root}>
+    <div className={styles.root} ref={fade.ref} onScroll={fade.onScroll}>
       <div className={styles.list} role="region" aria-label="Ближайшие сроки">
         {filteredGroups.map((group, index) => {
           const previous = filteredGroups[index - 1];
