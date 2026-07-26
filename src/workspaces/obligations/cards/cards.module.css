@@ -68,17 +68,19 @@
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-2);
-  border-left: 3px solid transparent;
   border-radius: var(--radius-sm);
-  transition:
-    background-color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
 }
 
-/* Подсветка изменённого поля относительно предложения агента (docs/UX.md §2). */
+/* Изменённое относительно предложения агента поле (docs/UX.md §2) — обводка
+   в духе акцентной рамки карточки P0: тонкое кольцо + мягкое гало. Именно
+   `box-shadow`, а не рамка или полоса слева: он рисуется поверх и не занимает
+   места, поэтому подсветка не сдвигает соседние поля. Заливки нет — она
+   перекрашивала поле целиком и мешала читать (design review). */
 .field[data-changed] {
-  background: var(--color-warning-subtle);
-  border-left-color: var(--color-warning);
+  box-shadow:
+    0 0 0 1px var(--color-warning),
+    0 0 0 4px var(--color-warning-subtle);
 }
 
 .fieldLabel {

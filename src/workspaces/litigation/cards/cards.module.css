@@ -83,14 +83,17 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-2);
-  border-left: 3px solid transparent;
   border-radius: var(--radius-sm);
   background: var(--color-surface-sunken);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
 }
 
+/* Та же обводка изменённого поля, что в `obligations/cards.module.css`:
+   кольцо `box-shadow` без заливки, не сдвигает соседей. */
 .itemRow[data-changed] {
-  background: var(--color-warning-subtle);
-  border-left-color: var(--color-warning);
+  box-shadow:
+    0 0 0 1px var(--color-warning),
+    0 0 0 4px var(--color-warning-subtle);
 }
 
 .itemFields {
