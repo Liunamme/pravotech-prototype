@@ -1,6 +1,6 @@
 import { useRef, type FocusEvent, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import type { ActionCard, Id } from '@/types/domain';
 import { TODAY_SCOPE } from '@/types/domain';
 import type { CardTypeDef } from '@/workspaces/types';
@@ -128,6 +128,20 @@ export function ActionCardShell<P>({
   } = useCardDecision({ card, cardType, onDecided, onSettled });
 
   const originThread = useStore((state) => (card.originThreadId ? state.threads[card.originThreadId] : undefined));
+  const subjectDoc = useStore((state) => (card.subjectRef ? state.documents[card.subjectRef.id] : undefined));
+  const openInspector = useStore((state) => state.openInspector);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  /** Открывает предмет карточки (договор/дело) в инспекторе — как чипы ссылок и строки сроков. */
+  function openSubject() {
+    const docId = card.subjectRef?.id;
+    if (!docId) return;
+    openInspector(docId);
+    const next = new URLSearchParams(searchParams);
+    next.set('doc', docId);
+    next.delete('anchor');
+    setSearchParams(next);
+  }
   const workspace = showWorkspace ? getWorkspace(card.workspaceId) : undefined;
   const WorkspaceIcon = workspace?.icon;
   const TypeIcon = cardType.icon;
@@ -244,11 +258,25 @@ export function ActionCardShell<P>({
         <div className={styles.collapsibleInner}>
           {!summaryAlways && <p className={styles.summary}>{card.summary}</p>}
 
-          {card.subjectRef && (
-            <Link to={`/w/${card.workspaceId}`} className={styles.subjectRef} onClick={(e) => e.stopPropagation()}>
-              {card.subjectRef.label}
-            </Link>
-          )}
+          {/* Предмет карточки — договор или дело. Ведёт в сам документ, а не в
+              пространство: раньше ссылка открывала `/w/:id` без треда, то есть
+              пустое приглашение «О чём поговорим?». Если документа нет в сторе,
+              подпись остаётся текстом, а не ссылкой в никуда. */}
+          {card.subjectRef &&
+            (subjectDoc ? (
+              <button
+                type="button"
+                className={styles.subjectRef}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openSubject();
+                }}
+              >
+                {card.subjectRef.label}
+              </button>
+            ) : (
+              <span className={styles.subjectRefPlain}>{card.subjectRef.label}</span>
+            ))}
 
           {modifiedDiffKeys && modifiedDiffKeys.size > 0 && (
             <p className={styles.diffNote}>
