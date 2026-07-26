@@ -190,7 +190,17 @@
   min-height: 0;
 }
 
-/* Вкладка контекста: боковые поля как у остального экрана. */
+/**
+ * Вкладка контекста: боковые поля как у остального экрана, края растворяются
+ * так же, как в ленте сообщений (`MessageList.module.css`) — тот же градиент
+ * с точностью до пикселя. Раньше список просто обрезался по краю экрана, и
+ * было не понять, кончился он или продолжается.
+ *
+ * Здесь можно маской, а не вуалью: внутри вкладок нет `backdrop-filter`
+ * (проверено по всем четырём), поэтому грабли №2 из docs/HANDOFF.md —
+ * «маска на предке отключает размытие внутри» — не срабатывают. У
+ * приглашения `backdrop-filter` есть у чипов, и там пришлось делать вуалью.
+ */
 .mobileTab {
   display: flex;
   flex-direction: column;
@@ -198,6 +208,14 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 0 var(--space-4) var(--space-3);
+  mask-image: linear-gradient(180deg, transparent 0, black 14px, black calc(100% - 28px), transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    black 14px,
+    black calc(100% - 28px),
+    transparent 100%
+  );
 }
 
 /* Прокрутку включает САМА обёртка. Вкладка контекста (`ContractsTab` и др.)
