@@ -20,17 +20,45 @@
 
   display: flex;
   flex-direction: column;
-  /* Матовое стекло 1:1 с макетом (design_handoff, строка 332): полупрозрачная
-     подложка `--pt-overlay` + `backdrop-filter` из токена. Тёмная тема — тёмное
-     стекло, светлая — светлое (значения токенов уже разведены по темам). */
-  background: var(--pt-overlay);
-  backdrop-filter: var(--pt-overlay-blur);
-  -webkit-backdrop-filter: var(--pt-overlay-blur);
-  border-left: 1px solid var(--pt-overlay-line);
+  /* Само стекло — в `.glass` ниже. На панели фона и фильтра НЕТ намеренно. */
   box-shadow: -14px 0 44px rgba(0, 0, 0, 0.16);
 
   /* Инспектор: сдвиг справа 220мс вход / 150мс выход, ease-out/ease-in (docs/UX.md §7). */
   animation: slideIn 220ms var(--ease-out);
+  /* Собственный слой композитора на время выезда: панель со стеклом
+     (`backdrop-filter`) при анимации заставляла браузер перерисовывать и то,
+     что лежит рядом, — сайдбар успевал дёрнуться кадром. */
+  will-change: transform;
+}
+
+/**
+ * Матовое стекло 1:1 с макетом (design_handoff, строка 332) — ОТДЕЛЬНЫМ
+ * декоративным слоем, а не фоном самой панели.
+ *
+ * Причина: `backdrop-filter` делает элемент «backdrop root», и композитор
+ * Chromium перестаёт считать его целью для колеса мыши — событие уходит тому,
+ * что лежит ПОД панелью (лента чата, очередь). Панель выглядит прозрачной для
+ * прокрутки. Если фильтр висит на инертном слое (`pointer-events: none`), а
+ * прокручиваемое содержимое лежит выше и фильтра не имеет, прокрутка работает
+ * нормально, а вид стекла не меняется ни на пиксель.
+ */
+.glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--pt-overlay);
+  backdrop-filter: var(--pt-overlay-blur);
+  -webkit-backdrop-filter: var(--pt-overlay-blur);
+  border-left: 1px solid var(--pt-overlay-line);
+}
+
+/* Содержимое лежит НАД стеклом: оба слоя позиционированы, порядок в DOM решает. */
+.viewerLayer {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .content[data-state='closed'] {

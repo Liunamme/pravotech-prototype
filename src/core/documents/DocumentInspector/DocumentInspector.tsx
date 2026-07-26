@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { useSearchParams } from 'react-router-dom';
 import { X } from 'lucide-react';
@@ -29,12 +29,65 @@ export type DocumentInspectorProps = {
   container?: HTMLElement | null;
 };
 
+/**
+ * Колесо мыши над оверлеем крутит ТОЛЬКО документ — что бы ни лежало под ним.
+ *
+ * Оверлей накрывает и ленту чата, и колонку очереди. Если браузер по какой-то
+ * причине адресует событие колеса не панели, а тому, что под ней (латчинг
+ * прокрутки трекпада, промах композиторного хит-теста над стеклом с
+ * `backdrop-filter`), интерфейс за панелью уезжает — панель выглядит
+ * «прозрачной для прокрутки».
+ *
+ * Поэтому решение принимается по ГЕОМЕТРИИ панели, а не по цели события.
+ * Нормальный путь (цель внутри панели) уходит браузеру нетронутым — прокрутка
+ * остаётся родной и плавной; вмешательство только там, где событие промазало.
+ * Прямоугольник берётся раз в жест: события колеса идут пачками чаще, чем раз
+ * в 250мс, лишних чтений раскладки нет.
+ *
+ * `passive: false` обязателен — иначе `preventDefault()` игнорируется.
+ */
+function useInspectorScrollShield(contentRef: RefObject<HTMLDivElement | null>, open: boolean) {
+  useEffect(() => {
+    if (!open) return;
+
+    let rect: DOMRect | null = null;
+    let rectAt = 0;
+
+    function onWheel(event: WheelEvent) {
+      const panel = contentRef.current;
+      const body = panel?.querySelector<HTMLElement>('[data-inspector-body]');
+      if (!panel || !body) return;
+
+      // Событие и так адресовано панели — не вмешиваемся.
+      if (event.target instanceof Node && panel.contains(event.target)) return;
+
+      if (!rect || event.timeStamp - rectAt > 250) {
+        rect = panel.getBoundingClientRect();
+        rectAt = event.timeStamp;
+      }
+      const overPanel =
+        event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+      if (!overPanel) return;
+
+      // `deltaMode` приводим к пикселям: Firefox шлёт строки (1), отдельные мыши — страницы (2).
+      const step =
+        event.deltaMode === 1 ? event.deltaY * 16 : event.deltaMode === 2 ? event.deltaY * body.clientHeight : event.deltaY;
+      event.preventDefault();
+      body.scrollTop += step;
+    }
+
+    document.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    return () => document.removeEventListener('wheel', onWheel, { capture: true });
+  }, [contentRef, open]);
+}
+
 export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
   const inspector = useStore((state) => state.inspector);
   const documents = useStore((state) => state.documents);
   const openInspector = useStore((state) => state.openInspector);
   const closeInspector = useStore((state) => state.closeInspector);
   const [searchParams, setSearchParams] = useSearchParams();
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Загрузка страницы с `?doc=&anchor=` в URL открывает инспектор ровно один
   // раз при монтировании — сид грузится синхронно до первого рендера
@@ -53,6 +106,8 @@ export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
 
   const doc = inspector ? documents[inspector.docId] : undefined;
   const open = Boolean(inspector && doc);
+
+  useInspectorScrollShield(contentRef, open);
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) return; // открытие всегда идёт через `openInspector` (CitationChip и т.п.), не отсюда
@@ -77,10 +132,14 @@ export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
     <RadixDialog.Root open={open} onOpenChange={handleOpenChange} modal={false}>
       <RadixDialog.Portal container={container ?? undefined}>
         <RadixDialog.Content
+          ref={contentRef}
           className={styles.content}
           aria-describedby={undefined}
           onInteractOutside={(e) => e.preventDefault()}
         >
+          {/* Декоративное стекло. Отдельным слоем и без ввода — см. `.glass` в CSS. */}
+          <div className={styles.glass} aria-hidden="true" />
+
           <RadixDialog.Title className={styles.visuallyHidden}>{doc?.title ?? 'Документ'}</RadixDialog.Title>
 
           <RadixDialog.Close asChild>
@@ -94,7 +153,9 @@ export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
             </IconButton>
           </RadixDialog.Close>
 
-          {doc && inspector && <DocumentViewer document={doc} activeAnchorId={inspector.anchorId} />}
+          <div className={styles.viewerLayer}>
+            {doc && inspector && <DocumentViewer document={doc} activeAnchorId={inspector.anchorId} />}
+          </div>
         </RadixDialog.Content>
       </RadixDialog.Portal>
     </RadixDialog.Root>

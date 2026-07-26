@@ -46,14 +46,18 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-4) 52px var(--space-3) var(--space-5);
+  padding: var(--space-4) var(--space-5) var(--space-3);
   border-bottom: 1px solid var(--pt-line2);
 }
 
+/* Место под кнопку закрытия резервирует только эта строка — она с кнопкой на
+   одной высоте. Раньше отступ 52px стоял у всей шапки, и заголовок с реквизитами
+   без нужды жались влево. */
 .kindRow {
   display: flex;
   align-items: center;
   gap: var(--space-1);
+  padding-right: 36px;
   color: var(--pt-t3);
 }
 
@@ -102,11 +106,14 @@
 
 /* ── тело ──────────────────────────────────────────────────────────── */
 
+/* Без `max-width: 68ch`: панель и так узкая (520px), а ограничение съедало
+   правые 50px — текст и карточки пунктов прижимались влево, поля выходили
+   разными (21px слева против 71px справа). Теперь поля симметричные, карточки
+   на всю ширину панели. */
 .prose {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  max-width: 68ch;
   padding: var(--space-4) var(--space-5) var(--space-6);
   font-family: var(--font-serif);
 }
