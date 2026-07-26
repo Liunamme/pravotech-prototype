@@ -9,6 +9,10 @@
   height: 100%;
 }
 
+/* ВАЖНО: никаких `mask-image` на этом элементе и на `.list`. Маска делает
+   предка «backdrop root» — и `backdrop-filter` у вуалей внутри перестаёт
+   что-либо размывать (поведение Chromium). Края ленты отделаны вуалями
+   `.topVeil`/`.bottomVeil`, а не маской. */
 .scroll {
   height: 100%;
 }
@@ -18,11 +22,45 @@
   flex-direction: column;
   gap: 14px;
   padding: 4px 12px 36px;
-  /* Лента затухает ТОЛЬКО снизу (design review): верхнее затухание размывало
-     самую верхнюю карточку на начальной позиции — эффект сверху даёт blur
-     sticky-заголовка, дублировать его маской не нужно. */
-  mask-image: linear-gradient(180deg, black 0, black calc(100% - 12px), transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, black 0, black calc(100% - 12px), transparent 100%);
+}
+
+/* Размытая полоса у верхнего края ленты — «стекло», в котором тонет уезжающий
+   вверх контент и на котором лежат sticky-заголовки групп.
+   `position: sticky` (а не absolute у контейнера): полоса обязана быть ВНУТРИ
+   прокручиваемого блока, иначе `backdrop-filter` брал бы фоном не карточки, а
+   подложку колонки. Отрицательный `margin-bottom` убирает её из потока — она
+   не сдвигает список. Размытие растушёвано маской: плотное у самого края и
+   полностью растворяется книзу, без видимой границы. */
+.topVeil,
+.bottomVeil {
+  position: sticky;
+  z-index: 1;
+  height: 52px;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  /* Растворяется динамически: пока за краем ничего не спрятано, размывать
+     нечего — иначе вуаль без причины мылила бы крайнюю карточку. */
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.topVeil {
+  top: 0;
+  margin-bottom: -52px;
+  mask-image: linear-gradient(180deg, black 0, black 42%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, black 0, black 42%, transparent 100%);
+}
+
+.bottomVeil {
+  bottom: 0;
+  margin-top: -52px;
+  mask-image: linear-gradient(0deg, black 0, black 42%, transparent 100%);
+  -webkit-mask-image: linear-gradient(0deg, black 0, black 42%, transparent 100%);
+}
+
+.veilVisible {
+  opacity: 1;
 }
 
 .group {
@@ -36,18 +74,17 @@
 .groupHeader {
   position: sticky;
   top: 0;
+  /* Выше размытой полосы `.topVeil`, чтобы сам текст заголовка оставался
+     резким, пока карточки под ним размываются. */
   z-index: var(--z-sticky);
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 4px 12px;
   margin: 0 -4px;
-  /* Рассеивание вместо жёсткой плашки (design review, эффект как в системном
-     меню): blur размывает проезжающий под заголовком контент, а фон-вуаль
-     плотная у текста и растворяется книзу — сам заголовок читается поверх. */
-  background: linear-gradient(180deg, var(--pt-sticky) 0%, var(--pt-sticky) 55%, transparent 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* Ни фона, ни собственного blur: отделку края держит `.topVeil` — плашка,
+     едущая вместе с заголовком, читалась как случайный прямоугольник
+     (design review). */
   font-size: 10px;
   font-weight: var(--weight-bold);
   letter-spacing: 0.9px;

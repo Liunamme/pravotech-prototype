@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type UIEvent } from 'react';
 import { Inbox } from 'lucide-react';
 import type { ActionCard, Id, Priority } from '@/types/domain';
 import { PRIORITIES, TODAY_SCOPE } from '@/types/domain';
@@ -49,7 +49,25 @@ export function CardQueue({ scope }: CardQueueProps) {
   const [bulkExitingIds, setBulkExitingIds] = useState<ReadonlySet<Id>>(() => new Set());
   const [expandedOverrides, setExpandedOverrides] = useState<Record<Id, boolean>>({});
   const [focusedId, setFocusedId] = useState<Id | null>(null);
+  /**
+   * Есть ли скрытый контент за верхним/нижним краем ленты — по этому включаются
+   * размытые вуали у краёв (та же схема, что у `useScrollFade`: в дефолтной
+   * позиции и у дна отделки нет, чтобы не мылить крайние карточки зря).
+   */
+  const [veils, setVeils] = useState({ top: false, bottom: false });
+  const rootRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<Record<Id, HTMLDivElement | null>>({});
+
+  const measureVeils = useCallback((el: HTMLElement | null | undefined) => {
+    if (!el) return;
+    const top = el.scrollTop > 2;
+    const bottom = el.scrollTop + el.clientHeight < el.scrollHeight - 2;
+    setVeils((prev) => (prev.top === top && prev.bottom === bottom ? prev : { top, bottom }));
+  }, []);
+
+  function handleScroll(event: UIEvent<HTMLDivElement>) {
+    measureVeils(event.currentTarget);
+  }
 
   const handleDecided = useCallback((card: ActionCard) => {
     setSettlingIds((prev) => {
@@ -91,6 +109,12 @@ export function CardQueue({ scope }: CardQueueProps) {
       (g) => g.items.length > 0,
     );
   }, [visibleCards]);
+
+  // Первичный замер и пересчёт при смене состава ленты: без него нижняя вуаль
+  // появилась бы только после первой прокрутки.
+  useEffect(() => {
+    measureVeils(rootRef.current?.querySelector<HTMLElement>('[data-queue-scroll]'));
+  }, [measureVeils, visibleCards]);
 
   const orderedIds = useMemo(() => visibleCards.map((c) => c.id), [visibleCards]);
   const activeId = focusedId && orderedIds.includes(focusedId) ? focusedId : (orderedIds[0] ?? null);
@@ -192,8 +216,19 @@ export function CardQueue({ scope }: CardQueueProps) {
   }
 
   return (
-    <div className={styles.root}>
-      <ScrollArea className={styles.scroll} onKeyDown={handleListKeyDown}>
+    <div className={styles.root} ref={rootRef}>
+      <ScrollArea
+        className={styles.scroll}
+        data-queue-scroll=""
+        onKeyDown={handleListKeyDown}
+        onScroll={handleScroll}
+        shadows={false}
+      >
+        {/* Размытая растушёванная полоса у верхнего края — место, куда прилипают
+            заголовки групп. Сами заголовки фона не имеют: контент размывается
+            под этой полосой, а не под каждым заголовком (design review). */}
+        <div className={cn(styles.topVeil, veils.top && styles.veilVisible)} aria-hidden="true" />
+
         <div className={styles.list}>
           {groups.map((group) => (
             <section key={group.priority} className={styles.group} aria-label={GROUP_LABEL[group.priority]}>
@@ -231,6 +266,10 @@ export function CardQueue({ scope }: CardQueueProps) {
             </section>
           ))}
         </div>
+
+        {/* Зеркальная вуаль у нижнего края — лента уходит в размытие, а не
+            обрывается по границе колонки. */}
+        <div className={cn(styles.bottomVeil, veils.bottom && styles.veilVisible)} aria-hidden="true" />
       </ScrollArea>
     </div>
   );

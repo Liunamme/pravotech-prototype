@@ -2,14 +2,22 @@ import { useRef, useState, type HTMLAttributes, type UIEvent } from 'react';
 import { cn } from '@/shared/lib/cn';
 import styles from './ScrollArea.module.css';
 
-export type ScrollAreaProps = HTMLAttributes<HTMLDivElement>;
+export type ScrollAreaProps = HTMLAttributes<HTMLDivElement> & {
+  /**
+   * Показывать тени-индикаторы у краёв. `false` — когда у списка своя
+   * обработка краёв (маска-затухание, размытая полоса под sticky-заголовками):
+   * тень-плашка `--color-surface` поверх такой отделки читается как лишний
+   * полупрозрачный прямоугольник.
+   */
+  shadows?: boolean;
+};
 
 /**
  * Тонкая обёртка над `composes: scrollArea` (SPEC 4) с необязательными
  * тенями-индикаторами прокрутки сверху/снизу — подсказывают, что список
  * длиннее видимой области, без постоянно видимого скроллбара.
  */
-export function ScrollArea({ className, onScroll, children, ...rest }: ScrollAreaProps) {
+export function ScrollArea({ className, onScroll, children, shadows = true, ...rest }: ScrollAreaProps) {
   const [atTop, setAtTop] = useState(true);
   const [atBottom, setAtBottom] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
@@ -26,11 +34,11 @@ export function ScrollArea({ className, onScroll, children, ...rest }: ScrollAre
 
   return (
     <div className={styles.wrap}>
-      <div className={cn(styles.topShadow, !atTop && styles.visible)} aria-hidden="true" />
+      {shadows && <div className={cn(styles.topShadow, !atTop && styles.visible)} aria-hidden="true" />}
       <div ref={ref} className={cn(styles.root, className)} onScroll={handleScroll} {...rest}>
         {children}
       </div>
-      <div className={cn(styles.bottomShadow, !atBottom && styles.visible)} aria-hidden="true" />
+      {shadows && <div className={cn(styles.bottomShadow, !atBottom && styles.visible)} aria-hidden="true" />}
     </div>
   );
 }
