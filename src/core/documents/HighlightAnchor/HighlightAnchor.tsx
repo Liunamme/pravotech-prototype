@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
+import { scrollIntoViewWithin } from '@/shared/lib/scrollIntoViewWithin';
 import styles from './HighlightAnchor.module.css';
 
 export type HighlightPhase = 'idle' | 'flash' | 'settled';
@@ -47,7 +48,10 @@ export function HighlightAnchor({ active, highlightWhole = true, children, class
     const reduced = prefersReducedMotion();
     const node = ref.current;
     if (node) {
-      node.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+      // Только контейнер прокрутки инспектора: родной `scrollIntoView`
+      // подкручивает и предков (включая страницу), из-за чего вся раскладка
+      // уезжала вбок, пока панель выезжает — см. `scrollIntoViewWithin`.
+      scrollIntoViewWithin(node, { behavior: reduced ? 'auto' : 'smooth' });
     }
 
     if (reduced) {

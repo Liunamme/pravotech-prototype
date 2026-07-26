@@ -81,7 +81,16 @@ function useInspectorScrollShield(contentRef: RefObject<HTMLDivElement | null>, 
   }, [contentRef, open]);
 }
 
-export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
+export function DocumentInspector(props: DocumentInspectorProps = {}) {
+  const { container } = props;
+  /**
+   * Страница обещала узел плашки, но он ещё не примонтирован. Рендерить в этот
+   * момент нельзя: портал ушёл бы в `document.body`, где `position: absolute;
+   * right: 0` считается от страницы, а выезд `translateX(100%)` уводит панель
+   * за правый край окна — вёрстка успевает дёрнуться, пока узел не появится.
+   */
+  const waitingForContainer = 'container' in props && !container;
+
   const inspector = useStore((state) => state.inspector);
   const documents = useStore((state) => state.documents);
   const openInspector = useStore((state) => state.openInspector);
@@ -105,7 +114,7 @@ export function DocumentInspector({ container }: DocumentInspectorProps = {}) {
   }, []);
 
   const doc = inspector ? documents[inspector.docId] : undefined;
-  const open = Boolean(inspector && doc);
+  const open = Boolean(inspector && doc) && !waitingForContainer;
 
   useInspectorScrollShield(contentRef, open);
 

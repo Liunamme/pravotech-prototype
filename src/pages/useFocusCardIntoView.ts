@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useStore } from '@/store';
+import { scrollIntoViewWithin } from '@/shared/lib/scrollIntoViewWithin';
 
 /**
  * Соединяет клик по событию календаря (`relatedCardId`, docs/UX.md §5) с
@@ -24,7 +25,9 @@ export function useFocusCardIntoView<T extends HTMLElement>() {
     if (node) {
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       node.focus({ preventScroll: true });
-      node.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+      // Тот же приём, что и у якоря документа: подкручиваем только ленту
+      // очереди, а не всех предков и страницу (см. `scrollIntoViewWithin`).
+      scrollIntoViewWithin(node, { behavior: reduced ? 'auto' : 'smooth' });
     }
 
     // Разовый импульс: сбрасываем сразу же, иначе повторный клик на тот же
