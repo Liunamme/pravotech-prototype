@@ -7,7 +7,8 @@
 
 ## 1. Стек и базовая настройка
 
-- Vite · React 18 · TypeScript **strict** · React Router 6 (**HashRouter**) · Zustand · CSS Modules · Radix UI · clsx · lucide-react · date-fns.
+- Vite · React 19 · TypeScript **strict** · React Router 8 (**HashRouter**, импорт из `react-router`) · Zustand · CSS Modules · Radix UI · clsx · lucide-react · date-fns.
+  React и роутер подняты с 18/6 в ходе предрелизного аудита: единственная версия роутера без high-CVE (GHSA-qwww-vcr4-c8h2) требует React ≥ 19.2.7. Пакета `react-router-dom` в v8 больше нет.
 - Шрифты через `@fontsource-variable/inter` и `@fontsource-variable/source-serif-4` — **без внешних CDN** (работает офлайн и на GitHub Pages).
 - `vite.config.ts`: `base: './'` — относительные пути к ассетам. В связке с `HashRouter` это даёт работоспособность на любом хостинге без правки конфига.
 - `tsconfig`: `strict: true`, `noUnusedLocals`, `noUncheckedIndexedAccess`, алиас `@/*` → `src/*`.
