@@ -326,7 +326,8 @@ function WorkspaceInvite({
   return (
     <div className={styles.invite}>
       {headerAction && <div className={styles.inviteHeaderAction}>{headerAction}</div>}
-      <div className={styles.inviteBody}>
+      <div className={styles.inviteScrollArea}>
+        <div className={styles.inviteBody}>
         <EmptyState
           icon={MessageCircleQuestion}
           title="О чём поговорим?"
@@ -351,6 +352,8 @@ function WorkspaceInvite({
             })}
           </div>
         )}
+        </div>
+        <div className={styles.inviteFade} aria-hidden="true" />
       </div>
 
       {/* Тот же композер, что и в треде: приглашение — это будущий диалог,

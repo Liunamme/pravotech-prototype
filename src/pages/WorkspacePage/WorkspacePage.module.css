@@ -96,6 +96,37 @@
   padding: var(--space-6);
 }
 
+/**
+ * Прокручиваемая область приглашения и вуаль у её нижнего края.
+ *
+ * Затухание сделано ВУАЛЬЮ, а не `mask-image` на самой области, как в ленте
+ * сообщений. Причина — грабли №2 из docs/HANDOFF.md: маска делает предка
+ * backdrop root, и `backdrop-filter` у чипов подсказок (`.skillChip`,
+ * blur 14px) перестал бы работать вовсе. Вуаль — сосед, а не предок, её
+ * собственная маска на чипы не влияет. Тот же приём, что у краёв очереди
+ * (`CardQueue`).
+ */
+.inviteScrollArea {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.inviteFade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28px;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(to top, black 30%, transparent 100%);
+  mask-image: linear-gradient(to top, black 30%, transparent 100%);
+}
+
 .inviteBody > *:first-child {
   margin-top: auto;
 }
@@ -104,12 +135,20 @@
   margin-bottom: auto;
 }
 
+/**
+ * `width: 100%` обязателен, а не декоративен. Родитель — колоночный flex с
+ * `align-items: center`, и без явной ширины лента чипов получает ширину по
+ * содержимому: перенос строк не срабатывает вовсе, лента растёт до
+ * `max-width` и на узком экране вылезает за оба края разом. Прокруткой её не
+ * достать — она центрирована, — поэтому первый чип становился недостижим.
+ */
 .skillChips {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  width: 100%;
   max-width: 520px;
 }
 
