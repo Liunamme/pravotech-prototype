@@ -10,7 +10,9 @@
   border-radius: var(--radius-sm);
   background: var(--pt-accent-soft);
   border: none;
-  color: var(--pt-accent);
+  /* Не акцентным цветом: фиолетовый текст на фиолетовой подложке сливался.
+     `--pt-text` — белый в тёмной теме и тёмный в светлой (design review). */
+  color: var(--pt-text);
   font-size: 10px;
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;

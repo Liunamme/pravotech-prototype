@@ -53,8 +53,11 @@
   border-color: var(--color-danger-border);
 }
 
+/* Текст не акцентный: фиолетовое на фиолетовой подложке сливалось (design
+   review). `--color-text` переворачивается по теме — белый в тёмной, тёмный в
+   светлой; так же сделаны остальные чипы с акцентным фоном. */
 .variant_accent {
   background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  color: var(--color-text);
   border-color: var(--color-accent-border);
 }

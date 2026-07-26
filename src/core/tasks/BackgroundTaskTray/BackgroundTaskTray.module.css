@@ -119,7 +119,8 @@
 }
 
 .step_active .stepIcon {
-  color: var(--pt-accent);
+  /* На акцентной подложке текст/иконка не акцентные — сливались (design review). */
+  color: var(--pt-text);
   background: var(--pt-accent-soft);
   border-color: var(--pt-accent);
 }

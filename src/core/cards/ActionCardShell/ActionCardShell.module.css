@@ -238,12 +238,13 @@
   border: 1px solid var(--pt-accent);
 }
 
+/* Лежит внутри `.editArea` с акцентной подложкой — текст не акцентный. */
 .editHint {
   font-size: 10.5px;
   font-weight: var(--weight-semibold);
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  color: var(--pt-accent);
+  color: var(--pt-text);
 }
 
 /* ── "показать в чате" ────────────────────────────────────────────── */

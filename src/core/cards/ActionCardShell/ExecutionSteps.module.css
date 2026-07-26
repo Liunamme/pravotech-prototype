@@ -50,7 +50,7 @@
 
 .step_active .stepIcon {
   background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  color: var(--color-text);
 }
 
 .step_failed .stepIcon {

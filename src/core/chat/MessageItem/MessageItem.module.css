@@ -14,7 +14,8 @@
   border-radius: var(--radius-md);
   background: var(--pt-accent-soft);
   border: 1px solid var(--pt-line);
-  color: var(--pt-accent);
+  /* Инициал на акцентной подложке — не акцентным цветом (design review). */
+  color: var(--pt-text);
   font-size: 11px;
   font-weight: var(--weight-bold);
 }
