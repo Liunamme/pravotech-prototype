@@ -29,7 +29,7 @@ export function AppShell() {
   const [dismissed, setDismissed] = useState(false);
 
   if (device === 'mobile' && !dismissed) {
-    return <UnsupportedViewport device={device} onDismiss={() => setDismissed(true)} />;
+    return <UnsupportedViewport onDismiss={() => setDismissed(true)} />;
   }
 
   return (
