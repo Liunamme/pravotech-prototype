@@ -104,7 +104,11 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
         )}
       </div>
 
-      <p className={styles.hint}>
+      {/* `data-kind` разделяет две подсказки: про клавиатуру и про идущий
+          ответ. Первая на телефоне бессмысленна — там нет ни Enter, ни Shift,
+          — и скрывается целиком вместе со своей строкой (CSS). Вторая нужна
+          везде: она объясняет, почему кнопка отправки стала кнопкой «стоп». */}
+      <p className={styles.hint} data-kind={isStreaming ? 'streaming' : 'keyboard'}>
         {isStreaming ? 'Агент отвечает — можно остановить' : 'Enter — отправить · Shift+Enter — перенос строки'}
       </p>
     </div>

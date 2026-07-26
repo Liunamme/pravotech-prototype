@@ -44,11 +44,22 @@
   color: var(--pt-t2);
 }
 
-/* Активная вкладка: белый значок в тёмной теме и тёмный в светлой — тот же
-   приём, что у активной иконки рейки. Акцентный цвет на подписи сливался бы
-   с фоном в тёмной теме. */
+/* Активная вкладка — акцентная подложка-таблетка, как в макете. Текст на ней
+   НЕ акцентный (см. `Badge.variant_accent`): фиолетовый по фиолетовому
+   сливается. Подложка сама по себе вторая, нецветовая примета активности —
+   форма, а не только оттенок (docs/UX.md §9). */
 .item[aria-current='page'] {
   color: var(--pt-text);
+}
+
+.item[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  inset: 6px 8px;
+  z-index: -1;
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-subtle);
+  border: 1px solid var(--color-accent-border);
 }
 
 .label {
@@ -59,16 +70,3 @@
   letter-spacing: -0.1px;
 }
 
-/* Подчёркивание активной вкладки — вторая, нецветовая примета активности
-   (docs/UX.md §9: цвет не единственный носитель смысла). */
-.item[aria-current='page']::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 26px;
-  height: 2px;
-  border-radius: 0 0 2px 2px;
-  background: var(--pt-accent);
-}
