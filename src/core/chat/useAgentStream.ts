@@ -14,6 +14,7 @@ import { useAgentTransport } from '@/core/agent/transport';
 import { describeTransportFailure, isAbortError } from '@/core/agent/transportError';
 import { useStore } from '@/store';
 import { selectThreadMessages } from '@/store/selectors';
+import { newId } from '@/shared/lib/id';
 import { NEW_THREAD_TITLE, threadTitleFromMessage } from '@/shared/lib/threadTitle';
 
 export type UseAgentStreamResult = {
@@ -51,15 +52,9 @@ export function useAgentStream(threadId: Id, scope: ThreadScope): UseAgentStream
    * должен — `src/types/domain.ts` вне области этой задачи).
    */
   const inputByMessageId = useRef<Map<Id, string>>(new Map());
-  const idSeq = useRef(0);
 
-  const nextId = useCallback(
-    (suffix: string): Id => {
-      idSeq.current += 1;
-      return `msg-${threadId}-${Date.now()}-${idSeq.current}-${suffix}`;
-    },
-    [threadId],
-  );
+  /** `'u'` — реплика юриста, `'a'` — сообщение агента; дальше случайный UUID. */
+  const nextId = useCallback((suffix: string): Id => newId(`msg-${suffix}`), []);
 
   const runStream = useCallback(
     async (agentMessageId: Id, input: string, history: Message[]) => {

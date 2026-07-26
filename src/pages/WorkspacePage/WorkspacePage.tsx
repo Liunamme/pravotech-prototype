@@ -12,6 +12,7 @@ import { ChatView } from '@/core/chat/ChatView';
 import { Composer } from '@/core/chat/Composer';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
 import { EmptyState } from '@/shared/ui';
+import { newId } from '@/shared/lib/id';
 import { WorkspaceSidebar } from './WorkspaceSidebar';
 import { WorkspaceRightPanel } from './WorkspaceRightPanel';
 import styles from './WorkspacePage.module.css';
@@ -72,7 +73,7 @@ export function WorkspacePage() {
   const validThread = thread && thread.workspaceId === manifest.id ? thread : undefined;
 
   function handlePickSkill(skill: AgentSkill) {
-    const id = `thread-${manifest!.id}-${Date.now()}`;
+    const id = newId('thread');
     const now = new Date().toISOString();
     createThread({
       id,
@@ -94,7 +95,7 @@ export function WorkspacePage() {
    * списке диалогов, а текст улетает агенту как обычное сообщение.
    */
   function handleInviteSend(text: string) {
-    const id = `thread-${manifest!.id}-${Date.now()}`;
+    const id = newId('thread');
     const now = new Date().toISOString();
     createThread({
       id,
