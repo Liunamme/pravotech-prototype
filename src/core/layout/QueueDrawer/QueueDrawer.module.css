@@ -1,0 +1,105 @@
+/**
+ * Выдвижная очередь на планшете. Стекло и геометрия — те же, что у
+ * документного оверлея (`DocumentInspector.module.css`): панель принадлежит
+ * рабочей области, поэтому `position: absolute` относительно `main`, а не
+ * `fixed` от вьюпорта.
+ */
+
+.content {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  /* Та же ширина, что у правой колонки на десктопе: содержимое одно и то же,
+     и переключение раскладок не должно перекраивать очередь заново. */
+  width: min(var(--inspector-panel-width), 100%);
+  max-width: 100%;
+  z-index: var(--z-dialog);
+
+  display: flex;
+  flex-direction: column;
+  box-shadow: -14px 0 44px rgba(0, 0, 0, 0.16);
+
+  /* Тот же выезд, что у инспектора: 220мс вход, 150мс выход (docs/UX.md §7). */
+  animation: slideIn 220ms var(--ease-out);
+  will-change: transform;
+}
+
+.content[data-state='closed'] {
+  animation: slideOut 150ms var(--ease-in);
+}
+
+/* Инертный слой со стеклом — см. комментарий в `QueueDrawer.tsx`. */
+.glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--pt-overlay);
+  -webkit-backdrop-filter: var(--pt-overlay-blur);
+  backdrop-filter: var(--pt-overlay-blur);
+  border-left: 1px solid var(--pt-overlay-line);
+}
+
+/* Содержимое над стеклом: оба слоя позиционированы, порядок в DOM решает. */
+.body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/**
+ * Полоса с крестиком — отдельной строкой НАД содержимым, а не абсолютом в
+ * углу: панель показывает чужой компонент со своей шапкой (сегменты
+ * «Очередь · Сроки»), и крестик поверх неё ложился прямо на сегмент «Сроки».
+ */
+.closeRow {
+  position: relative;
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-2) var(--space-3) 0;
+}
+
+/* `.close.close` — специфичность удвоена нарочно: перебивает варианты
+   `IconButton` вне зависимости от порядка их правил в бандле. */
+.close.close {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-lg);
+  background: var(--pt-glass);
+  border: 1px solid var(--pt-line);
+  color: var(--pt-t2);
+}
+
+.visuallyHidden {
+  composes: visuallyHidden from '../../../shared/styles/shared.module.css';
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content,
+  .content[data-state='closed'] {
+    animation: none;
+  }
+}

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { TODAY_SCOPE } from '@/types/domain';
 import { InspectorSlot } from '@/core/layout/InspectorSlot';
+import { QueueDrawer, QueueTrigger } from '@/core/layout/QueueDrawer';
 import { ChatView } from '@/core/chat/ChatView';
 import { BackgroundTaskTray } from '@/core/tasks/BackgroundTaskTray';
 import { useStore } from '@/store';
+import { selectQueueCounts } from '@/store/selectors';
 import { cn } from '@/shared/lib/cn';
+import { useDeviceClass } from '@/shared/lib/useDeviceClass';
 import { DayNav } from './DayNav';
 import { RightPanel } from './RightPanel';
 import styles from './TodayPage.module.css';
@@ -31,6 +34,15 @@ export function TodayPage() {
       внутрь него (design_handoff: оверлей лежит НАД содержимым `main`, не окна). */
   const [mainEl, setMainEl] = useState<HTMLDivElement | null>(null);
 
+  /**
+   * На планшете три колонки не помещаются: очередь уезжает в выдвижную панель
+   * поверх рабочей области, а её место забирает чат (docs/UX.md §8).
+   */
+  const isTablet = useDeviceClass() === 'tablet';
+  const [queueOpen, setQueueOpen] = useState(false);
+  const counts = useStore(selectQueueCounts);
+  const queueCount = counts.P0 + counts.P1 + counts.P2 + counts.P3;
+
   // Тред «Сегодня» создаётся один раз при первом заходе на страницу в этой
   // сессии стора — если он уже есть (повторный заход, HMR), не трогаем его.
   useEffect(() => {
@@ -53,12 +65,33 @@ export function TodayPage() {
 
       <div className={styles.main} ref={setMainEl}>
         <div className={styles.center}>
-          {threadExists && <ChatView threadId={TODAY_THREAD_ID} scope={TODAY_SCOPE} autoRunOnEmpty="дайджест" />}
+          {threadExists && (
+            <ChatView
+              threadId={TODAY_THREAD_ID}
+              scope={TODAY_SCOPE}
+              autoRunOnEmpty="дайджест"
+              headerAction={
+                isTablet ? (
+                  <QueueTrigger
+                    open={queueOpen}
+                    onToggle={() => setQueueOpen((open) => !open)}
+                    count={queueCount}
+                  />
+                ) : undefined
+              }
+            />
+          )}
         </div>
 
-        <div className={cn(styles.right, inspectorOpen && styles.behindInspector)}>
+        <QueueDrawer
+          asDrawer={isTablet}
+          open={queueOpen}
+          onOpenChange={setQueueOpen}
+          container={mainEl}
+          columnClassName={cn(styles.right, inspectorOpen && styles.behindInspector)}
+        >
           <RightPanel />
-        </div>
+        </QueueDrawer>
 
         <InspectorSlot container={mainEl} />
       </div>
