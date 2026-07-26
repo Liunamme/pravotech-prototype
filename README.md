@@ -1,5 +1,10 @@
 # ПравоТех — прототип агентной платформы для юристов
 
+[![CI](https://github.com/Liunamme/pravotech-prototype/actions/workflows/ci.yml/badge.svg)](https://github.com/Liunamme/pravotech-prototype/actions/workflows/ci.yml)
+[![Deploy](https://github.com/Liunamme/pravotech-prototype/actions/workflows/deploy.yml/badge.svg)](https://github.com/Liunamme/pravotech-prototype/actions/workflows/deploy.yml)
+
+**Живая демонстрация: https://liunamme.github.io/pravotech-prototype/**
+
 Рабочий прототип B2B-платформы, в которой AI-агент выполняет работу юриста: ведёт дело,
 работает с документами и сроками, предлагает действия — а юрист подтверждает, изменяет
 или отклоняет. Один и тот же агент присутствует во всех частях продукта.
