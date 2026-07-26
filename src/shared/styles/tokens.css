@@ -50,6 +50,10 @@
   --pt-ok: #4ade80;
   --pt-ok-soft: rgba(74, 222, 128, 0.14);
   --pt-overlay: rgba(22, 15, 30, 0.6);
+  /* Затемнение под модальным окном. Именно тёмное в обеих темах: раньше скрим
+     брал цвет ТЕКСТА, а он в тёмной теме почти белый — и вся страница под
+     модалкой засвечивалась. */
+  --pt-scrim: rgba(6, 3, 12, 0.62);
   --pt-overlay-line: rgba(255, 255, 255, 0.18);
   --pt-overlay-blur: blur(22px) saturate(150%);
   /* Световой кант сверху у стеклянных поверхностей. */
@@ -70,6 +74,7 @@
   --color-surface-hover: var(--pt-glass);
   --color-surface-active: var(--pt-glass2);
   --color-surface-selected: var(--pt-accent-soft);
+  --color-scrim: var(--pt-scrim);
 
   /* Текст */
   --color-text: var(--pt-text);
@@ -245,6 +250,7 @@
   --pt-ok: #15803d;
   --pt-ok-soft: rgba(21, 128, 61, 0.1);
   --pt-overlay: rgba(255, 255, 255, 0.72);
+  --pt-scrim: rgba(26, 14, 44, 0.34);
   --pt-overlay-line: rgba(26, 14, 44, 0.1);
   --pt-overlay-blur: blur(20px) saturate(150%);
   --pt-inset-hi: inset 0 1px 0 rgba(255, 255, 255, 0.5);
