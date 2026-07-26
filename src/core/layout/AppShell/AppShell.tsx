@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Outlet } from 'react-router';
 import { useDeviceClass } from '@/shared/lib/useDeviceClass';
-import { MobileTabBar, MobileTopBar } from '../MobileChrome';
+import { MobileSettingsSheet, MobileTabBar, MobileTopBar } from '../MobileChrome';
 import { Rail } from '../Rail/Rail';
 import styles from './AppShell.module.css';
 
@@ -19,6 +20,9 @@ import styles from './AppShell.module.css';
  */
 export function AppShell() {
   const isMobile = useDeviceClass() === 'mobile';
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  /** Узел корня — лист настроек выезжает внутри него, а не от края окна. */
+  const [mobileRootEl, setMobileRootEl] = useState<HTMLDivElement | null>(null);
 
   const bloom = (
     <div className={styles.bloom} aria-hidden="true">
@@ -30,13 +34,14 @@ export function AppShell() {
 
   if (isMobile) {
     return (
-      <div className={styles.mobileRoot}>
+      <div className={styles.mobileRoot} ref={setMobileRootEl}>
         {bloom}
         <MobileTopBar />
         <main className={styles.mobileContent}>
           <Outlet />
         </main>
-        <MobileTabBar />
+        <MobileTabBar onOpenSettings={() => setSettingsOpen((open) => !open)} settingsOpen={settingsOpen} />
+        <MobileSettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} container={mobileRootEl} />
       </div>
     );
   }

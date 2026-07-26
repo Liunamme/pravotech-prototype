@@ -2,7 +2,14 @@ import { NavLink } from 'react-router';
 import { Settings } from 'lucide-react';
 import { TodayIcon } from '@/shared/ui/icons/AppIcons';
 import { workspaces } from '@/workspaces/registry';
+import { cn } from '@/shared/lib/cn';
 import styles from './MobileTabBar.module.css';
+
+export type MobileTabBarProps = {
+  /** Открывает лист настроек. Настройки на телефоне — не страница, а панель снизу. */
+  onOpenSettings: () => void;
+  settingsOpen: boolean;
+};
 
 /**
  * Нижняя навигация — мобильная замена рейки (макет
@@ -19,8 +26,13 @@ import styles from './MobileTabBar.module.css';
  * Активная вкладка помечается через `[aria-current='page']`, который
  * `NavLink` ставит сам, а не функцией `className={({isActive}) => …}` —
  * та же причина, что и у рейки (см. `Rail.tsx`).
+ *
+ * «Настройки» — единственная вкладка-кнопка: на телефоне они открываются
+ * листом снизу, а не отдельной страницей (см. `MobileSettingsSheet`).
+ * Поэтому у неё `aria-pressed`, а не `aria-current`: это переключатель
+ * панели, а не место в навигации.
  */
-export function MobileTabBar() {
+export function MobileTabBar({ onOpenSettings, settingsOpen }: MobileTabBarProps) {
   return (
     <nav className={styles.root} aria-label="Основная навигация">
       <NavLink to="/today" className={styles.item}>
@@ -38,10 +50,15 @@ export function MobileTabBar() {
         );
       })}
 
-      <NavLink to="/settings" className={styles.item}>
-        <Settings size={17} strokeWidth={1.8} />
+      <button
+        type="button"
+        className={cn(styles.item, settingsOpen && styles.itemActive)}
+        aria-pressed={settingsOpen}
+        onClick={onOpenSettings}
+      >
+        <Settings size={17} strokeWidth={1.8} aria-hidden="true" />
         <span className={styles.label}>Настройки</span>
-      </NavLink>
+      </button>
     </nav>
   );
 }

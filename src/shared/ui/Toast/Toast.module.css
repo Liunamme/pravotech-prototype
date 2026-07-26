@@ -204,13 +204,14 @@
  * На телефоне тост уезжает над нижними вкладками и растягивается на всю
  * ширину. В правом нижнем углу он ложился бы прямо на вкладку «Настройки»
  * и перекрывал навигацию, а 320px из 393-х всё равно почти вся ширина.
- * 56px — высота полосы вкладок, плюс безопасная зона домашнего индикатора.
+ * Высота полосы вкладок берётся из `--mobile-tabbar-height`, плюс безопасная
+ * зона домашнего индикатора.
  */
 @media (max-width: 767px) {
   .viewport {
     left: var(--space-3);
     right: var(--space-3);
-    bottom: calc(56px + env(safe-area-inset-bottom, 0px) + var(--space-3));
+    bottom: calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom, 0px) + var(--space-3));
     width: auto;
     max-width: none;
   }

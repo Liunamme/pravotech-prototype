@@ -1,0 +1,199 @@
+/**
+ * Лист настроек. Прижат к низу рабочей области, над нижними вкладками —
+ * навигация не должна пропадать под ним.
+ */
+.content {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Над нижней навигацией, а не поверх неё: кнопка «Настройки» остаётся
+     видимой и подсвеченной, и ей же лист закрывается. Так же ведут себя
+     панели очереди и диалогов. */
+  bottom: calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-dialog);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-5);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  box-shadow: 0 -14px 44px rgba(0, 0, 0, 0.22);
+
+  animation: slideUp 220ms var(--ease-out);
+  will-change: transform;
+}
+
+.content[data-state='closed'] {
+  animation: slideDown 150ms var(--ease-in);
+}
+
+/* Инертный слой со стеклом — см. комментарий в `QueueDrawer.tsx`. */
+.glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--pt-overlay);
+  -webkit-backdrop-filter: var(--pt-overlay-blur);
+  backdrop-filter: var(--pt-overlay-blur);
+  border-top: 1px solid var(--pt-overlay-line);
+}
+
+.grabber {
+  position: relative;
+  align-self: center;
+  width: 36px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--pt-line);
+}
+
+.close.close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-lg);
+  background: var(--pt-glass);
+  border: 1px solid var(--pt-line);
+  color: var(--pt-t2);
+}
+
+.account {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* Место под крестик: без него длинная должность подлезала бы под него. */
+  padding-right: 36px;
+}
+
+.avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--pt-accent-soft);
+  border: 1px solid var(--pt-line);
+  /* Инициалы на акцентной подложке — не акцентным цветом (design review). */
+  color: var(--pt-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.accountBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.accountName {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--pt-text);
+}
+
+.accountRole {
+  composes: truncate from '../../../shared/styles/shared.module.css';
+  font-size: var(--text-sm);
+  color: var(--pt-t3);
+}
+
+.section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--pt-t3);
+}
+
+.themeRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.themeButton {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  /* 44px — рекомендованный минимум цели для пальца. */
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background: var(--pt-glass2);
+  border: 1px solid var(--pt-line);
+  font-size: var(--text-sm);
+  color: var(--pt-t2);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+/* Выбранная тема — акцентная подложка; текст на ней НЕ акцентный
+   (см. `Badge.variant_accent`): фиолетовый по фиолетовому сливается. */
+.themeButtonActive,
+.themeButtonActive:hover {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent-border);
+  color: var(--pt-text);
+  font-weight: var(--weight-medium);
+}
+
+.about {
+  position: relative;
+  margin: 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--pt-line);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--pt-t3);
+}
+
+.visuallyHidden {
+  composes: visuallyHidden from '../../../shared/styles/shared.module.css';
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content,
+  .content[data-state='closed'] {
+    animation: none;
+  }
+}
