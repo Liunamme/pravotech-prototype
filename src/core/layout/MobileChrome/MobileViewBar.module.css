@@ -32,7 +32,7 @@
  *
  * `mask-image` делает элемент backdrop root, поэтому внутри ленты не должно
  * появляться `backdrop-filter` — у таблеток его и нет (см. грабли №2 в
- * docs/HANDOFF.md).
+ * docs/SPEC.md, ловушка 2).
  */
 .scroller {
   flex: 1;
