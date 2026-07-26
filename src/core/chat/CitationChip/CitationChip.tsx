@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 import { FileText } from 'lucide-react';
 import type { SourceRef } from '@/types/domain';
 import { Tooltip } from '@/shared/ui';

@@ -1,6 +1,6 @@
 import { useRef, type FocusEvent, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router';
 import type { ActionCard, Id } from '@/types/domain';
 import { TODAY_SCOPE } from '@/types/domain';
 import type { CardTypeDef } from '@/workspaces/types';

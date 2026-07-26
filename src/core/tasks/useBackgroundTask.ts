@@ -15,7 +15,7 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import type { BackgroundTask, Id, TaskState } from '@/types/domain';
 import { TODAY_SCOPE } from '@/types/domain';
 import { useStore } from '@/store';

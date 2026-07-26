@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router';
 import { LoaderCircle, Moon, Settings, Sun } from 'lucide-react';
 import { Tooltip } from '@/shared/ui';
 import { TodayIcon } from '@/shared/ui/icons/AppIcons';

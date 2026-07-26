@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { LayoutDashboard } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useStore } from '@/store';
 import { workspaces } from '@/workspaces/registry';
 import { formatWeekdayDate } from '@/shared/lib/date';

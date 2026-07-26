@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router';
 import { CalendarCheck } from 'lucide-react';
 import type { CalendarEvent, Id } from '@/types/domain';
 import { TODAY_SCOPE } from '@/types/domain';

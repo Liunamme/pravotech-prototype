@@ -1,4 +1,4 @@
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { HashRouter, Navigate, Route, Routes } from 'react-router';
 import { AppShell } from '@/core/layout/AppShell';
 import { TodayPage } from '@/pages/TodayPage';
 import { WorkspacePage } from '@/pages/WorkspacePage';

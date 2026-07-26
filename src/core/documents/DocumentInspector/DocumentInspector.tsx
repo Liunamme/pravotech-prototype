@@ -1,6 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 import { X } from 'lucide-react';
 import { useStore } from '@/store';
 import { IconButton } from '@/shared/ui';

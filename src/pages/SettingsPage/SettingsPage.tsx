@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { FlaskConical, Scale } from 'lucide-react';
 import { useTheme } from '@/app/ThemeProvider';
 import { workspaces } from '@/workspaces/registry';

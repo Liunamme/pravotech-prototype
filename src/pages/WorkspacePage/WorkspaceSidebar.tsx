@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { MessagesSquare, Plus } from 'lucide-react';
 import type { Id, ThreadStatus } from '@/types/domain';
 import type { WorkspaceManifest } from '@/workspaces/types';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router';
 import { MessageCircleQuestion, Sparkles } from 'lucide-react';
 import type { AgentSkill } from '@/workspaces/types';
 import type { Id } from '@/types/domain';

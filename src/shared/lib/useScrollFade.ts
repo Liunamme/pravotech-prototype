@@ -21,7 +21,14 @@ export function useScrollFade() {
     el.style.setProperty('--fade-bottom', atBottom ? '0px' : '28px');
   }, []);
 
-  const ref = useCallback((el: HTMLElement | null) => el && update(el), [update]);
+  // Тело со скобками намеренно: в React 19 значение, возвращённое ref-колбэком,
+  // трактуется как функция очистки, поэтому колбэк не должен возвращать ничего.
+  const ref = useCallback(
+    (el: HTMLElement | null) => {
+      if (el) update(el);
+    },
+    [update],
+  );
   const onScroll = useCallback((e: UIEvent<HTMLElement>) => update(e.currentTarget), [update]);
 
   return { ref, onScroll };

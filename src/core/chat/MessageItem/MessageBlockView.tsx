@@ -1,5 +1,5 @@
 import { FileText, ChevronRight } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 import type { MessageBlock, SourceRef } from '@/types/domain';
 import { Button } from '@/shared/ui';
 import { useStore } from '@/store';
