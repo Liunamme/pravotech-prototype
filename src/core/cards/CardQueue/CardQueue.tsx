@@ -224,9 +224,9 @@ export function CardQueue({ scope }: CardQueueProps) {
         onScroll={handleScroll}
         shadows={false}
       >
-        {/* Размытая растушёванная полоса у верхнего края — место, куда прилипают
-            заголовки групп. Сами заголовки фона не имеют: контент размывается
-            под этой полосой, а не под каждым заголовком (design review). */}
+        {/* Полоса, в которой гаснет уезжающее вверх содержимое и на которой
+            лежат заголовки групп. Сами заголовки фона не имеют: гасит вуаль,
+            а не плашка под каждым заголовком (design review). */}
         <div className={cn(styles.topVeil, veils.top && styles.veilVisible)} aria-hidden="true" />
 
         <div className={styles.list}>
@@ -269,7 +269,6 @@ export function CardQueue({ scope }: CardQueueProps) {
 
         {/* Зеркальная вуаль у нижнего края — лента уходит в размытие, а не
             обрывается по границе колонки. */}
-        <div className={cn(styles.bottomVeil, veils.bottom && styles.veilVisible)} aria-hidden="true" />
       </ScrollArea>
     </div>
   );
