@@ -260,7 +260,10 @@ export function CardQueue({ scope }: CardQueueProps) {
         data-queue-scroll=""
         style={
           {
-            '--fade-top': veils.top ? '38px' : '0px',
+            // 60px, а не «на глаз»: прилипший заголовок стоит в первых ~30px, и
+            // содержимое обязано быть почти прозрачным именно там, иначе текст
+            // карточки читается сквозь текст заголовка.
+            '--fade-top': veils.top ? '60px' : '0px',
             '--fade-bottom': veils.bottom ? '24px' : '0px',
           } as CSSProperties
         }
