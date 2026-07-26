@@ -8,10 +8,11 @@
 import { useRef } from 'react';
 import { FileSearch, Plus, X } from 'lucide-react';
 import type { ActionCard, Id, IsoDateTime, TaskEvent } from '@/types/domain';
-import type { CardTypeDef } from '@/workspaces/types';
+import type { CardTypeDef, FieldErrors } from '@/workspaces/types';
 import { sleep, statusStepDelay } from '@/core/agent/timing';
 import { diffPayload } from '@/core/cards/diffPayload';
-import { Button } from '@/shared/ui';
+import { FIELD_LIMITS, checkText } from '@/core/cards/validation';
+import { Button, FieldError } from '@/shared/ui';
 import styles from './cards.module.css';
 
 export type EvidenceRequestItem = { what: string; from: string };
@@ -43,12 +44,15 @@ function Body({ payload }: { payload: EvidenceRequestPayload; card: ActionCard<E
 function EditForm({
   payload,
   onChange,
+  errors = {},
 }: {
   payload: EvidenceRequestPayload;
   onChange: (next: EvidenceRequestPayload) => void;
+  errors?: FieldErrors;
 }) {
   const originalRef = useRef(payload);
   const changed = diffPayload(originalRef.current, payload);
+  const limitReached = payload.items.length >= FIELD_LIMITS.items;
 
   function updateItem(index: number, next: Partial<EvidenceRequestItem>) {
     const items = payload.items.map((item, i) => (i === index ? { ...item, ...next } : item));
@@ -60,6 +64,7 @@ function EditForm({
   }
 
   function addItem() {
+    if (limitReached) return;
     onChange({ ...payload, items: [...payload.items, { what: '', from: '' }] });
   }
 
@@ -74,8 +79,10 @@ function EditForm({
                 className={styles.input}
                 type="text"
                 value={item.what}
+                aria-invalid={Boolean(errors[`items[${index}].what`]) || undefined}
                 onChange={(e) => updateItem(index, { what: e.target.value })}
               />
+              <FieldError message={errors[`items[${index}].what`]} />
             </label>
             <label className={styles.field}>
               <span className={styles.fieldLabel}>У кого</span>
@@ -83,8 +90,10 @@ function EditForm({
                 className={styles.input}
                 type="text"
                 value={item.from}
+                aria-invalid={Boolean(errors[`items[${index}].from`]) || undefined}
                 onChange={(e) => updateItem(index, { from: e.target.value })}
               />
+              <FieldError message={errors[`items[${index}].from`]} />
             </label>
           </div>
           <Button
@@ -99,13 +108,16 @@ function EditForm({
         </div>
       ))}
 
+      <FieldError message={errors.items} />
+
       <Button
         variant="secondary"
         size="sm"
         iconLeft={<Plus size={13} strokeWidth={1.75} aria-hidden="true" />}
         onClick={addItem}
+        disabled={limitReached}
       >
-        Добавить пункт
+        {limitReached ? `Не больше ${FIELD_LIMITS.items} пунктов` : 'Добавить пункт'}
       </Button>
 
       <label className={styles.field} data-changed={changed.has('motionText') || undefined}>
@@ -114,11 +126,40 @@ function EditForm({
           className={styles.textarea}
           rows={4}
           value={payload.motionText}
+          aria-invalid={Boolean(errors.motionText) || undefined}
           onChange={(e) => onChange({ ...payload, motionText: e.target.value })}
         />
+        <FieldError message={errors.motionText} />
       </label>
     </div>
   );
+}
+
+/**
+ * Ходатайство подаётся в суд: перечень без единого пункта или с пустой
+ * строкой «что / у кого» — это заведомо неисполнимое требование, а
+ * неограниченный список позволял отправить в суд что угодно любого объёма.
+ */
+function validate(payload: EvidenceRequestPayload): FieldErrors {
+  const errors: FieldErrors = {};
+
+  if (payload.items.length === 0) {
+    errors.items = 'Добавьте хотя бы один пункт.';
+  } else if (payload.items.length > FIELD_LIMITS.items) {
+    errors.items = `Не больше ${FIELD_LIMITS.items} пунктов.`;
+  }
+
+  payload.items.forEach((item, index) => {
+    const what = checkText(item.what, { what: 'что истребовать', max: FIELD_LIMITS.line });
+    const from = checkText(item.from, { what: 'у кого истребовать', max: FIELD_LIMITS.line });
+    if (what) errors[`items[${index}].what`] = what;
+    if (from) errors[`items[${index}].from`] = from;
+  });
+
+  const motionText = checkText(payload.motionText, { what: 'текст ходатайства', max: FIELD_LIMITS.text });
+  if (motionText) errors.motionText = motionText;
+
+  return errors;
 }
 
 async function* execute(): AsyncIterable<TaskEvent> {
@@ -137,5 +178,6 @@ export const evidenceRequestCardType: CardTypeDef<EvidenceRequestPayload> = {
   icon: FileSearch,
   Body,
   EditForm,
+  validate,
   execute,
 };

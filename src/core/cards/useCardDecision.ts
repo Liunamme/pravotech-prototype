@@ -25,10 +25,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ActionCard, CardDecision, Id, TaskEvent, TaskStep } from '@/types/domain';
-import type { CardTypeDef } from '@/workspaces/types';
+import type { CardTypeDef, FieldErrors } from '@/workspaces/types';
 import { useStore } from '@/store';
 import { useToast } from '@/shared/ui';
 import { diffPayload } from './diffPayload';
+import { hasErrors, validateCardDecision } from './validation';
+
+const NO_ERRORS: FieldErrors = {};
 
 export type ExecutionPhase = 'idle' | 'executing' | 'done' | 'failed';
 
@@ -150,7 +153,8 @@ export function useCardDecision<P>({ card, cardType, onDecided, onSettled }: Use
   const { toast } = useToast();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editedPayload, setEditedPayload] = useState<P>(card.payload);
+  const [editedPayload, setEditedPayloadState] = useState<P>(card.payload);
+  const [errors, setErrors] = useState<FieldErrors>(NO_ERRORS);
   const [execution, setExecution] = useState<ExecutionSnapshot>(IDLE_EXECUTION);
   const [destructiveOpen, setDestructiveOpen] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -179,6 +183,16 @@ export function useCardDecision<P>({ card, cardType, onDecided, onSettled }: Use
   }, []);
 
   const changedKeys = useMemo(() => diffPayload(card.payload, editedPayload), [card.payload, editedPayload]);
+
+  /**
+   * Ошибки показываются только после попытки подтвердить и снимаются при
+   * первой же правке: подсвечивать пустое поле, к которому юрист ещё не
+   * притронулся, — значит ругаться раньше, чем человек что-то сделал.
+   */
+  const setEditedPayload = useCallback((next: P) => {
+    setEditedPayloadState(next);
+    setErrors(NO_ERRORS);
+  }, []);
 
   /**
    * Двухфазный уход из очереди (docs/UX.md §7 «карточка решена»): сперва
@@ -294,19 +308,32 @@ export function useCardDecision<P>({ card, cardType, onDecided, onSettled }: Use
   const reject = useCallback(() => runDecision('reject'), [runDecision]);
 
   const startEdit = useCallback(() => {
-    setEditedPayload(card.payload);
+    setEditedPayloadState(card.payload);
+    setErrors(NO_ERRORS);
     setIsEditing(true);
   }, [card.payload]);
 
   const cancelEdit = useCallback(() => {
     setIsEditing(false);
-    setEditedPayload(card.payload);
+    setEditedPayloadState(card.payload);
+    setErrors(NO_ERRORS);
   }, [card.payload]);
 
+  /**
+   * Правка уходит в решение, только если прошла проверку типа карточки.
+   * Иначе форма остаётся открытой с ошибками у полей — молча подтверждать
+   * пустое уведомление или платёж на ноль нельзя (docs/UX.md §2).
+   */
   const confirmEdit = useCallback(() => {
+    const found = validateCardDecision(cardType, editedPayload);
+    if (hasErrors(found)) {
+      setErrors(found);
+      return;
+    }
+    setErrors(NO_ERRORS);
     setIsEditing(false);
     requestDecision('modify', editedPayload);
-  }, [editedPayload, requestDecision]);
+  }, [cardType, editedPayload, requestDecision]);
 
   const confirmDestructive = useCallback(() => {
     const pending = pendingDecisionRef.current;
@@ -330,6 +357,7 @@ export function useCardDecision<P>({ card, cardType, onDecided, onSettled }: Use
     isEditing,
     editedPayload,
     setEditedPayload,
+    errors,
     changedKeys,
     startEdit,
     cancelEdit,

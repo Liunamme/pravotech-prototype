@@ -19,6 +19,13 @@ import type {
   Thread,
 } from '@/types/domain';
 
+/**
+ * Ошибки формы карточки: ключ — путь до поля payload (`draftNotice`,
+ * `items[0].what`), значение — что показать юристу под этим полем. Пустой
+ * объект = править можно, решение уйдёт в исполнение.
+ */
+export type FieldErrors = Record<string, string>;
+
 /** Готовая подсказка агенту, подставляется в композер одним кликом. */
 export type AgentSkill = {
   id: Id;
@@ -50,7 +57,13 @@ export interface CardTypeDef<P = unknown> {
   /** Read-режим тела карточки. Хромировку (шапку, кнопки, diff) рисует ActionCardShell. */
   Body: FC<{ payload: P; card: ActionCard<P> }>;
   /** Форма режима «изменить». Нет формы — кнопка «Изменить» скрыта. */
-  EditForm?: FC<{ payload: P; onChange: (next: P) => void }>;
+  EditForm?: FC<{ payload: P; onChange: (next: P) => void; errors?: FieldErrors }>;
+  /**
+   * Правила проверки правки перед «Сохранить и подтвердить». Живут рядом с
+   * типом, потому что только он знает свои поля; ядро зовёт их через
+   * `core/cards/validation.ts`. Нет правил — правка уходит как есть.
+   */
+  validate?: (payload: P) => FieldErrors;
   /** Подпись основной кнопки. По умолчанию 'Подтвердить'. */
   confirmLabel?: string;
   /** true → confirm-диалог вместо undo-тоста (необратимые действия). */

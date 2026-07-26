@@ -16,5 +16,6 @@ export * from './Tooltip';
 export * from './Dialog';
 export * from './Popover';
 export * from './EmptyState';
+export * from './FieldError';
 export * from './Toast';
 export * from './ScrollArea';

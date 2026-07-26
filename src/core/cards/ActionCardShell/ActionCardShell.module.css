@@ -266,6 +266,15 @@
   color: var(--pt-text);
 }
 
+/* Ошибка, относящаяся к форме целиком, а не к полю (повреждённый payload). */
+.formError {
+  padding: var(--space-2);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}
+
 /* ── "показать в чате" ────────────────────────────────────────────── */
 
 .showInChat {

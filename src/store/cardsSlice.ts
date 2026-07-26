@@ -4,6 +4,41 @@ import type { StoreState } from './index';
 
 const DECIDED_STATES = new Set<CardState>(['accepted', 'modified', 'rejected']);
 
+/**
+ * Граница данных на входе в стор.
+ *
+ * `decide()` принимает payload из формы — то есть, в перспективе, из
+ * браузера. Класть его в стор как есть значит доверять чужой стороне: в
+ * прототипе это «всего лишь» кривой payload, но тот же вызов после
+ * подключения API станет телом команды. Правило простое: изменённый payload
+ * обязан быть объектом ТОЙ ЖЕ формы, что предложил агент, — новые ключи
+ * отбрасываются, не-объект отвергается целиком.
+ *
+ * Это не защита (её даёт только сервер, который берёт карточку по id и сам
+ * решает, что менять можно), а честная граница: в стор не попадает то, чего
+ * тип карточки не предусматривал.
+ */
+function sanitizeModifiedPayload(original: unknown, next: unknown): unknown {
+  if (original === null || typeof original !== 'object' || Array.isArray(original)) return original;
+  if (next === null || typeof next !== 'object' || Array.isArray(next)) return original;
+
+  const allowed = Object.keys(original as Record<string, unknown>);
+  const source = next as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+  for (const key of allowed) {
+    result[key] = key in source ? source[key] : (original as Record<string, unknown>)[key];
+  }
+
+  if (import.meta.env.DEV) {
+    const extra = Object.keys(source).filter((key) => !allowed.includes(key));
+    if (extra.length > 0) {
+      console.warn(`[cardsSlice] decide(): отброшены ключи, которых нет в payload карточки: ${extra.join(', ')}.`);
+    }
+  }
+
+  return result;
+}
+
 const DECISION_TO_STATE: Record<CardDecision, CardState> = {
   accept: 'accepted',
   modify: 'modified',
@@ -51,7 +86,8 @@ export const createCardsSlice: StateCreator<StoreState, [], [], CardsSlice> = (s
         ...card,
         state: nextState,
         decidedAt: new Date().toISOString(),
-        modifiedPayload: decision === 'modify' ? (modifiedPayload ?? card.payload) : undefined,
+        modifiedPayload:
+          decision === 'modify' ? sanitizeModifiedPayload(card.payload, modifiedPayload ?? card.payload) : undefined,
       };
 
       return { cards: { ...state.cards, [id]: updated } };

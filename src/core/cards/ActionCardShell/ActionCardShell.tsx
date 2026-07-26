@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
 import type { ActionCard, Id } from '@/types/domain';
 import { TODAY_SCOPE } from '@/types/domain';
-import type { CardTypeDef } from '@/workspaces/types';
+import type { CardTypeDef, FieldErrors } from '@/workspaces/types';
 import { getWorkspace } from '@/workspaces/registry';
 import {
   Badge,
@@ -24,6 +24,7 @@ import { cn } from '@/shared/lib/cn';
 import { useStore } from '@/store';
 import { CitationChip } from '@/core/chat/CitationChip';
 import { diffPayload } from '../diffPayload';
+import { FORM_ERROR_KEY } from '../validation';
 import { useCardDecision } from '../useCardDecision';
 import type { UseCardDecisionResult } from '../useCardDecision';
 import { ExecutionSteps } from './ExecutionSteps';
@@ -113,6 +114,7 @@ export function ActionCardShell<P>({
     isEditing,
     editedPayload,
     setEditedPayload,
+    errors,
     changedKeys,
     startEdit,
     cancelEdit,
@@ -300,6 +302,7 @@ export function ActionCardShell<P>({
             bodyPayload={bodyPayload}
             editedPayload={editedPayload}
             onEditChange={setEditedPayload}
+            errors={errors}
             changedKeys={changedKeys}
             execution={execution}
             onRetry={retry}
@@ -376,6 +379,7 @@ function BodySlot<P>({
   bodyPayload,
   editedPayload,
   onEditChange,
+  errors,
   changedKeys,
   execution,
   onRetry,
@@ -387,6 +391,7 @@ function BodySlot<P>({
   bodyPayload: P;
   editedPayload: P;
   onEditChange: (next: P) => void;
+  errors: FieldErrors;
   changedKeys: Set<string>;
   execution: UseCardDecisionResult<P>['execution'];
   onRetry: () => void;
@@ -395,6 +400,7 @@ function BodySlot<P>({
     return <ExecutionSteps execution={execution} onRetry={onRetry} />;
   }
   if (isEditing) {
+    const formError = errors[FORM_ERROR_KEY];
     return (
       <div className={styles.editArea}>
         {changedKeys.size > 0 && (
@@ -402,7 +408,16 @@ function BodySlot<P>({
             Изменено {changedKeys.size} {pluralField(changedKeys.size)}
           </p>
         )}
-        {cardType.EditForm && <cardType.EditForm payload={editedPayload} onChange={onEditChange} />}
+        {/* Общая ошибка формы (повреждённый payload) — над полями: она не
+            относится ни к одному из них, и подсказка у поля её не объяснит. */}
+        {formError && (
+          <p className={styles.formError} role="alert">
+            {formError}
+          </p>
+        )}
+        {cardType.EditForm && (
+          <cardType.EditForm payload={editedPayload} onChange={onEditChange} errors={errors} />
+        )}
       </div>
     );
   }

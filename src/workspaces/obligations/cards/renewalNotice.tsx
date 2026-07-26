@@ -12,11 +12,13 @@ import { useRef } from 'react';
 import { FileSignature } from 'lucide-react';
 import type { ActionCard, TaskEvent } from '@/types/domain';
 import type { RenewalNoticePayload } from '@/core/agent/scenarios/cards';
-import type { CardTypeDef } from '@/workspaces/types';
+import type { CardTypeDef, FieldErrors } from '@/workspaces/types';
 import { sleep, statusStepDelay } from '@/core/agent/timing';
 import { formatDate } from '@/shared/lib/date';
+import { FieldError } from '@/shared/ui';
 import { diffPayload } from '@/core/cards/diffPayload';
-import { toDateInputValue, withNewDate } from './dateInput';
+import { FIELD_LIMITS, checkDeadline, checkText, collectErrors } from '@/core/cards/validation';
+import { toDateInputValue, withNewDate } from '@/shared/lib/isoDate';
 import styles from './cards.module.css';
 
 function Body({ payload }: { payload: RenewalNoticePayload; card: ActionCard<RenewalNoticePayload> }) {
@@ -48,9 +50,11 @@ function Body({ payload }: { payload: RenewalNoticePayload; card: ActionCard<Ren
 function EditForm({
   payload,
   onChange,
+  errors = {},
 }: {
   payload: RenewalNoticePayload;
   onChange: (next: RenewalNoticePayload) => void;
+  errors?: FieldErrors;
 }) {
   const originalRef = useRef(payload);
   const changed = diffPayload(originalRef.current, payload);
@@ -63,8 +67,10 @@ function EditForm({
           className={styles.input}
           type="date"
           value={toDateInputValue(payload.noticeDeadline)}
+          aria-invalid={Boolean(errors.noticeDeadline) || undefined}
           onChange={(e) => onChange({ ...payload, noticeDeadline: withNewDate(payload.noticeDeadline, e.target.value) })}
         />
+        <FieldError message={errors.noticeDeadline} />
       </label>
       <label className={styles.field} data-changed={changed.has('draftNotice') || undefined}>
         <span className={styles.fieldLabel}>Текст уведомления</span>
@@ -72,11 +78,25 @@ function EditForm({
           className={styles.textarea}
           rows={4}
           value={payload.draftNotice}
+          aria-invalid={Boolean(errors.draftNotice) || undefined}
           onChange={(e) => onChange({ ...payload, draftNotice: e.target.value })}
         />
+        <FieldError message={errors.draftNotice} />
       </label>
     </div>
   );
+}
+
+/**
+ * Уведомление о непролонгации уходит контрагенту и прекращает договор —
+ * пустой текст или несуществующая дата здесь означают юридически ничтожное
+ * действие, а не просто неаккуратную форму.
+ */
+function validate(payload: RenewalNoticePayload): FieldErrors {
+  return collectErrors({
+    noticeDeadline: checkDeadline(payload.noticeDeadline),
+    draftNotice: checkText(payload.draftNotice, { what: 'текст уведомления', max: FIELD_LIMITS.text }),
+  });
 }
 
 async function* execute(): AsyncIterable<TaskEvent> {
@@ -95,5 +115,6 @@ export const renewalNoticeCardType: CardTypeDef<RenewalNoticePayload> = {
   icon: FileSignature,
   Body,
   EditForm,
+  validate,
   execute,
 };
