@@ -81,3 +81,30 @@
   display: flex;
   flex-direction: column;
 }
+
+/* ── мобильный каркас ─────────────────────────────────────────────── */
+
+/* Один столбец: полоса с логотипом, содержимое, нижние вкладки.
+   `100dvh`, а не `100vh`: на телефоне адресная строка съезжает, и `vh`
+   оставлял бы под нижними вкладками пустую полосу высотой с неё. */
+.mobileRoot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--pt-bg);
+  isolation: isolate;
+}
+
+.mobileContent {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

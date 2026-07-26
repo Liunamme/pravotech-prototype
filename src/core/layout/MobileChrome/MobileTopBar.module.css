@@ -1,0 +1,78 @@
+/* Верхняя полоса мобильной раскладки: логотип слева, действия справа. */
+.root {
+  position: relative;
+  z-index: 3;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 52px;
+  /* Чёлка и «остров» на iPhone: без вычета контент полосы уезжает под них. */
+  padding: env(safe-area-inset-top, 0px) var(--space-3) 0 var(--space-4);
+}
+
+.logo {
+  flex: 1;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.3px;
+  color: var(--pt-text);
+}
+
+.logoAccent {
+  color: var(--pt-accent);
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.iconButton {
+  composes: focusRing from '../../../shared/styles/shared.module.css';
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  /* 38px — минимальная комфортная цель для пальца; ниже начинаются промахи. */
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-lg);
+  background: var(--pt-glass2);
+  border: 1px solid var(--pt-line);
+  color: var(--pt-t2);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.iconButton:hover {
+  color: var(--pt-text);
+}
+
+.active {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent-border);
+  color: var(--pt-text);
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--pt-accent);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  /* См. `Badge.variant_accent`: на акцентной подложке текст не акцентный. */
+  color: var(--pt-text);
+}
