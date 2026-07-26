@@ -7,7 +7,14 @@ import styles from './EventRow.module.css';
 
 export type EventRowProps = {
   event: CalendarEvent;
-  onOpen: (event: CalendarEvent) => void;
+  /**
+   * `undefined` — строке некуда вести, она не кликабельна. Решает вызывающая
+   * сторона (`DeadlineTimeline`): только у неё есть стор, чтобы проверить, что
+   * документ или карточка за событием действительно существуют. Раньше строка
+   * гадала об этом сама по наличию полей — и оказывалась «кликабельной, но
+   * никуда не ведущей».
+   */
+  onOpen?: (event: CalendarEvent) => void;
 };
 
 const KIND_ICON: Record<EventKind, LucideIcon> = {
@@ -28,16 +35,16 @@ const KIND_LABEL: Record<EventKind, string> = {
 export function EventRow({ event, onOpen }: EventRowProps) {
   const Icon = KIND_ICON[event.kind];
   const time = formatDateTime(event.at).split(', ')[1];
-  const isClickable = Boolean(event.relatedCardId || (event.sources && event.sources.length > 0));
+  const isClickable = Boolean(onOpen);
 
   return (
     <div
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
       className={cn(styles.root, isClickable && styles.clickable)}
-      onClick={isClickable ? () => onOpen(event) : undefined}
+      onClick={onOpen ? () => onOpen(event) : undefined}
       onKeyDown={
-        isClickable
+        onOpen
           ? (e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();

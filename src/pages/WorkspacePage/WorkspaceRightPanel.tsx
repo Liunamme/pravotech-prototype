@@ -23,6 +23,24 @@ export function WorkspaceRightPanel({ workspaceId }: WorkspaceRightPanelProps) {
   const queueCount = useStore((state) => selectWorkspaceQueue(state, workspaceId).length);
   const queueRef = useFocusCardIntoView<HTMLDivElement>();
 
+  /**
+   * Клик по сроку просит показать карточку (`focusedCardId`), но переключает он
+   * ГЛОБАЛЬНЫЙ сегмент — а здесь сегмент локальный, и до него этот запрос не
+   * доходил: колонка оставалась на «Сроках», и клик выглядел как ведущий в
+   * никуда.
+   *
+   * Переключаем прямо во время рендера, а не эффектом: очередь обязана быть
+   * смонтирована в ТОМ ЖЕ коммите, в котором появился `focusedCardId` —
+   * иначе `useFocusCardIntoView` не найдёт узел карточки, а сам запрос
+   * сбрасывается через 50мс.
+   */
+  const focusedCardId = useStore((state) => state.focusedCardId);
+  const [handledFocus, setHandledFocus] = useState<Id | null>(null);
+  if (focusedCardId && focusedCardId !== handledFocus) {
+    setHandledFocus(focusedCardId);
+    setSegment('queue');
+  }
+
   return (
     <div className={styles.root}>
       <div className={styles.topBlock}>

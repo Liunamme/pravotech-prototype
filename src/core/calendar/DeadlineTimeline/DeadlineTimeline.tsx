@@ -26,6 +26,8 @@ const HORIZON_DAYS = 14;
  */
 export function DeadlineTimeline({ scope }: DeadlineTimelineProps) {
   const groups = useStore((state) => selectUpcoming(state, HORIZON_DAYS));
+  const documents = useStore((state) => state.documents);
+  const cards = useStore((state) => state.cards);
   const focusCard = useStore((state) => state.focusCard);
   const setSegment = useStore((state) => state.setSegment);
   const openInspector = useStore((state) => state.openInspector);
@@ -39,18 +41,44 @@ export function DeadlineTimeline({ scope }: DeadlineTimelineProps) {
       .filter((group) => group.items.length > 0);
   }, [groups, scope]);
 
-  function handleOpen(event: CalendarEvent) {
-    if (event.relatedCardId) {
-      setSegment('queue');
-      focusCard(event.relatedCardId);
-      return;
+  /**
+   * Куда ведёт строка срока. Порядок — от частного к общему:
+   *  1. карточка в очереди (`relatedCardId`) — самое конкретное действие;
+   *  2. цитата в документе (`sources[0]`) — открыть документ на нужном пункте;
+   *  3. предмет события (`subjectRef`) — открыть договор или дело целиком.
+   * `undefined` — вести некуда, строка не кликабельна.
+   *
+   * Ссылки проверяются по стору: карточка или документ могли не доехать до
+   * состояния, и тогда клик молча ничего бы не делал.
+   */
+  function resolveTarget(event: CalendarEvent): { kind: 'card'; cardId: Id } | { kind: 'doc'; docId: Id; anchorId?: Id } | undefined {
+    if (event.relatedCardId && cards[event.relatedCardId]) {
+      return { kind: 'card', cardId: event.relatedCardId };
     }
     const source = event.sources?.[0];
-    if (!source) return;
-    openInspector(source.docId, source.anchorId);
+    if (source && documents[source.docId]) {
+      return { kind: 'doc', docId: source.docId, anchorId: source.anchorId };
+    }
+    if (event.subjectRef && documents[event.subjectRef.id]) {
+      return { kind: 'doc', docId: event.subjectRef.id };
+    }
+    return undefined;
+  }
+
+  function handleOpen(event: CalendarEvent) {
+    const target = resolveTarget(event);
+    if (!target) return;
+
+    if (target.kind === 'card') {
+      setSegment('queue');
+      focusCard(target.cardId);
+      return;
+    }
+
+    openInspector(target.docId, target.anchorId);
     const next = new URLSearchParams(searchParams);
-    next.set('doc', source.docId);
-    if (source.anchorId) next.set('anchor', source.anchorId);
+    next.set('doc', target.docId);
+    if (target.anchorId) next.set('anchor', target.anchorId);
     else next.delete('anchor');
     setSearchParams(next);
   }
@@ -95,7 +123,11 @@ export function DeadlineTimeline({ scope }: DeadlineTimelineProps) {
               <header className={styles.dayHeader}>{formatDayHeader(group.day)}</header>
               <div className={styles.dayItems}>
                 {group.items.map((event) => (
-                  <EventRow key={event.id} event={event} onOpen={handleOpen} />
+                  <EventRow
+                    key={event.id}
+                    event={event}
+                    onOpen={resolveTarget(event) ? handleOpen : undefined}
+                  />
                 ))}
               </div>
             </div>
